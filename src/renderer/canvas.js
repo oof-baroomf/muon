@@ -2,6 +2,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 let pan = { x: 0, y: 0 };
 let scale = 1;
+const ipc = window.electronAPI;          // may be undefined if preload fails
 
 const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; draw(); };
 window.addEventListener('resize', resize); resize();
@@ -22,7 +23,7 @@ window.addEventListener('pointermove', e => {
   if (!dragging) return;
   pan.x += e.clientX - last.x; pan.y += e.clientY - last.y;
   last.x = e.clientX; last.y = e.clientY;
-  window.electronAPI.updateTransform(pan, scale);
+  ipc && ipc.updateTransform(pan, scale);
   draw();
 });
 window.addEventListener('pointerup', () => dragging = false);
@@ -41,5 +42,5 @@ canvas.addEventListener('dblclick', e => {
   const rect = canvas.getBoundingClientRect();
   const wx = (e.clientX - rect.left - pan.x) / scale;
   const wy = (e.clientY - rect.top - pan.y) / scale;
-  window.electronAPI.spawnView({ wx, wy, url });
+  ipc && ipc.spawnView({ wx, wy, url });
 });

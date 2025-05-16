@@ -8,7 +8,8 @@ function createWindow () {
   const win = new BrowserWindow({
     width: 1280, height: 800,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      // `preload.js` lives one directory above `src/`
+      preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true

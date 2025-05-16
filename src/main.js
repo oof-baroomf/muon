@@ -26,11 +26,20 @@ function createWindow () {
     const view = new BrowserView({
       webPreferences: { contextIsolation: true, nodeIntegration: false }
     });
-    views.push(view);
-    win.addBrowserView(view);
-    view.webContents.loadURL(url);
     view.__worldPos = { x: wx, y: wy };
-    updateLayout();
+
+    // initial size/position derived from current canvas transform
+    const w = 1024, h = 768;
+    view.setBounds({
+      x: Math.round((wx + pan.x) * scale),
+      y: Math.round((wy + pan.y) * scale),
+      width: Math.round(w * scale),
+      height: Math.round(h * scale)
+    });
+
+    win.addBrowserView(view);       // now definitely inside the window
+    views.push(view);
+    view.webContents.loadURL(url).catch(console.error);
   });
 
   ipcMain.on('canvas-transform', (_e, t) => {

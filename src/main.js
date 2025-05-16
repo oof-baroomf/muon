@@ -28,6 +28,9 @@ function createWindow () {
     });
     view.__worldPos = { x: wx, y: wy };
 
+    win.addBrowserView(view);          // attach
+    win.setTopBrowserView(view);       // …and ensure it’s above others
+
     // initial size/position derived from current canvas transform
     const w = 1024, h = 768;
     view.setBounds({
@@ -36,8 +39,7 @@ function createWindow () {
       width: Math.round(w * scale),
       height: Math.round(h * scale)
     });
-
-    win.addBrowserView(view);       // now definitely inside the window
+    view.setAutoResize({ width: true, height: true });   // keeps it in-window
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
   });

@@ -32,7 +32,7 @@ canvas.addEventListener('wheel', e => {
   e.preventDefault();
   const factor = e.deltaY < 0 ? 1.1 : 0.9;
   scale *= factor;
-  window.electronAPI.updateTransform(pan, scale);
+  ipc && ipc.updateTransform(pan, scale);
   draw();
 }, { passive:false });
 

@@ -4,6 +4,37 @@ let pan = { x: 0, y: 0 };
 let scale = 1;
 const ipc = window.electronAPI;          // may be undefined if preload fails
 
+// ----- URL-input overlay elements -----
+const promptEl = document.getElementById('urlPrompt');
+const inputEl  = document.getElementById('urlInput');
+const okBtn    = document.getElementById('urlOk');
+const cancelBtn= document.getElementById('urlCancel');
+let spawnPos   = null;   // world-coords saved on double-click
+
+function showPrompt(wx, wy) {
+  spawnPos = { wx, wy };
+  inputEl.value = 'https://';
+  promptEl.style.display = 'flex';
+  inputEl.focus();
+}
+
+function hidePrompt() { promptEl.style.display = 'none'; spawnPos = null; }
+
+okBtn.addEventListener('click', () => {
+  if (!spawnPos) return;
+  const raw = inputEl.value.trim();
+  if (!raw) { hidePrompt(); return; }
+  const url = /^[a-zA-Z][\w+.+-]*:\/\//.test(raw) ? raw : `https://${raw}`;
+  ipc && ipc.spawnView({ ...spawnPos, url });
+  hidePrompt();
+});
+cancelBtn.addEventListener('click', hidePrompt);
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') okBtn.click();
+  else if (e.key === 'Escape') hidePrompt();
+});
+promptEl.addEventListener('click', e => { if (e.target === promptEl) hidePrompt(); });
+
 const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; draw(); };
 window.addEventListener('resize', resize); resize();
 
@@ -37,14 +68,8 @@ canvas.addEventListener('wheel', e => {
 }, { passive:false });
 
 canvas.addEventListener('dblclick', e => {
-  const input = prompt('URL to open?', 'https://example.com');
-  if (!input) return;
-  // prepend "https://" if the user forgot the scheme
-  const url = /^[a-zA-Z][\w+.-]*:\/\//.test(input.trim())
-              ? input.trim()
-              : `https://${input.trim()}`;
   const rect = canvas.getBoundingClientRect();
   const wx = (e.clientX - rect.left - pan.x) / scale;
-  const wy = (e.clientY - rect.top - pan.y) / scale;
-  ipc && ipc.spawnView({ wx, wy, url });      // use the sanitised URL
+  const wy = (e.clientY - rect.top  - pan.y) / scale;
+  showPrompt(wx, wy);
 });

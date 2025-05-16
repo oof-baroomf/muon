@@ -1,0 +1,11 @@
+{
+  "name": "infinite-canvas-browser",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "electron": "^29.0.0"
+  },
+  "scripts": {
+    "start": "electron ."
+  }
+}

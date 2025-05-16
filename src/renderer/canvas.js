@@ -46,5 +46,5 @@ canvas.addEventListener('dblclick', e => {
   const rect = canvas.getBoundingClientRect();
   const wx = (e.clientX - rect.left - pan.x) / scale;
   const wy = (e.clientY - rect.top - pan.y) / scale;
-  ipc && ipc.spawnView({ wx, wy, url });
+  ipc && ipc.spawnView({ wx, wy, url });      // use the sanitised URL
 });

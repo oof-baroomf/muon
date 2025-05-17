@@ -21,6 +21,8 @@ function createWindow () {
   const views = [];
   let pan = {x: 0, y: 0};
   let scale = 1;
+  const VIEW_W = 1024;
+  const VIEW_H = 768;
 
   ipcMain.handle('spawn-browserview', (_e, { wx, wy, url }) => {
     const view = new BrowserView({
@@ -32,15 +34,25 @@ function createWindow () {
     win.setTopBrowserView(view);       // …and ensure it’s above others
 
     // initial size/position derived from current canvas transform
-    const w = 1024, h = 768;
     view.setBounds({
       x: Math.round((wx + pan.x) * scale),
       y: Math.round((wy + pan.y) * scale),
-      width: Math.round(w * scale),
-      height: Math.round(h * scale)
+      width: Math.round(VIEW_W * scale),
+      height: Math.round(VIEW_H * scale)
     });
     view.setAutoResize({ width: true, height: true });   // keeps it in-window
     views.push(view);
+
+    // keep websites reporting a constant screen size
+    view.webContents.enableDeviceEmulation({
+      screenPosition: 'desktop',
+      screenSize: { width: VIEW_W, height: VIEW_H },
+      viewPosition: { x: 0, y: 0 },
+      deviceScaleFactor: 0,
+      viewSize: { width: VIEW_W, height: VIEW_H },
+      scale
+    });
+
     view.webContents.loadURL(url).catch(console.error);
   });
 
@@ -53,12 +65,20 @@ function createWindow () {
   function updateLayout () {
     views.forEach(v => {
       const { x, y } = v.__worldPos;
-      const w = 1024, h = 768;
       v.setBounds({
         x: Math.round((x + pan.x) * scale),
         y: Math.round((y + pan.y) * scale),
-        width: Math.round(w * scale),
-        height: Math.round(h * scale)
+        width: Math.round(VIEW_W * scale),
+        height: Math.round(VIEW_H * scale)
+      });
+
+      v.webContents.enableDeviceEmulation({
+        screenPosition: 'desktop',
+        screenSize: { width: VIEW_W, height: VIEW_H },
+        viewPosition: { x: 0, y: 0 },
+        deviceScaleFactor: 0,
+        viewSize: { width: VIEW_W, height: VIEW_H },
+        scale
       });
     });
   }

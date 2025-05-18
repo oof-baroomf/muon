@@ -69,14 +69,8 @@ canvas.addEventListener('wheel', e => {
 }, { passive:false });
 
 canvas.addEventListener('dblclick', e => {
-  const input = prompt('URL to open?', 'https://example.com');
-  if (!input) return;
-  // prepend "https://" if the user forgot the scheme
-  const url = /^[a-zA-Z][\w+.-]*:\/\//.test(input.trim())
-              ? input.trim()
-              : `https://${input.trim()}`;
   const rect = canvas.getBoundingClientRect();
   const wx = (e.clientX - rect.left - pan.x) / scale;
-  const wy = (e.clientY - rect.top - pan.y) / scale;
-  ipc && ipc.spawnView({ wx, wy, url });      // use the sanitised URL
+  const wy = (e.clientY - rect.top  - pan.y) / scale;
+  showPrompt(wx, wy);
 });

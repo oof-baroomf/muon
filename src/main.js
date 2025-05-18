@@ -33,11 +33,13 @@ function createWindow () {
 
     const w = 1024, h = 768;          // logical size inside the page
     view.__size = { w, h };           // store once
+    const screenX = Math.round(wx * scale + pan.x);
+    const screenY = Math.round(wy * scale + pan.y);
     view.setBounds({
-      x: Math.round((wx + pan.x) * scale),
-      y: Math.round((wy + pan.y) * scale),
-      width:  Math.round(w * scale),
-      height: Math.round(h * scale)
+      x: screenX,
+      y: screenY,
+      width:  Math.max(50, Math.round(w * scale)),   // ≥50 px so Electron never gets 0
+      height: Math.max(50, Math.round(h * scale))
     });
     view.webContents.setZoomFactor(scale);               // scale content, not layout
     views.push(view);
@@ -54,11 +56,13 @@ function createWindow () {
     views.forEach(v => {
       const { x, y } = v.__worldPos;
       const { w = 1024, h = 768 } = v.__size || {}; // default if missing
+      const screenX = Math.round(x * scale + pan.x);
+      const screenY = Math.round(y * scale + pan.y);
       v.setBounds({
-        x: Math.round((x + pan.x) * scale),
-        y: Math.round((y + pan.y) * scale),
-        width:  Math.round(w * scale),
-        height: Math.round(h * scale)
+        x: screenX,
+        y: screenY,
+        width:  Math.max(50, Math.round(w * scale)),
+        height: Math.max(50, Math.round(h * scale))
       });
       v.webContents.setZoomFactor(scale);
     });

@@ -62,7 +62,7 @@ window.addEventListener('pointerup', () => dragging = false);
 
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.0125 : 0.9875; // ±1.25 %
+  const factor = e.deltaY < 0 ? 1.003 : 0.997;   // ±0.3 %
   scale = Math.min(Math.max(scale * factor, 0.15), 6); // keep 0.15 – 6×
   ipc && ipc.updateTransform(pan, scale);
   draw();

@@ -58,6 +58,7 @@ function createWindow () {
       const { w = 1024, h = 768 } = v.__size || {}; // default if missing
       const screenX = Math.round(x * scale + pan.x);
       const screenY = Math.round(y * scale + pan.y);
+      if (!Number.isFinite(screenX) || !Number.isFinite(screenY)) return; // safety
       v.setBounds({
         x: screenX,
         y: screenY,

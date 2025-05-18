@@ -21,7 +21,6 @@ function createWindow () {
   const views = [];
   let pan = {x: 0, y: 0};
   let scale = 1;
-  let layoutToken = null;
 
   ipcMain.handle('spawn-browserview', (_e, { wx, wy, url }) => {
     const view = new BrowserView({
@@ -51,11 +50,7 @@ function createWindow () {
   ipcMain.on('canvas-transform', (_e, t) => {
     pan   = t.pan;
     scale = t.scale;
-    if (layoutToken) return;                 // already queued
-    layoutToken = setImmediate(() => {       // next loop ≈ next frame
-      layoutToken = null;
-      updateLayout();
-    });
+    updateLayout();          // ← run every event, no delay
   });
 
   function updateLayout () {

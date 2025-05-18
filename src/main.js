@@ -50,7 +50,7 @@ function createWindow () {
   ipcMain.on('canvas-transform', (_e, t) => {
     pan   = t.pan;
     scale = t.scale;
-    updateLayout();          // ← run every event, no delay
+    updateLayout();                          // run immediately, no delay
   });
 
   function updateLayout () {

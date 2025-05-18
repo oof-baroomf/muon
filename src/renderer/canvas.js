@@ -51,21 +51,14 @@ function draw () {
 
 let dragging = false, last = {x:0,y:0};
 
-// ---------- smooth outbound transform ----------
-let rafToken = null;
-function scheduleTransformSend() {
-  if (rafToken) return;              // already scheduled this frame
-  rafToken = requestAnimationFrame(() => {
-    rafToken = null;
-    ipc && ipc.updateTransform(pan, scale);
-  });
-}
 canvas.addEventListener('pointerdown', e => { dragging = true; last.x = e.clientX; last.y = e.clientY; });
 window.addEventListener('pointermove', e => {
   if (!dragging) return;
-  pan.x += e.clientX - last.x; pan.y += e.clientY - last.y;
-  last.x = e.clientX; last.y = e.clientY;
-  scheduleTransformSend();
+  pan.x += e.clientX - last.x;
+  pan.y += e.clientY - last.y;
+  last.x = e.clientX;
+  last.y = e.clientY;
+  ipc && ipc.updateTransform(pan, scale);
   draw();
 });
 window.addEventListener('pointerup', () => dragging = false);

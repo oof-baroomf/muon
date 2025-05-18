@@ -62,8 +62,11 @@ window.addEventListener('pointerup', () => dragging = false);
 
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
-  const factor = e.deltaY < 0 ? 1.003 : 0.997;   // ±0.3 %
-  scale = Math.min(Math.max(scale * factor, 0.15), 6); // keep 0.15 – 6×
+  // each 100 wheel-units → ±1 tick → ±1.25 %
+  const base   = 1.0125;                         // 1.25 %
+  const ticks  = -e.deltaY / 100;                // negative = zoom in
+  const factor = Math.pow(base, ticks);          // smooth, fractional
+  scale = Math.min(Math.max(scale * factor, 0.15), 6);   // clamp 0.15–6×
   ipc && ipc.updateTransform(pan, scale);
   draw();
 }, { passive:false });

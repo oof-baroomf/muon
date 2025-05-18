@@ -31,15 +31,14 @@ function createWindow () {
     win.addBrowserView(view);          // attach
     win.setTopBrowserView(view);       // …and ensure it’s above others
 
-    // initial size/position derived from current canvas transform
-    const w = 1024, h = 768;
+    const w = 1024, h = 768;          // logical "native" size
+    view.__size = { w, h };           // remember for later
     view.setBounds({
       x: Math.round((wx + pan.x) * scale),
       y: Math.round((wy + pan.y) * scale),
-      width: Math.round(w * scale),
+      width:  Math.round(w * scale),
       height: Math.round(h * scale)
     });
-    view.setAutoResize({ width: true, height: true });   // keeps it in-window
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
   });
@@ -53,11 +52,11 @@ function createWindow () {
   function updateLayout () {
     views.forEach(v => {
       const { x, y } = v.__worldPos;
-      const w = 1024, h = 768;
+      const { w, h } = v.__size;
       v.setBounds({
         x: Math.round((x + pan.x) * scale),
         y: Math.round((y + pan.y) * scale),
-        width: Math.round(w * scale),
+        width:  Math.round(w * scale),
         height: Math.round(h * scale)
       });
     });

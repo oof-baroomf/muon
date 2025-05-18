@@ -38,8 +38,8 @@ function createWindow () {
     view.setBounds({
       x: screenX,
       y: screenY,
-      width:  Math.max(50, Math.round(w * scale)),   // ≥50 px so Electron never gets 0
-      height: Math.max(50, Math.round(h * scale))
+      width:  Math.max(1, Math.round(w * scale)),
+      height: Math.max(1, Math.round(h * scale))
     });
     view.webContents.setZoomFactor(scale);               // scale content, not layout
     views.push(view);
@@ -62,8 +62,8 @@ function createWindow () {
       v.setBounds({
         x: screenX,
         y: screenY,
-        width:  Math.max(50, Math.round(w * scale)),
-        height: Math.max(50, Math.round(h * scale))
+        width:  Math.max(1, Math.round(w * scale)),
+        height: Math.max(1, Math.round(h * scale))
       });
       v.webContents.setZoomFactor(scale);
     });

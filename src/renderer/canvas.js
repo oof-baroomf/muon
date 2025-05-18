@@ -72,13 +72,13 @@ window.addEventListener('pointerup', () => dragging = false);
 
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
-  // each 100 wheel-units → ±1 tick → ±1.25 %
-  const base   = 1.0125;                         // 1.25 %
+  // ±2.5 % per 100 wheel-units  →  2× more sensitive
+  const base   = 1.025;                          // 2.5 %
   const ticks  = -e.deltaY / 100;                // negative = zoom in
   const factor = Math.pow(base, ticks);          // smooth, fractional
-  scale = Math.min(Math.max(scale * factor, 0.15), 6);   // clamp 0.15–6×
-  ipc && ipc.updateTransform(pan, scale);
+  scale = Math.min(Math.max(scale * factor, 0.15), 6);
   draw();
+  scheduleTransformSend();                       // smooth update
 }, { passive:false });
 
 canvas.addEventListener('dblclick', e => {

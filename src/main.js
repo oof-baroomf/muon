@@ -42,7 +42,8 @@ function createWindow () {
       width:  Math.max(1, Math.round(w * scale)),
       height: Math.max(1, Math.round(h * scale))
     });
-    // no setZoomFactor → keep layout identical, let bounds do the scaling
+    view.__lastZoom = -1;                 // force first zoom update
+    view.webContents.setZoomFactor(scale); // scale the pixels, not the layout
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
   });
@@ -70,6 +71,10 @@ function createWindow () {
         width:  Math.max(1, Math.round(w * scale)),
         height: Math.max(1, Math.round(h * scale))
       });
+      if (Math.abs((v.__lastZoom ?? 1) - scale) > 1e-3) {
+        v.webContents.setZoomFactor(scale);
+        v.__lastZoom = scale;
+      }
     });
   }
 }

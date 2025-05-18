@@ -21,6 +21,7 @@ function createWindow () {
   const views = [];
   let pan = {x: 0, y: 0};
   let scale = 1;
+  let layoutToken = null;
 
   ipcMain.handle('spawn-browserview', (_e, { wx, wy, url }) => {
     const view = new BrowserView({
@@ -41,15 +42,19 @@ function createWindow () {
       width:  Math.max(1, Math.round(w * scale)),
       height: Math.max(1, Math.round(h * scale))
     });
-    view.webContents.setZoomFactor(scale);               // scale content, not layout
+    // no setZoomFactor → keep layout identical, let bounds do the scaling
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
   });
 
   ipcMain.on('canvas-transform', (_e, t) => {
-    pan = t.pan;
+    pan   = t.pan;
     scale = t.scale;
-    updateLayout();
+    if (layoutToken) return;                 // already queued
+    layoutToken = setImmediate(() => {       // next loop ≈ next frame
+      layoutToken = null;
+      updateLayout();
+    });
   });
 
   function updateLayout () {
@@ -65,7 +70,6 @@ function createWindow () {
         width:  Math.max(1, Math.round(w * scale)),
         height: Math.max(1, Math.round(h * scale))
       });
-      v.webContents.setZoomFactor(scale);
     });
   }
 }

@@ -72,13 +72,11 @@ window.addEventListener('pointerup', () => dragging = false);
 
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
-  // ±2.5 % per 100 wheel-units  →  2× more sensitive
-  const base   = 1.025;                          // 2.5 %
-  const ticks  = -e.deltaY / 100;                // negative = zoom in
-  const factor = Math.pow(base, ticks);          // smooth, fractional
-  scale = Math.min(Math.max(scale * factor, 0.15), 6);
+  const base   = 1.025;                             // 2.5 %
+  const factor = e.deltaY < 0 ? base : 1 / base;    // trackpad gives many small events
+  scale = Math.min(Math.max(scale * factor, 0.25), 6);
   draw();
-  scheduleTransformSend();                       // smooth update
+  scheduleTransformSend();                          // always queue IPC
 }, { passive:false });
 
 canvas.addEventListener('dblclick', e => {

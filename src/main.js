@@ -67,16 +67,16 @@ function createWindow () {
       // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
       if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
 
+      if (Math.abs((v.__lastZoom ?? 1) - scale) > 1e-3) {
+        v.webContents.setZoomFactor(scale);
+        v.__lastZoom = scale;
+      }
       v.setBounds({
         x: screenX,
         y: screenY,
         width:  Math.max(1, Math.round(w * scale)),
         height: Math.max(1, Math.round(h * scale))
       });
-      if (Math.abs((v.__lastZoom ?? 1) - scale) > 1e-3) {
-        v.webContents.setZoomFactor(scale);
-        v.__lastZoom = scale;
-      }
     });
   }
 }

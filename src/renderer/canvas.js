@@ -51,6 +51,9 @@ function draw () {
 
 let dragging = false, last = {x:0,y:0};
 
+let zoomEndTimeout = null;
+const ZOOM_END_DEBOUNCE_MS = 250; // Adjust as needed (milliseconds)
+
 canvas.addEventListener('pointerdown', e => { dragging = true; last.x = e.clientX; last.y = e.clientY; });
 window.addEventListener('pointermove', e => {
   if (!dragging) return;
@@ -71,8 +74,14 @@ canvas.addEventListener('wheel', e => {
   if (!Number.isFinite(nextScale)) return;       // ignore absurd deltas
   scale = Math.min(Math.max(nextScale, 0.15), 6);
   draw();
-  // send immediately so main process updates every event
+  // Send transform immediately for setBounds (view frame scaling)
   ipc && ipc.updateTransform(pan, scale);
+
+  // Debounce sending the final scale for content zoom (setZoomFactor)
+  clearTimeout(zoomEndTimeout);
+  zoomEndTimeout = setTimeout(() => {
+    ipc && ipc.updateViewsZoomFactor(scale);
+  }, ZOOM_END_DEBOUNCE_MS);
 }, { passive:false });
 
 canvas.addEventListener('dblclick', e => {

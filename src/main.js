@@ -59,6 +59,16 @@ function createWindow () {
     updateLayout();                          // run immediately, no delay
   });
 
+  ipcMain.on('update-views-zoom-factor', (_e, finalScale) => {
+    views.forEach(v => {
+      // Use finalScale which is the scale after zoom burst has ended
+      if (Math.abs((v.__lastZoom ?? 1) - finalScale) > 1e-3) {
+        v.webContents.setZoomFactor(finalScale);
+        v.__lastZoom = finalScale;
+      }
+    });
+  });
+
   function updateLayout () {
     views.forEach(v => {
       const { x, y } = v.__worldPos;
@@ -69,12 +79,7 @@ function createWindow () {
       // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
       if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
 
-      // Apply zoom factor change first if needed
-      if (Math.abs((v.__lastZoom ?? 1) - scale) > 1e-3) {
-        v.webContents.setZoomFactor(scale);
-        v.__lastZoom = scale;
-      }
-      // Then apply bounds change
+      // Only apply bounds change here - zoom factor is handled by update-views-zoom-factor
       v.setBounds({
         x: screenX,
         y: screenY,

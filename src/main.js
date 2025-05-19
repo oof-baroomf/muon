@@ -39,14 +39,16 @@ function createWindow () {
     // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
     if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
 
+    // Apply zoom factor first for new views
+    view.webContents.setZoomFactor(scale);
+    view.__lastZoom = scale; // Record the initial zoom factor applied
+
     view.setBounds({
       x: screenX,
       y: screenY,
       width:  Math.max(1, Math.round(w * scale)),
       height: Math.max(1, Math.round(h * scale))
     });
-    view.__lastZoom = -1;                 // force first zoom update
-    view.webContents.setZoomFactor(scale); // scale the pixels, not the layout
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
   });
@@ -67,10 +69,12 @@ function createWindow () {
       // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
       if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
 
+      // Apply zoom factor change first if needed
       if (Math.abs((v.__lastZoom ?? 1) - scale) > 1e-3) {
         v.webContents.setZoomFactor(scale);
         v.__lastZoom = scale;
       }
+      // Then apply bounds change
       v.setBounds({
         x: screenX,
         y: screenY,

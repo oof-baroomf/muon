@@ -35,6 +35,10 @@ function createWindow () {
     view.__size = { w, h };           // store once
     const screenX = Math.round(wx * scale + pan.x);
     const screenY = Math.round(wy * scale + pan.y);
+
+    // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
+    if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
+
     view.setBounds({
       x: screenX,
       y: screenY,
@@ -59,7 +63,10 @@ function createWindow () {
       const { w = 1024, h = 768 } = v.__size || {}; // default if missing
       const screenX = Math.round(x * scale + pan.x);
       const screenY = Math.round(y * scale + pan.y);
-      if (!Number.isFinite(screenX) || !Number.isFinite(screenY)) return; // safety
+
+      // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
+      if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
+
       v.setBounds({
         x: screenX,
         y: screenY,

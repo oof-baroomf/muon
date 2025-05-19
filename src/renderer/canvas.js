@@ -66,8 +66,10 @@ window.addEventListener('pointerup', () => dragging = false);
 canvas.addEventListener('wheel', e => {
   e.preventDefault();
   // very fine-grained: ≈ 0.1 % per deltaY pixel
-  const factor = Math.pow(1.001, -e.deltaY);     // trackpad or wheel
-  scale = Math.min(Math.max(scale * factor, 0.15), 6);
+  const factor = Math.pow(1.001, -e.deltaY);
+  let nextScale = scale * factor;
+  if (!Number.isFinite(nextScale)) return;       // ignore absurd deltas
+  scale = Math.min(Math.max(nextScale, 0.15), 6);
   draw();
   // send immediately so main process updates every event
   ipc && ipc.updateTransform(pan, scale);

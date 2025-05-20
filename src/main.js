@@ -4,6 +4,8 @@ const { app,
         BrowserView,
         ipcMain } = require('electron');
 
+const TITLE_H = 24;      // logical px used for each view's draggable bar
+
 function createWindow () {
   const win = new BrowserWindow({
     width: 1280, height: 800,
@@ -34,7 +36,7 @@ function createWindow () {
     const w = 1024, h = 768;          // logical size inside the page
     view.__size = { w, h };           // store once
     const screenX = Math.round(wx * scale + pan.x);
-    const screenY = Math.round(wy * scale + pan.y);
+    const screenY = Math.round(wy * scale + pan.y + TITLE_H * scale);
 
     // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
     if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
@@ -51,6 +53,8 @@ function createWindow () {
     });
     views.push(view);
     view.webContents.loadURL(url).catch(console.error);
+
+    return view.webContents.id;      // ← lets the renderer know which view it spawned
   });
 
   ipcMain.on('canvas-transform', (_e, t) => {
@@ -74,7 +78,7 @@ function createWindow () {
       const { x, y } = v.__worldPos;
       const { w = 1024, h = 768 } = v.__size || {}; // default if missing
       const screenX = Math.round(x * scale + pan.x);
-      const screenY = Math.round(y * scale + pan.y);
+      const screenY = Math.round(y * scale + pan.y + TITLE_H * scale);
 
       // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
       if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;

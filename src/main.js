@@ -63,6 +63,19 @@ function createWindow () {
     updateLayout();                          // run immediately, no delay
   });
 
+  ipcMain.on('update-view-bounds', (_e, { id, pos, size }) => {
+    const v = views.find(v => v.webContents.id === id);
+    if (!v) return;
+
+    if (pos && Number.isFinite(pos.x) && Number.isFinite(pos.y))
+      v.__worldPos = { x: pos.x, y: pos.y };
+
+    if (size && Number.isFinite(size.w) && Number.isFinite(size.h))
+      v.__size = { w: size.w, h: size.h };
+
+    updateLayout();
+  });
+
   ipcMain.on('update-views-zoom-factor', (_e, finalScale) => {
     views.forEach(v => {
       // Use finalScale which is the scale after zoom burst has ended

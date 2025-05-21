@@ -99,13 +99,29 @@ canvas.addEventListener('pointerdown', e => {
   last.x = e.clientX; last.y = e.clientY;
 });
 window.addEventListener('pointermove', e => {
-  if (!dragging) return;
-  pan.x += e.clientX - last.x;
-  pan.y += e.clientY - last.y;
-  last.x = e.clientX;
-  last.y = e.clientY;
-  ipc && ipc.updateTransform(pan, scale);
-  draw();
+  const dx = e.clientX - last.x;
+  const dy = e.clientY - last.y;
+
+  if (activeView) {
+    if (viewDragMode === 'move') {
+      activeView.wx += dx / scale;
+      activeView.wy += dy / scale;
+      ipc && ipc.updateViewBounds({ id: activeView.id,
+                                    pos: { x: activeView.wx, y: activeView.wy } });
+    } else {                                // resize
+      activeView.w  = Math.max(100, activeView.w + dx / scale);
+      activeView.h  = Math.max( 80, activeView.h + dy / scale);
+      ipc && ipc.updateViewBounds({ id: activeView.id,
+                                    size: { w: activeView.w, h: activeView.h } });
+    }
+    draw();
+  } else if (dragging) {
+    pan.x += dx; pan.y += dy;
+    ipc && ipc.updateTransform(pan, scale);
+    draw();
+  }
+
+  last.x = e.clientX; last.y = e.clientY;
 });
 window.addEventListener('pointerup', () => {
   dragging = false;

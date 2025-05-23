@@ -53,20 +53,6 @@ function draw () {
     ctx.beginPath(); ctx.moveTo(-1e5, i); ctx.lineTo(1e5, i); ctx.stroke();
   }
 
-  // ───────── overlay view title-bars ─────────
-  ctx.fillStyle = '#222';
-  ctx.strokeStyle = '#444';
-  ctx.lineWidth = 1 / scale;
-  ctx.font = `${12 / scale}px sans-serif`;
-  ctx.textBaseline = 'middle';
-
-  for (const v of views) {
-    ctx.fillRect(v.wx, v.wy, v.w, TITLE_H);
-    ctx.strokeRect(v.wx, v.wy, v.w, TITLE_H);
-    ctx.fillStyle = '#ddd';
-    ctx.fillText(v.url, v.wx + 8 / scale, v.wy + TITLE_H / 2);
-    ctx.fillStyle = '#222';
-  }
 }
 
 let dragging   = false, last = {x:0,y:0};
@@ -80,21 +66,7 @@ canvas.addEventListener('pointerdown', e => {
   const wx = (e.clientX - rect.left - pan.x) / scale;
   const wy = (e.clientY - rect.top  - pan.y) / scale;
 
-  // try title-bars from topmost → back
-  for (let i = views.length - 1; i >= 0; --i) {
-    const v = views[i];
-    if (wx >= v.wx && wx <= v.wx + v.w &&
-        wy >= v.wy && wy <= v.wy + TITLE_H) {
-
-      const nearRight = wx >= v.wx + v.w - (12 / scale);
-      activeView   = v;
-      viewDragMode = nearRight ? 'resize' : 'move';
-      last.x = e.clientX; last.y = e.clientY;
-      return;                           // handled
-    }
-  }
-
-  // otherwise start panning the whole canvas
+  // start panning the whole canvas
   dragging = true;
   last.x = e.clientX; last.y = e.clientY;
 });

@@ -26,7 +26,14 @@ function createWindow () {
 
   ipcMain.handle('spawn-browserview', (_e, { wx, wy, url }) => {
     const view = new BrowserView({
-      webPreferences: { contextIsolation: true, nodeIntegration: false }
+      webPreferences: {
+        preload: path.join(__dirname, 'titlebar-preload.js'),  // we'll inject a tiny HTML bar
+        contextIsolation: true,
+        nodeIntegration: false,
+        sandbox: true,
+        backgroundThrottling: false,
+        transparent: true
+      }
     });
     view.__worldPos = { x: wx, y: wy };
 
@@ -51,10 +58,32 @@ function createWindow () {
       width:  Math.max(1, Math.round(w * scale)),
       height: Math.max(1, Math.round(h * scale))
     });
-    views.push(view);
-    view.webContents.loadURL(url).catch(console.error);
+    view.webContents.loadURL(`data:text/html,
+      <style>
+        body{margin:0;background:#333;color:#eee;
+             height:${TITLE_H}px;display:flex;align-items:center}
+        span{flex:1;padding-left:8px;font:12px sans-serif;}
+      </style>
+      <span>${encodeURIComponent(url)}</span>`).catch(console.error);
 
-    return view.webContents.id;      // ← lets the renderer know which view it spawned
+    const page = new BrowserView({
+      webPreferences: { contextIsolation: true, nodeIntegration: false }
+    });
+    page.__worldPos = view.__worldPos;      // share same metadata
+    page.__size     = view.__size;
+
+    win.addBrowserView(page);
+    win.setTopBrowserView(page);            // page sits above the bar
+
+    page.webContents.setZoomFactor(scale);
+    page.webContents.loadURL(url).catch(console.error);
+
+    views.push({ bar: view, page });        // keep them paired
+
+    // initial placement for both:
+    positionPair({bar:view, page});
+
+    return page.webContents.id;             // tell renderer which content-view it controls
   });
 
   ipcMain.on('canvas-transform', (_e, t) => {
@@ -86,24 +115,27 @@ function createWindow () {
     });
   });
 
+  function positionPair({bar, page}) {
+    const {x, y} = bar.__worldPos;
+    const {w, h} = bar.__size;
+    const screenX = Math.round(x * scale + pan.x);
+    const screenY = Math.round(y * scale + pan.y);
+
+    if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
+
+    bar.setBounds({ x: screenX,
+                    y: screenY,
+                    width:  Math.max(1, Math.round(w * scale)),
+                    height: Math.max(1, Math.round(TITLE_H * scale)) });
+
+    page.setBounds({ x: screenX,
+                     y: screenY + Math.round(TITLE_H * scale),
+                     width:  Math.max(1, Math.round(w * scale)),
+                     height: Math.max(1, Math.round(h * scale)) });
+  }
+
   function updateLayout () {
-    views.forEach(v => {
-      const { x, y } = v.__worldPos;
-      const { w = 1024, h = 768 } = v.__size || {}; // default if missing
-      const screenX = Math.round(x * scale + pan.x);
-      const screenY = Math.round(y * scale + pan.y + TITLE_H * scale);
-
-      // ------- safety: skip if any value is NaN/∞ (avoids "conversion failure")-------
-      if (![screenX, screenY, w * scale, h * scale].every(Number.isFinite)) return;
-
-      // Only apply bounds change here - zoom factor is handled by update-views-zoom-factor
-      v.setBounds({
-        x: screenX,
-        y: screenY,
-        width:  Math.max(1, Math.round(w * scale)),
-        height: Math.max(1, Math.round(h * scale))
-      });
-    });
+    views.forEach(positionPair);
   }
 }
 

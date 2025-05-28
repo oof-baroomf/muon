@@ -231,6 +231,15 @@ function makeDraggableAndResizable(element, viewId) {
             element.style.setProperty('--view-scale', currentScale);
             element.style.transform = `scale(${currentScale})`;
             window.electronAPI.zoomView(viewId, currentScale);
+            
+            // --- keep the underlying BrowserView in sync with this visual scale ---
+            const rect = element.getBoundingClientRect();
+            window.electronAPI.updateViewBounds(viewId, {
+              x: Math.round(rect.left),
+              y: Math.round(rect.top),
+              width: Math.round(rect.width),
+              height: Math.round(rect.height)
+            });
         }
     }, { passive: false });
 }

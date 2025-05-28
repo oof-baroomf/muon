@@ -1,0 +1,18 @@
+{
+  "name": "electron-video-browser",
+  "version": "1.0.0",
+  "description": "A browser replicating the video's UI and behavior.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "Electron",
+    "browser"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.0.1"
+  }
+}

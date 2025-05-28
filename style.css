@@ -1,0 +1,202 @@
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #121212;
+    color: #e0e0e0;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#url-input-container {
+    position: fixed;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    padding: 8px;
+    background-color: rgba(30, 30, 30, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+#url-input-container.hidden {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px);
+    pointer-events: none;
+}
+
+.url-input-box {
+    display: flex;
+    align-items: center;
+    padding: 5px 10px;
+    background-color: #252525;
+    border-radius: 6px;
+}
+
+.prompt-char {
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+    font-size: 18px;
+    color: #888;
+    margin-right: 10px;
+    padding-left: 5px;
+}
+
+#url-input {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    color: #e0e0e0;
+    font-size: 18px;
+    width: 500px;
+    font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'Liberation Mono', 'Courier New', monospace;
+}
+
+#url-input::placeholder {
+    color: #666;
+}
+
+#views-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.view-window {
+    position: absolute;
+    background-color: #2d2d2d;
+    border: 1px solid #444;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: opacity 0.3s ease, transform 0.3s ease-out, box-shadow 0.2s ease;
+    --view-scale: 1;
+    transform: scale(var(--view-scale));
+}
+
+.view-window.active {
+    border-color: #5a9cf8;
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4), 0 0 0 2px #5a9cf844;
+    z-index: 1000;
+}
+
+.view-window.dragging, .view-window.resizing {
+    transition: none;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.view-header {
+    background-color: #333333;
+    color: #ccc;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: grab;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+}
+
+.view-header:active {
+    cursor: grabbing;
+}
+
+.view-controls {
+    display: flex;
+}
+
+.view-close-button {
+    background: #ff5f57;
+    border: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    padding: 0;
+    margin-left: 8px;
+    color: transparent;
+    cursor: pointer;
+    font-size: 9px;
+    line-height: 12px;
+    text-align: center;
+    outline: none;
+}
+.view-close-button:hover {
+    background: #e0443e;
+    color: #4d0000;
+}
+
+.view-content-area {
+    flex-grow: 1;
+    padding: 10px;
+    color: #aaa;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #1e1e1e;
+}
+
+.resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 15px;
+    height: 15px;
+    cursor: nwse-resize;
+    z-index: 10;
+}
+
+#bottom-indicator {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    color: #aaa;
+    background-color: rgba(30, 30, 30, 0.8);
+    padding: 5px 15px;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
+
+#bottom-indicator.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #2a2a2a;
+}
+::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}

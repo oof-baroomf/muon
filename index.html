@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Browser</title>
+    <link rel="stylesheet" href="style.css">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self'; style-src 'self' 'unsafe-inline';">
+</head>
+<body>
+    <div id="app-container">
+        <div id="url-input-container" class="hidden">
+            <div class="url-input-box">
+                <span class="prompt-char"></span>
+                <input type="text" id="url-input" placeholder="Website URL">
+            </div>
+        </div>
+
+        <div id="views-container">
+        </div>
+
+        <div id="bottom-indicator" class="hidden">
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>

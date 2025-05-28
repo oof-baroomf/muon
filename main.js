@@ -33,7 +33,8 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
     views.forEach(view => {
-      if (view && !view.isDestroyed()) {
+      if (view && !view.webContents.isDestroyed()) {
+        view.webContents.destroy();
       }
     });
     views.clear();
@@ -95,7 +96,7 @@ ipcMain.on('create-new-view', (event, urlToLoad) => {
 
 ipcMain.on('focus-view', (event, viewId) => {
   const view = views.get(viewId);
-  if (view && !view.isDestroyed()) {
+  if (view && !view.webContents.isDestroyed()) {
     mainWindow.removeBrowserView(view);
     mainWindow.addBrowserView(view);
     view.webContents.focus();
@@ -104,7 +105,7 @@ ipcMain.on('focus-view', (event, viewId) => {
 
 ipcMain.on('update-view-bounds', (event, { viewId, bounds }) => {
   const view = views.get(viewId);
-  if (view && !view.isDestroyed() && mainWindow) {
+  if (view && !view.webContents.isDestroyed() && mainWindow) {
     const contentBounds = mainWindow.getContentBounds();
     const newBounds = {
         x: Math.max(0, Math.min(bounds.x, contentBounds.width - bounds.width)),
@@ -118,7 +119,7 @@ ipcMain.on('update-view-bounds', (event, { viewId, bounds }) => {
 
 ipcMain.on('close-view', (event, viewId) => {
   const view = views.get(viewId);
-  if (view && !view.isDestroyed() && mainWindow) {
+  if (view && !view.webContents.isDestroyed() && mainWindow) {
     mainWindow.removeBrowserView(view);
     views.delete(viewId);
     event.sender.send('view-closed-ack', viewId);
@@ -127,7 +128,7 @@ ipcMain.on('close-view', (event, viewId) => {
 
 ipcMain.on('navigate-view', (event, { viewId, action }) => {
     const view = views.get(viewId);
-    if (view && !view.isDestroyed()) {
+    if (view && !view.webContents.isDestroyed()) {
         if (action === 'back' && view.webContents.canGoBack()) {
             view.webContents.goBack();
         } else if (action === 'forward' && view.webContents.canGoForward()) {
@@ -138,9 +139,16 @@ ipcMain.on('navigate-view', (event, { viewId, action }) => {
     }
 });
 
+ipcMain.on('zoom-view', (event, { viewId, zoomFactor }) => {
+  const view = views.get(viewId);
+  if (view && !view.webContents.isDestroyed()) {
+    view.webContents.setZoomFactor(zoomFactor);
+  }
+});
+
 ipcMain.on('set-view-mouse-passthrough', (event, { viewId, passthrough }) => {
   const view = views.get(viewId);
-  if (view && !view.isDestroyed()) {
+  if (view && !view.webContents.isDestroyed()) {
     view.webContents.setIgnoreMenuShortcuts(!passthrough);
   }
 });

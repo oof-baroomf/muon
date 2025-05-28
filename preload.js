@@ -11,4 +11,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setViewMousePassthrough: (viewId, passthrough) => ipcRenderer.send('set-view-mouse-passthrough', { viewId, passthrough }),
   sendKeyEvent: (key) => ipcRenderer.send('key-event', key),
   removeAllListeners: (channel) => ipcRenderer.removeAllListeners(channel),
+  zoomView: (viewId, zoomFactor) => ipcRenderer.send('zoom-view', { viewId, zoomFactor }),
 });

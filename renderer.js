@@ -221,7 +221,7 @@ function makeDraggableAndResizable(element, viewId) {
             } else {
                 currentScale -= scaleAmount;
             }
-            currentScale = Math.max(0.2, Math.min(currentScale, 3));
+            currentScale = Math.max(0.25, Math.min(currentScale, 5));
 
             const rect = element.getBoundingClientRect();
             const originX = ((e.clientX - rect.left) / rect.width) * 100;
@@ -230,6 +230,7 @@ function makeDraggableAndResizable(element, viewId) {
             element.style.transformOrigin = `${originX}% ${originY}%`;
             element.style.setProperty('--view-scale', currentScale);
             element.style.transform = `scale(${currentScale})`;
+            window.electronAPI.zoomView(viewId, currentScale);
         }
     }, { passive: false });
 }

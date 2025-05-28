@@ -233,7 +233,6 @@ function makeDraggableAndResizable(element, viewId) {
             window.electronAPI.zoomView(viewId, currentScale);
             
             // --- keep the underlying BrowserView in sync with this visual scale ---
-            const rect = element.getBoundingClientRect();
             window.electronAPI.updateViewBounds(viewId, {
               x: Math.round(rect.left),
               y: Math.round(rect.top),

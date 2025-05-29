@@ -109,12 +109,12 @@ ipcMain.on('update-view-bounds', (event, { viewId, bounds }) => {
   if (view && !view.webContents.isDestroyed() && mainWindow) {
     const contentBounds = mainWindow.getContentBounds();
     const newBounds = {
-        console.log('[main] applying newBounds', newBounds);
         x: Math.max(0, Math.min(bounds.x, contentBounds.width - bounds.width)),
         y: Math.max(0, Math.min(bounds.y, contentBounds.height - bounds.height)),
         width: Math.max(100, Math.min(bounds.width, contentBounds.width)),
         height: Math.max(100, Math.min(bounds.height, contentBounds.height))
     };
+    console.log('[main] applying newBounds', newBounds);
     view.setBounds(newBounds);
   }
 });

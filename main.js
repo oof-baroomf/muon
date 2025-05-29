@@ -78,7 +78,7 @@ ipcMain.on('create-new-view', (event, urlToLoad) => {
   const y = Math.floor((winHeight - viewHeight) / 2);
 
   view.setBounds({ x, y, width: viewWidth, height: viewHeight });
-  view.setAutoResize({ width: true, height: true });
+  view.setAutoResize({ horizontal: true, vertical: true });
   view.webContents.loadURL(urlToLoad).catch(err => {
     console.error(`Failed to load URL ${urlToLoad}:`, err);
     view.webContents.loadURL(`data:text/html,<h1>Error loading: ${urlToLoad}</h1><p>${err.message}</p>`);

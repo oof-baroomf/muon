@@ -190,12 +190,6 @@ function makeDraggableAndResizable(element, viewId) {
 
     document.addEventListener('mouseup', (e) => {
         if (isDragging || isResizing) {
-            console.log('[wheel] sending updateViewBounds', viewId, {
-              x: Math.round(postRect.left),
-              y: Math.round(postRect.top),
-              width: Math.round(postRect.width),
-              height: Math.round(postRect.height)
-            });
             window.electronAPI.updateViewBounds(viewId, {
                 x: element.offsetLeft,
                 y: element.offsetTop,
@@ -215,8 +209,14 @@ function makeDraggableAndResizable(element, viewId) {
     });
 
     element.addEventListener('wheel', (e) => {
-        if (e.ctrlKey) {
-            console.log('[wheel] ctrl?', e.ctrlKey, 'deltaY', e.deltaY);
+        console.log('[wheel raw]', {
+          deltaY: e.deltaY,
+          ctrl:  e.ctrlKey,
+          meta:  e.metaKey,
+          alt:   e.altKey
+        });
+
+        if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
             e.stopPropagation();
 

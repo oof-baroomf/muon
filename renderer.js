@@ -223,31 +223,24 @@ function makeDraggableAndResizable(element, viewId) {
             }
             currentScale = Math.max(0.25, Math.min(currentScale, 5));
 
-            const rect = element.getBoundingClientRect();
-            const originX = ((e.clientX - rect.left) / rect.width) * 100;
-            const originY = ((e.clientY - rect.top) / rect.height) * 100;
+            // 1. measure before the scale so we can set the correct transformOrigin
+            const preRect = element.getBoundingClientRect();
+            const originX = ((e.clientX - preRect.left) / preRect.width) * 100;
+            const originY = ((e.clientY - preRect.top) / preRect.height) * 100;
 
             element.style.transformOrigin = `${originX}% ${originY}%`;
             element.style.setProperty('--view-scale', currentScale);
             element.style.transform = `scale(${currentScale})`;
             window.electronAPI.zoomView(viewId, currentScale);
-            
-            // --- keep the underlying BrowserView in sync with this visual scale ---
-            const scaledRect = element.getBoundingClientRect();
-            if (
-              Math.round(scaledRect.width)  !== element._lastSentWidth  ||
-              Math.round(scaledRect.height) !== element._lastSentHeight
-            ) {
-              element._lastSentWidth  = Math.round(scaledRect.width);
-              element._lastSentHeight = Math.round(scaledRect.height);
 
-              window.electronAPI.updateViewBounds(viewId, {
-                x: Math.round(scaledRect.left),
-                y: Math.round(scaledRect.top),
-                width:  element._lastSentWidth,
-                height: element._lastSentHeight
-              });
-            }
+            // 2. NOW measure again - this reflects the new scaled size
+            const postRect = element.getBoundingClientRect();
+            window.electronAPI.updateViewBounds(viewId, {
+              x: Math.round(postRect.left),
+              y: Math.round(postRect.top),
+              width: Math.round(postRect.width),
+              height: Math.round(postRect.height)
+            });
         }
     }, { passive: false });
 }

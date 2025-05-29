@@ -104,10 +104,12 @@ ipcMain.on('focus-view', (event, viewId) => {
 });
 
 ipcMain.on('update-view-bounds', (event, { viewId, bounds }) => {
+  console.log('[main] update-view-bounds', viewId, 'requested →', bounds);
   const view = views.get(viewId);
   if (view && !view.webContents.isDestroyed() && mainWindow) {
     const contentBounds = mainWindow.getContentBounds();
     const newBounds = {
+        console.log('[main] applying newBounds', newBounds);
         x: Math.max(0, Math.min(bounds.x, contentBounds.width - bounds.width)),
         y: Math.max(0, Math.min(bounds.y, contentBounds.height - bounds.height)),
         width: Math.max(100, Math.min(bounds.width, contentBounds.width)),
@@ -140,6 +142,7 @@ ipcMain.on('navigate-view', (event, { viewId, action }) => {
 });
 
 ipcMain.on('zoom-view', (event, { viewId, zoomFactor }) => {
+  console.log('[main] zoom-view', viewId, 'factor →', zoomFactor);
   const view = views.get(viewId);
   if (view && !view.webContents.isDestroyed()) {
     view.webContents.setZoomFactor(zoomFactor);

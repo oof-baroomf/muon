@@ -190,6 +190,12 @@ function makeDraggableAndResizable(element, viewId) {
 
     document.addEventListener('mouseup', (e) => {
         if (isDragging || isResizing) {
+            console.log('[wheel] sending updateViewBounds', viewId, {
+              x: Math.round(postRect.left),
+              y: Math.round(postRect.top),
+              width: Math.round(postRect.width),
+              height: Math.round(postRect.height)
+            });
             window.electronAPI.updateViewBounds(viewId, {
                 x: element.offsetLeft,
                 y: element.offsetTop,
@@ -210,6 +216,7 @@ function makeDraggableAndResizable(element, viewId) {
 
     element.addEventListener('wheel', (e) => {
         if (e.ctrlKey) {
+            console.log('[wheel] ctrl?', e.ctrlKey, 'deltaY', e.deltaY);
             e.preventDefault();
             e.stopPropagation();
 
@@ -222,9 +229,11 @@ function makeDraggableAndResizable(element, viewId) {
                 currentScale -= scaleAmount;
             }
             currentScale = Math.max(0.25, Math.min(currentScale, 5));
+            console.log('[wheel] new currentScale →', currentScale);
 
             // 1. measure before the scale so we can set the correct transformOrigin
             const preRect = element.getBoundingClientRect();
+            console.log('[wheel] preRect', preRect);
             const originX = ((e.clientX - preRect.left) / preRect.width) * 100;
             const originY = ((e.clientY - preRect.top) / preRect.height) * 100;
 
@@ -235,6 +244,7 @@ function makeDraggableAndResizable(element, viewId) {
 
             // 2. NOW measure again - this reflects the new scaled size
             const postRect = element.getBoundingClientRect();
+            console.log('[wheel] postRect', postRect);
             window.electronAPI.updateViewBounds(viewId, {
               x: Math.round(postRect.left),
               y: Math.round(postRect.top),

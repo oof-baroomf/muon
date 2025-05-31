@@ -145,7 +145,7 @@ ipcMain.on('update-view-bounds', (event, { id, bounds }) => {
                 console.warn(`[UpdateViewBounds] mainWindow not available for view ${id}.`);
             }
         } else {
-            // console.log(`[UpdateViewBounds] View ${id} is already destroyed. Cannot update bounds.`);
+            console.log(`[UpdateViewBounds] View ${id} is already destroyed. Cannot update bounds.`);
         }
     } else {
         console.warn(`[UpdateViewBounds] No valid BrowserView found for id ${id}. Found:`, view);
@@ -163,7 +163,7 @@ ipcMain.on('remove-view', (event, id) => {
             view.webContents.destroy();
         }
         views.delete(id);
-        // console.log(`[RemoveView] View ${id} processed for removal.`);
+        console.log(`[RemoveView] View ${id} processed for removal.`);
     } else {
         console.warn(`[RemoveView] No valid BrowserView found for id ${id} to remove. Found:`, view);
     }
@@ -184,7 +184,7 @@ ipcMain.on('navigate-view', (event, { id, action, url }) => {
                 contents.reload();
             }
         } else {
-            // console.log(`[NavigateView] View ${id} is already destroyed. Cannot navigate.`);
+            console.log(`[NavigateView] View ${id} is already destroyed. Cannot navigate.`);
         }
     } else {
         console.warn(`[NavigateView] No valid BrowserView found for id ${id}. Found:`, view);

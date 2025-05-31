@@ -231,6 +231,7 @@ urlInput.addEventListener('keydown', async (e) => {
                     console.warn(`[Renderer - DelayedOp] View ${id} no longer exists. Skipping focus/bounds.`);
                 }
             }, 500);
+        }
     } else if (e.key === 'Escape') {
         urlInputContainer.style.display = 'none';
         urlInput.blur();

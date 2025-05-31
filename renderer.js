@@ -211,15 +211,26 @@ urlInput.addEventListener('keydown', async (e) => {
             isDragging: false,
         };
 
+        console.log(`[Renderer] Requesting creation of view ${id} for URL ${url}`);
         const createdId = await window.electronAPI.createView(id, url);
+
         if (createdId) {
+            console.log(`[Renderer] Main process confirmed creation for view ${createdId}. Initializing proxy.`);
             viewData.element = createViewProxyElement(viewData);
             views.set(id, viewData);
-            setActiveView(id);
-            updateAllViewBounds();
-        } else {
-            console.error("Failed to create view in main process.");
-        }
+
+            // Delay focus and initial bounds update
+            console.log(`[Renderer] Scheduling delayed focus and bounds update for view ${id}.`);
+            setTimeout(() => {
+                if (views.has(id)) {
+                    console.log(`[Renderer - DelayedOp] Attempting to set active view ${id} and update bounds.`);
+                    setActiveView(id);
+                    updateAllViewBounds();
+                    console.log(`[Renderer - DelayedOp] setActiveView and updateAllViewBounds called for ${id}.`);
+                } else {
+                    console.warn(`[Renderer - DelayedOp] View ${id} no longer exists. Skipping focus/bounds.`);
+                }
+            }, 500);
     } else if (e.key === 'Escape') {
         urlInputContainer.style.display = 'none';
         urlInput.blur();

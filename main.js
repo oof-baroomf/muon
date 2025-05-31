@@ -192,18 +192,44 @@ ipcMain.on('navigate-view', (event, { id, action, url }) => {
 });
 
 ipcMain.on('focus-view', (event, id) => {
+    console.log(`[Main - FocusViewAttempt] Received request to focus view ${id}.`);
     const view = views.get(id);
-    // This is likely the area of your error (around line 110)
-    if (view instanceof BrowserView) {
-        if (!view.isDestroyed()) {
-            // console.log(`[FocusView] Focusing view ${id}.`) // For debugging
-            view.webContents.focus();
-        } else {
-            // console.log(`[FocusView] View ${id} is already destroyed. Cannot focus.`);
-        }
-    } else {
-        console.warn(`[FocusView] No valid BrowserView found for id ${id} to focus. Found:`, view);
-        // If the error was "view.isDestroyed is not a function", then 'view' was truthy but not a BrowserView.
-        // This log will show what 'view' actually was.
+
+    if (!view) {
+        console.error(`[Main - FocusView] CRITICAL: View with id ${id} NOT FOUND in views map at time of focus request.`);
+        return;
+    }
+
+    if (!(view instanceof BrowserView)) {
+        console.error(`[Main - FocusView] CRITICAL: Item with id ${id} found in views map IS NOT an instance of BrowserView. Type: ${typeof view}, Value:`, view);
+        return;
+    }
+
+    console.log(`[Main - FocusView] View ${id} is an instance of BrowserView.`);
+
+    if (view.isDestroyed()) {
+        console.warn(`[Main - FocusView] View ${id} IS ALREADY DESTROYED (native object). Cannot focus.`);
+        return;
+    }
+    console.log(`[Main - FocusView] View ${id} is not destroyed (native object check passed).`);
+
+    if (!view.webContents) {
+        console.error(`[Main - FocusView] CRITICAL: View ${id} has NO webContents property. This should not happen for a valid BrowserView.`);
+        return;
+    }
+    console.log(`[Main - FocusView] View ${id} has a webContents property.`);
+
+    if (view.webContents.isDestroyed()) {
+        console.warn(`[Main - FocusView] View ${id} webContents IS DESTROYED (webContents specific). Cannot focus.`);
+        return;
+    }
+    console.log(`[Main - FocusView] View ${id} webContents is not destroyed.`);
+
+    try {
+        console.log(`[Main - FocusView] Attempting to call webContents.focus() for view ${id}.`);
+        view.webContents.focus();
+        console.log(`[Main - FocusView] Successfully CALLED webContents.focus() for view ${id}. (This does not guarantee focus was acquired by OS).`);
+    } catch (error) {
+        console.error(`[Main - FocusView] !!! EXCEPTION DURING webContents.focus() CALL for view ${id}:`, error);
     }
 });

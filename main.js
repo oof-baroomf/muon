@@ -4,6 +4,13 @@ const path = require('path');
 let mainWindow;
 const views = new Map();
 
+// Handle SSL certificate errors (for debugging only)
+app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
+    console.warn(`[CertificateError] URL: ${url}, Error: ${error}`);
+    event.preventDefault();
+    callback(true);
+});
+
 function createWindow() {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width, height } = primaryDisplay.workAreaSize;
@@ -49,17 +56,20 @@ app.on('activate', () => {
     }
 });
 
-ipcMain.handle('create-view', (event, { id, url }) => {
+ipcMain.handle('create-view', async (event, { id, url }) => {
     if (!mainWindow) {
-        console.error('Create-view: mainWindow is not available.');
+        console.error('[CreateView] mainWindow is not available.');
         return null;
     }
 
+    let view;
     try {
-        const view = new BrowserView({ // Ensure BrowserView is correctly referenced
+        view = new BrowserView({
             webPreferences: {
                 contextIsolation: true,
                 nodeIntegration: false,
+                sandbox: true,
+                partition: `persist:view_${id}`
             }
         });
         mainWindow.addBrowserView(view);
@@ -67,17 +77,54 @@ ipcMain.handle('create-view', (event, { id, url }) => {
 
         view.setBounds({ x: 0, y: 0, width: 1, height: 1 });
         view.setBackgroundColor('#FFFFFF');
-        view.webContents.loadURL(url).catch(err => {
-            console.error(`[CreateView] Failed to load URL ${url} for view ${id}:`, err);
-            // Optionally, clean up the view if URL loading fails critically
-            // mainWindow.removeBrowserView(view);
-            // views.delete(id);
-            // view.webContents.destroy();
+
+        const wc = view.webContents;
+
+        wc.on('did-finish-load', () => {
+            console.log(`[WebContentsEvent - ${id}] did-finish-load: ${wc.getURL()}`);
         });
-        // console.log(`[CreateView] View ${id} created and mapped.`);
+        wc.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+            console.error(`[WebContentsEvent - ${id}] did-fail-load: ${validatedURL}, Error: ${errorCode}, ${errorDescription}`);
+        });
+        wc.on('did-stop-loading', () => {
+            console.log(`[WebContentsEvent - ${id}] did-stop-loading: ${wc.getURL()}`);
+        });
+        wc.on('unresponsive', () => {
+            console.warn(`[WebContentsEvent - ${id}] WebContents became unresponsive: ${wc.getURL()}`);
+        });
+        wc.on('render-process-gone', (event, details) => {
+            console.error(`[WebContentsEvent - ${id}] Render process gone: ${wc.getURL()}, Reason: ${details.reason}, ExitCode: ${details.exitCode}`);
+            if (views.has(id)) {
+                if (mainWindow && !view.isDestroyed()) {
+                    try {
+                        mainWindow.removeBrowserView(view);
+                    } catch (e) {
+                        console.error(`[RenderProcessGoneCleanup - ${id}] Error removing BrowserView: `, e);
+                    }
+                }
+                views.delete(id);
+                if (mainWindow && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                    mainWindow.webContents.send('view-crashed', id);
+                }
+            }
+        });
+
+        console.log(`[CreateView - ${id}] Attempting to load URL: ${url}`);
+        await wc.loadURL(url);
+        console.log(`[CreateView - ${id}] loadURL call completed for: ${url}`);
+
         return id;
     } catch (error) {
-        console.error(`[CreateView] Error during BrowserView creation for id ${id}:`, error);
+        console.error(`[CreateView - ${id}] Error during BrowserView creation or initial load:`, error);
+        if (view && mainWindow && views.has(id)) {
+            if (!view.isDestroyed()) {
+                try { mainWindow.removeBrowserView(view); } catch(e) { /* ignore */ }
+            }
+            views.delete(id);
+        }
+        if (view && view.webContents && !view.webContents.isDestroyed()){
+            try { view.webContents.destroy(); } catch(e) { /* ignore */ }
+        }
         return null;
     }
 });

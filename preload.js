@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     removeView: (id) => ipcRenderer.send('remove-view', id),
     navigateView: (id, action, url = null) => ipcRenderer.send('navigate-view', { id, action, url }),
     focusView: (id) => ipcRenderer.send('focus-view', id),
+    onViewCrashed: (callback) => ipcRenderer.on('view-crashed', (event, id) => callback(id))
 });

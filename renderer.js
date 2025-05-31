@@ -238,6 +238,20 @@ window.addEventListener('resize', () => {
     applyTransform();
 });
 
+// Handle view crashes from main process
+window.electronAPI.onViewCrashed((crashedViewId) => {
+    console.error(`View with ID ${crashedViewId} has crashed and was removed from main process.`);
+    const viewData = views.get(crashedViewId);
+    if (viewData && viewData.element) {
+        viewData.element.remove();
+    }
+    views.delete(crashedViewId);
+    if (activeViewId === crashedViewId) {
+        activeViewId = null;
+        backButton.style.display = 'none';
+    }
+});
+
 canvasContainer.addEventListener('click', (e) => {
     if (e.target === canvasContainer || e.target === canvas) {
         if (activeViewId !== null) {

@@ -251,16 +251,48 @@ window.addEventListener('resize', () => {
 });
 
 // Handle view crashes from main process
-window.electronAPI.onViewCrashed((crashedViewId) => {
-    console.error(`View with ID ${crashedViewId} has crashed and was removed from main process.`);
-    const viewData = views.get(crashedViewId);
-    if (viewData && viewData.element) {
-        viewData.element.remove();
+window.electronAPI.onViewCrashed(({id, url, crashCount, reason}) => {
+    console.error(`View ${id} (${url}) crashed (${crashCount}x). Reason: ${reason}`);
+    
+    const viewData = views.get(id);
+    if (viewData) {
+        // Show crash UI
+        if (viewData.element) {
+            viewData.element.innerHTML = `
+                <div class="crash-overlay">
+                    <div class="crash-message">
+                        <h3>Page Crashed</h3>
+                        <p>${url}</p>
+                        <p>Attempt ${crashCount} of 3</p>
+                        <button class="reload-btn">Reload</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add reload handler
+            viewData.element.querySelector('.reload-btn').addEventListener('click', () => {
+                window.electronAPI.navigateView(id, 'reload');
+            });
+        }
+
+        // Update active view if needed
+        if (activeViewId === id) {
+            backButton.style.display = 'none';
+        }
     }
-    views.delete(crashedViewId);
-    if (activeViewId === crashedViewId) {
-        activeViewId = null;
-        backButton.style.display = 'none';
+});
+
+// Handle view recreation requests
+window.electronAPI.onRecreateView((id) => {
+    const viewData = views.get(id);
+    if (viewData) {
+        window.electronAPI.createView(id, viewData.url)
+            .then(() => {
+                console.log(`Successfully recreated view ${id}`);
+            })
+            .catch(err => {
+                console.error(`Failed to recreate view ${id}:`, err);
+            });
     }
 });
 

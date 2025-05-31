@@ -57,10 +57,30 @@ app.on('activate', () => {
     }
 });
 
+// Global view state tracker
+const viewStates = new Map();
+
 ipcMain.handle('create-view', async (event, { id, url }) => {
-    if (!mainWindow) {
-        console.error('[CreateView] mainWindow is not available.');
+    if (!mainWindow || mainWindow.isDestroyed()) {
+        console.error('[CreateView] mainWindow is not available or destroyed.');
         return null;
+    }
+
+    // Check for existing view with same ID
+    if (views.has(id)) {
+        console.warn(`[CreateView] View with id ${id} already exists. Cleaning up old view.`);
+        const oldView = views.get(id);
+        if (oldView && !oldView.isDestroyed()) {
+            try {
+                mainWindow.removeBrowserView(oldView);
+                if (oldView.webContents && !oldView.webContents.isDestroyed()) {
+                    oldView.webContents.destroy();
+                }
+            } catch (e) {
+                console.error(`[CreateView] Error cleaning up old view ${id}:`, e);
+            }
+        }
+        views.delete(id);
     }
 
     let view;
@@ -70,8 +90,17 @@ ipcMain.handle('create-view', async (event, { id, url }) => {
                 contextIsolation: true,
                 nodeIntegration: false,
                 sandbox: true,
-                partition: `persist:view_${id}`
+                partition: `persist:view_${id}`,
+                webSecurity: true,
+                allowRunningInsecureContent: false
             }
+        });
+
+        // Track view state
+        viewStates.set(id, {
+            creationTime: Date.now(),
+            lastActivity: Date.now(),
+            crashCount: 0
         });
         mainWindow.addBrowserView(view);
         views.set(id, view);
@@ -94,19 +123,46 @@ ipcMain.handle('create-view', async (event, { id, url }) => {
             console.warn(`[WebContentsEvent - ${id}] WebContents became unresponsive: ${wc.getURL()}`);
         });
         wc.on('render-process-gone', (event, details) => {
-            console.error(`[WebContentsEvent - ${id}] Render process gone: ${wc.getURL()}, Reason: ${details.reason}, ExitCode: ${details.exitCode}`);
-            if (views.has(id)) {
-                if (mainWindow && !view.isDestroyed()) {
-                    try {
-                        mainWindow.removeBrowserView(view);
-                    } catch (e) {
-                        console.error(`[RenderProcessGoneCleanup - ${id}] Error removing BrowserView: `, e);
+            const state = viewStates.get(id) || {};
+            state.crashCount = (state.crashCount || 0) + 1;
+            viewStates.set(id, state);
+
+            console.error(`[WebContentsEvent - ${id}] Render process crashed (${state.crashCount} times): ${wc.getURL()}, Reason: ${details.reason}, ExitCode: ${details.exitCode}`);
+            
+            // Emergency cleanup
+            try {
+                if (views.has(id)) {
+                    const crashedView = views.get(id);
+                    if (mainWindow && !mainWindow.isDestroyed() && crashedView && !crashedView.isDestroyed()) {
+                        mainWindow.removeBrowserView(crashedView);
                     }
+                    views.delete(id);
                 }
-                views.delete(id);
-                if (mainWindow && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
-                    mainWindow.webContents.send('view-crashed', id);
+
+                // Notify renderer if possible
+                if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                    mainWindow.webContents.send('view-crashed', {
+                        id,
+                        url: wc.getURL(),
+                        crashCount: state.crashCount,
+                        reason: details.reason
+                    });
                 }
+
+                // Prevent memory leaks
+                if (view.webContents && !view.webContents.isDestroyed()) {
+                    view.webContents.destroy();
+                }
+            } catch (e) {
+                console.error(`[CrashHandler] Emergency cleanup failed for view ${id}:`, e);
+            }
+
+            // Auto-recover if crash count < 3
+            if (state.crashCount < 3) {
+                console.log(`[CrashRecovery] Attempting to recreate view ${id} (attempt ${state.crashCount})`);
+                setTimeout(() => {
+                    event.sender.send('recreate-view', id);
+                }, 1000);
             }
         });
 

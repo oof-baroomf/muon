@@ -28,7 +28,6 @@ function createWindow() {
     });
 
     mainWindow.loadFile('index.html');
-    mainWindow.webContents.openDevTools();
 
     mainWindow.on('closed', () => {
         mainWindow = null;
@@ -169,7 +168,6 @@ ipcMain.handle('create-view', async (event, { id, url }) => {
         console.log(`[CreateView - ${id}] Attempting to load URL: ${url}`);
         await wc.loadURL(url);
         console.log(`[CreateView - ${id}] loadURL call completed for: ${url}`);
-        view.webContents.openDevTools({ mode: 'detach' }); // For debugging individual views
 
         return id;
     } catch (error) {

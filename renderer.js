@@ -16,12 +16,21 @@ function updateCanvasAndViews() {
 }
 
 function getScreenRectForView(viewData) {
-    const canvasRect = canvas.getBoundingClientRect();
+    const wrapperRect = canvasWrapper.getBoundingClientRect();
+
+    // Position of the placeholder's top-left on the transformed canvas,
+    // relative to the canvas-wrapper's top-left, then add wrapper's offset in window.
+    const viewXonScreen = wrapperRect.left + panX + (viewData.logicalX * currentScale);
+    const viewYonScreen = wrapperRect.top + panY + (viewData.logicalY * currentScale);
+
+    const viewWidthOnScreen = viewData.logicalWidth * currentScale;
+    const viewHeightOnScreen = viewData.logicalHeight * currentScale;
+
     return {
-        x: canvasRect.left + (viewData.logicalX * currentScale),
-        y: canvasRect.top + (viewData.logicalY * currentScale),
-        width: viewData.logicalWidth * currentScale,
-        height: viewData.logicalHeight * currentScale,
+        x: Math.round(viewXonScreen),
+        y: Math.round(viewYonScreen),
+        width: Math.round(viewWidthOnScreen),
+        height: Math.round(viewHeightOnScreen),
     };
 }
 
@@ -82,7 +91,7 @@ function removeView(id) {
 }
 
 canvas.addEventListener('mousedown', (e) => {
-    if (e.target !== canvas) return;
+    if (e.target !== canvas && e.target !== canvasWrapper ) return; // Pan if clicking on canvas or its direct wrapper
     isPanning = true;
     lastMouseX = e.clientX; lastMouseY = e.clientY;
     canvas.style.cursor = 'grabbing';
@@ -101,15 +110,25 @@ window.addEventListener('mouseup', () => {
 
 canvasWrapper.addEventListener('wheel', (e) => {
     e.preventDefault();
-    const zoomIntensity = 0.05;
+    const zoomIntensity = 0.07; // Adjusted for better feel
     const oldScale = currentScale;
-    currentScale = Math.max(0.1, Math.min(3.0, currentScale * (1 - e.deltaY * zoomIntensity * 0.1)));
+
+    let scaleChange;
+    if (e.deltaY < 0) { // Zoom in
+        scaleChange = 1 + zoomIntensity;
+    } else { // Zoom out
+        scaleChange = 1 - zoomIntensity;
+    }
+    currentScale *= scaleChange;
+    currentScale = Math.max(0.05, Math.min(5.0, currentScale)); // Wider zoom range, min scale not too small
 
     const rect = canvasWrapper.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left; // Mouse X relative to canvasWrapper
+    const mouseY = e.clientY - rect.top; // Mouse Y relative to canvasWrapper
+
     panX = mouseX - (mouseX - panX) * (currentScale / oldScale);
     panY = mouseY - (mouseY - panY) * (currentScale / oldScale);
+
     updateCanvasAndViews();
 }, { passive: false });
 

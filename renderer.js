@@ -252,18 +252,16 @@ window.electronAPI.onViewReadyForBounds((id) => {
 // Handle view crashes or removals from main process
 window.electronAPI.onViewCrashedOrRemoved((id) => {
     const viewData = views.get(id);
-    console.error(`View ${id} (${url}) crashed (${crashCount}x). Reason: ${reason}`);
-    
-    const viewData = views.get(id);
     if (viewData) {
+        console.error(`[Renderer] View ${id} (URL: ${viewData.url || 'unknown'}) crashed or was removed from main process.`);
         // Show crash UI
         if (viewData.element) {
             viewData.element.innerHTML = `
                 <div class="crash-overlay">
                     <div class="crash-message">
-                        <h3>Page Crashed</h3>
-                        <p>${url}</p>
-                        <p>Attempt ${crashCount} of 3</p>
+                        <h3>Page Unavailable</h3>
+                        ${viewData.url ? `<p>URL: ${viewData.url}</p>` : ''}
+                        <p>The page crashed or could not be loaded.</p>
                         <button class="reload-btn">Reload</button>
                     </div>
                 </div>
@@ -271,14 +269,21 @@ window.electronAPI.onViewCrashedOrRemoved((id) => {
             
             // Add reload handler
             viewData.element.querySelector('.reload-btn').addEventListener('click', () => {
+                // Before reloading, clear the crash UI
+                viewData.element.innerHTML = '';
+                viewData.status = 'loading';
                 window.electronAPI.navigateView(id, 'reload');
             });
         }
 
         // Update active view if needed
         if (activeViewId === id) {
+            activeViewId = null;
             backButton.style.display = 'none';
         }
+        views.delete(id); // Remove from renderer's tracking
+    } else {
+        console.warn(`[Renderer] Received onViewCrashedOrRemoved for unknown id: ${id}`);
     }
 });
 

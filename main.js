@@ -2,7 +2,7 @@ const { app, BrowserWindow, BrowserView, ipcMain } = require('electron');
 const path = require('path');
 
 let mainWindow;
-const views = new Map();
+const views = new Map(); // To store { viewInstance, logicalWidth, logicalHeight }
 
 function createWindow() {
     mainWindow = new BrowserWindow({
@@ -48,7 +48,7 @@ app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 
-ipcMain.handle('create-view', async (event, { id, url, x, y, width, height }) => {
+ipcMain.handle('create-view', async (event, { id, url, x, y, width, height, logicalWidth, logicalHeight, initialScale }) => {
     if (!mainWindow) return null;
     if (views.has(id)) {
         const existingView = views.get(id);
@@ -66,7 +66,13 @@ ipcMain.handle('create-view', async (event, { id, url, x, y, width, height }) =>
         }
     });
     mainWindow.addBrowserView(view);
-    views.set(id, view);
+    views.set(id, { viewInstance: view, logicalWidth: logicalWidth, logicalHeight: logicalHeight });
+
+    view.webContents.once('did-finish-load', () => {
+        if (view.webContents && !view.webContents.isDestroyed()) {
+            view.webContents.setZoomFactor(initialScale);
+        }
+    });
 
     view.setBounds({ x: Math.round(x), y: Math.round(y), width: Math.round(width), height: Math.round(height) });
     view.setBackgroundColor('#ffffff');
@@ -79,13 +85,16 @@ ipcMain.handle('create-view', async (event, { id, url, x, y, width, height }) =>
     return id;
 });
 
-ipcMain.on('update-view-bounds', (event, { id, x, y, width, height }) => {
-    const view = views.get(id);
-    if (view && mainWindow && !mainWindow.isDestroyed() && view.webContents && !view.webContents.isDestroyed()) {
-        const w = Math.max(1, Math.round(width));
-        const h = Math.max(1, Math.round(height));
+ipcMain.on('update-view-visuals', (event, { id, visualX, visualY, visualWidth, visualHeight, newScale }) => {
+    const viewObject = views.get(id);
+    if (viewObject && viewObject.viewInstance && mainWindow && !mainWindow.isDestroyed() &&
+        viewObject.viewInstance.webContents && !viewObject.viewInstance.webContents.isDestroyed()) {
+        const actualView = viewObject.viewInstance;
+        const w = Math.max(1, Math.round(visualWidth));
+        const h = Math.max(1, Math.round(visualHeight));
         try {
-            view.setBounds({ x: Math.round(x), y: Math.round(y), width: w, height: h });
+            actualView.setBounds({ x: Math.round(visualX), y: Math.round(visualY), width: w, height: h });
+            actualView.webContents.setZoomFactor(newScale);
         } catch (error) {
             console.error("Error setting bounds for view", id, error);
         }
@@ -93,26 +102,28 @@ ipcMain.on('update-view-bounds', (event, { id, x, y, width, height }) => {
 });
 
 ipcMain.on('remove-view', (event, id) => {
-    const view = views.get(id);
-    if (view && mainWindow && !mainWindow.isDestroyed()) {
+    const viewObject = views.get(id);
+    if (viewObject && viewObject.viewInstance && mainWindow && !mainWindow.isDestroyed()) {
+        const actualView = viewObject.viewInstance;
         const currentViews = mainWindow.getBrowserViews();
-        if (currentViews.includes(view)) {
-            mainWindow.removeBrowserView(view);
+        if (currentViews.includes(actualView)) {
+            mainWindow.removeBrowserView(actualView);
         }
         views.delete(id);
     }
 });
 
 ipcMain.on('focus-view', (event, id) => {
-    const view = views.get(id);
-    if (view && mainWindow && !mainWindow.isDestroyed()) {
+    const viewObject = views.get(id);
+    if (viewObject && viewObject.viewInstance && mainWindow && !mainWindow.isDestroyed()) {
+        const actualView = viewObject.viewInstance;
         const currentViews = mainWindow.getBrowserViews();
-        if (currentViews.includes(view)) {
-            mainWindow.removeBrowserView(view);
-            mainWindow.addBrowserView(view);
+        if (currentViews.includes(actualView)) {
+            mainWindow.removeBrowserView(actualView);
+            mainWindow.addBrowserView(actualView);
         }
-        if (view.webContents) {
-            view.webContents.focus();
+        if (actualView.webContents) {
+            actualView.webContents.focus();
         }
     }
 });

@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('canvas');
+    const appContainer = document.getElementById('app-container'); // Get app container
     const urlInputArea = document.getElementById('url-input-area');
     const urlInput = document.getElementById('urlInput');
     const submitUrlButton = document.getElementById('submitUrlButton');
@@ -69,12 +70,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const scaledWidth = view.width * canvasState.scale;
             const scaledHeight = view.height * canvasState.scale;
 
-            window.electronAPI.updateViewBounds({
+            window.electronAPI.updateViewVisuals({
                 id: view.id,
-                x: scaledX,
-                y: scaledY,
-                width: scaledWidth,
-                height: scaledHeight,
+                visualX: visualX,
+                visualY: visualY,
+                visualWidth: visualWidth,
+                visualHeight: visualHeight,
+                newScale: canvasState.scale
             });
         });
     }
@@ -153,7 +155,13 @@ document.addEventListener('DOMContentLoaded', () => {
         await window.electronAPI.createView({
             id: viewData.id,
             url: viewData.url,
-            x: scaledX, y: scaledY, width: scaledWidth, height: scaledHeight
+            x: initialVisualX,
+            y: initialVisualY,
+            width: initialVisualWidth,
+            height: initialVisualHeight,
+            logicalWidth: viewData.logicalWidth,
+            logicalHeight: viewData.logicalHeight,
+            initialScale: canvasState.scale
         });
 
         urlInput.value = '';
@@ -256,7 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     let wheelTimeout = null;
-    canvas.addEventListener('wheel', (e) => {
+    appContainer.addEventListener('wheel', (e) => {
+        // Prevent zoom if focus is on input elements or similar
+        if (urlInput.contains(e.target) || submitUrlButton.contains(e.target) || (e.target && e.target.closest && e.target.closest('.view-title-bar'))) {
+            return; // Don't zoom if interacting with controls or title bars
+        }
         e.preventDefault();
         const zoomIntensity = 0.07;
         const scrollDelta = e.deltaY < 0 ? (1 + zoomIntensity) : (1 - zoomIntensity);

@@ -159,8 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
             y: initialVisualY,
             width: initialVisualWidth,
             height: initialVisualHeight,
-            logicalWidth: viewData.logicalWidth,
-            logicalHeight: viewData.logicalHeight,
+            logicalWidth: viewData.width,     // Use the logical dimensions
+            logicalHeight: viewData.height,   // from viewData
             initialScale: canvasState.scale
         });
 

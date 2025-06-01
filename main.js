@@ -94,6 +94,7 @@ ipcMain.on('update-view-visuals', (event, { id, visualX, visualY, visualWidth, v
         const h = Math.max(1, Math.round(visualHeight));
         try {
             actualView.setBounds({ x: Math.round(visualX), y: Math.round(visualY), width: w, height: h });
+            // Keep device emulation settings but update zoom factor
             actualView.webContents.setZoomFactor(newScale);
         } catch (error) {
             console.error("Error setting bounds for view", id, error);

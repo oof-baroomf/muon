@@ -122,41 +122,53 @@ ipcMain.handle('create-view', async (event, { id, url }) => {
             console.warn(`[WebContentsEvent - ${id}] WebContents became unresponsive: ${wc.getURL()}`);
         });
         wc.on('render-process-gone', (event, details) => {
-            const state = viewStates.get(id) || {};
-            state.crashCount = (state.crashCount || 0) + 1;
-            viewStates.set(id, state);
-
-            console.error(`[WebContentsEvent - ${id}] Render process crashed (${state.crashCount} times): ${wc.getURL()}, Reason: ${details.reason}, ExitCode: ${details.exitCode}`);
+            console.error(`[WebContentsEvent - ${id}] !!! RENDER PROCESS GONE: ${wc.getURL()}, Reason: ${details.reason}, ExitCode: ${details.exitCode}`);
             
-            // Emergency cleanup
-            try {
-                if (views.has(id)) {
-                    const crashedView = views.get(id);
-                    if (mainWindow && !mainWindow.isDestroyed() && crashedView && !crashedView.isDestroyed()) {
-                        mainWindow.removeBrowserView(crashedView);
-                    }
-                    views.delete(id);
-                }
+            const viewToRemove = views.get(id); // Get a reference before deleting from map
 
-                // Notify renderer if possible
-                if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
-                    mainWindow.webContents.send('view-crashed', {
-                        id,
-                        url: wc.getURL(),
-                        crashCount: state.crashCount,
-                        reason: details.reason
-                    });
-                }
+            // IMPORTANT: Remove from our tracking map immediately
+            if (views.has(id)) {
+                views.delete(id);
+                console.log(`[RenderProcessGoneCleanup - ${id}] View REMOVED from 'views' map.`);
+            } else {
+                 console.warn(`[RenderProcessGoneCleanup - ${id}] View ID was NOT IN 'views' map at time of cleanup.`);
+            }
 
-                // Prevent memory leaks
-                if (view.webContents && !view.webContents.isDestroyed()) {
-                    view.webContents.destroy();
+            // Attempt to remove and destroy the BrowserView from main window using the retrieved reference
+            if (mainWindow && viewToRemove && typeof viewToRemove.isDestroyed === 'function' && !viewToRemove.isDestroyed()) {
+                try {
+                    console.log(`[RenderProcessGoneCleanup - ${id}] Attempting to remove BrowserView from mainWindow.`);
+                    mainWindow.removeBrowserView(viewToRemove);
+                } catch (e) {
+                    console.error(`[RenderProcessGoneCleanup - ${id}] Error removing BrowserView from mainWindow: `, e);
                 }
-            } catch (e) {
-                console.error(`[CrashHandler] Emergency cleanup failed for view ${id}:`, e);
+            }
+
+            // Attempt to destroy webContents explicitly if it's not already
+            if (viewToRemove && viewToRemove.webContents && typeof viewToRemove.webContents.isDestroyed === 'function' && !viewToRemove.webContents.isDestroyed()) {
+                 try {
+                    console.log(`[RenderProcessGoneCleanup - ${id}] Attempting to destroy webContents.`);
+                    viewToRemove.webContents.destroy();
+                } catch (e) {
+                    console.error(`[RenderProcessGoneCleanup - ${id}] Error destroying webContents: `, e);
+                }
+            }
+            
+            // Inform renderer UI that the view is gone
+            if (mainWindow && mainWindow.webContents && !mainWindow.webContents.isDestroyed()) {
+                mainWindow.webContents.send('view-crashed', {
+                    id,
+                    url: wc.getURL(),
+                    crashCount: (viewStates.get(id)?.crashCount || 0) + 1,
+                    reason: details.reason
+                });
             }
 
             // Auto-recover if crash count < 3
+            const state = viewStates.get(id) || {};
+            state.crashCount = (state.crashCount || 0) + 1;
+            viewStates.set(id, state);
+            
             if (state.crashCount < 3) {
                 console.log(`[CrashRecovery] Attempting to recreate view ${id} (attempt ${state.crashCount})`);
                 setTimeout(() => {
@@ -250,53 +262,67 @@ ipcMain.on('navigate-view', (event, { id, action, url }) => {
 ipcMain.on('focus-view', (event, id) => {
     console.log(`[Main - FocusViewAttempt] Received request to focus view ${id}.`);
 
-    // Defer the core logic to the next tick of the event loop
     process.nextTick(() => {
         console.log(`[Main - FocusView - NextTick] Executing deferred focus logic for ${id}.`);
         const view = views.get(id);
 
         if (!view) {
-            console.error(`[Main - FocusView - NextTick] CRITICAL: View with id ${id} NOT FOUND in views map (deferred check).`);
+            console.error(`[Main - FocusView - NextTick] View with id ${id} NOT FOUND in views map (deferred check). The view might have crashed and been cleaned up.`);
             return;
         }
         console.log(`[Main - FocusView - NextTick - Check 1] View ${id} retrieved from map.`);
 
         if (!(view instanceof BrowserView)) {
-            console.error(`[Main - FocusView - NextTick] CRITICAL: Item with id ${id} in map IS NOT an instance of BrowserView. Type: ${typeof view}`);
+            console.error(`[Main - FocusView - NextTick] Item with id ${id} in map IS NOT an instance of BrowserView. Type: ${typeof view}. Value:`, view);
+            // If this happens, it implies something else put a non-BrowserView into the map.
+            views.delete(id); // Clean up the erroneous map entry
             return;
         }
         console.log(`[Main - FocusView - NextTick - Check 2] View ${id} IS an instance of BrowserView.`);
 
+        // --- NEW CHECK for the TypeError ---
+        if (typeof view.isDestroyed !== 'function') {
+            console.error(`[Main - FocusView - NextTick - Check 3A_TYPE_ERROR] view.isDestroyed IS NOT A FUNCTION for id ${id}. Object keys: ${Object.keys(view)}. This indicates an inconsistent state for the BrowserView object.`);
+            // Treat this as if the view is unusable or already gone.
+            // It's possible render-process-gone started cleanup but hasn't fully removed from Electron's internal list
+            // or our map yet if there's a race condition.
+            views.delete(id); // Ensure it's removed from our tracking
+            return;
+        }
+        console.log(`[Main - FocusView - NextTick - Check 3B_TYPE_OK] view.isDestroyed IS a function for ${id}.`);
+
         try {
-            console.log(`[Main - FocusView - NextTick - Check 3] About to check view.isDestroyed() for ${id}.`);
-            // THIS IS THE LINE WE BELIEVE IS CRASHING
             if (view.isDestroyed()) {
-                console.warn(`[Main - FocusView - NextTick - Check 4a] View ${id} IS ALREADY DESTROYED. Cannot focus.`);
+                console.warn(`[Main - FocusView - NextTick - Check 4a] View ${id} IS ALREADY DESTROYED (reported by isDestroyed). Cannot focus.`);
+                views.delete(id); // Ensure it's removed if isDestroyed() is true but it was still in map
                 return;
             }
             console.log(`[Main - FocusView - NextTick - Check 4b] View ${id} is not destroyed.`);
         } catch (e) {
-            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.isDestroyed() check for ${id}:`, e);
-            // A SIGSEGV will NOT be caught here. This is for synchronous JS errors.
+            // This catch would be for other errors if isDestroyed was a function but still threw
+            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.isDestroyed() call for ${id} (though it was a function):`, e);
+            views.delete(id); // Clean up
             return;
         }
 
-        // If it passes Check 4b, proceed with webContents checks
-        if (!view.webContents) {
-            console.error(`[Main - FocusView - NextTick - Check 5] CRITICAL: View ${id} has NO webContents property.`);
+        // Proceed with webContents checks if view is not considered destroyed
+        if (!view.webContents || typeof view.webContents.isDestroyed !== 'function') {
+            console.error(`[Main - FocusView - NextTick - Check 5_WC_INVALID] View ${id} has NO webContents or webContents.isDestroyed is not a function. Keys: ${view.webContents ? Object.keys(view.webContents) : 'N/A'}`);
+            views.delete(id); // Clean up
             return;
         }
-        console.log(`[Main - FocusView - NextTick - Check 6] View ${id} HAS a webContents property.`);
-
+        console.log(`[Main - FocusView - NextTick - Check 6] View ${id} HAS valid webContents property with isDestroyed function.`);
+        
         try {
-            console.log(`[Main - FocusView - NextTick - Check 7] About to check view.webContents.isDestroyed() for ${id}.`);
             if (view.webContents.isDestroyed()) {
                 console.warn(`[Main - FocusView - NextTick - Check 8a] View ${id} webContents IS DESTROYED. Cannot focus.`);
+                views.delete(id);
                 return;
             }
             console.log(`[Main - FocusView - NextTick - Check 8b] View ${id} webContents is not destroyed.`);
         } catch (e) {
             console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.webContents.isDestroyed() check for ${id}:`, e);
+            views.delete(id);
             return;
         }
         
@@ -308,6 +334,7 @@ ipcMain.on('focus-view', (event, id) => {
             console.log(`[Main - FocusView - NextTick - Check 11] SUCCESSFULLY CALLED webContents.focus() for view ${id}.`);
         } catch (error) {
             console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION DURING webContents.focus() CALL for view ${id}:`, error);
+            views.delete(id); // Clean up on error
         }
     });
 });

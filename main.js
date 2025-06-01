@@ -70,6 +70,11 @@ ipcMain.handle('create-view', async (event, { id, url, x, y, width, height, logi
 
     view.webContents.once('did-finish-load', () => {
         if (view.webContents && !view.webContents.isDestroyed()) {
+            view.webContents.enableDeviceEmulation({
+                viewSize: { width: logicalWidth, height: logicalHeight },
+                deviceScaleFactor: 1,
+                scale: 1
+            });
             view.webContents.setZoomFactor(initialScale);
         }
     });

@@ -217,20 +217,8 @@ urlInput.addEventListener('keydown', async (e) => {
         if (createdId) {
             console.log(`[Renderer] Main process confirmed creation for view ${createdId}. Initializing proxy.`);
             viewData.element = createViewProxyElement(viewData);
+            viewData.status = 'loading'; // Track view state in renderer too
             views.set(id, viewData);
-
-            // Delay focus and initial bounds update
-            console.log(`[Renderer] Scheduling delayed focus and bounds update for view ${id}.`);
-            setTimeout(() => {
-                if (views.has(id)) {
-                    console.log(`[Renderer - DelayedOp] Attempting to set active view ${id} and update bounds.`);
-                    setActiveView(id);
-                    updateAllViewBounds();
-                    console.log(`[Renderer - DelayedOp] setActiveView and updateAllViewBounds called for ${id}.`);
-                } else {
-                    console.warn(`[Renderer - DelayedOp] View ${id} no longer exists. Skipping focus/bounds.`);
-                }
-            }, 500);
         }
     } else if (e.key === 'Escape') {
         urlInputContainer.style.display = 'none';
@@ -250,8 +238,20 @@ window.addEventListener('resize', () => {
     applyTransform();
 });
 
-// Handle view crashes from main process
-window.electronAPI.onViewCrashed(({id, url, crashCount, reason}) => {
+// Handle when view is ready for bounds updates
+window.electronAPI.onViewReadyForBounds((id) => {
+    const viewData = views.get(id);
+    if (viewData) {
+        console.log(`[Renderer] View ${id} is ready for bounds updates.`);
+        viewData.status = 'active';
+        setActiveView(id);
+        updateAllViewBounds();
+    }
+});
+
+// Handle view crashes or removals from main process
+window.electronAPI.onViewCrashedOrRemoved((id) => {
+    const viewData = views.get(id);
     console.error(`View ${id} (${url}) crashed (${crashCount}x). Reason: ${reason}`);
     
     const viewData = views.get(id);

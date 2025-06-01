@@ -147,10 +147,10 @@ document.addEventListener('DOMContentLoaded', () => {
             removeView(viewData.id);
         });
 
-        const scaledX = (viewData.x * canvasState.scale) + canvasState.offsetX;
-        const scaledY = (viewData.y * canvasState.scale) + canvasState.offsetY;
-        const scaledWidth = viewData.width * canvasState.scale;
-        const scaledHeight = viewData.height * canvasState.scale;
+        const initialVisualX = (viewData.x * canvasState.scale) + canvasState.offsetX;
+        const initialVisualY = (viewData.y * canvasState.scale) + canvasState.offsetY;
+        const initialVisualWidth = viewData.width * canvasState.scale;
+        const initialVisualHeight = viewData.height * canvasState.scale;
 
         await window.electronAPI.createView({
             id: viewData.id,

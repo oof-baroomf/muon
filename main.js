@@ -251,43 +251,65 @@ ipcMain.on('navigate-view', (event, { id, action, url }) => {
 
 ipcMain.on('focus-view', (event, id) => {
     console.log(`[Main - FocusViewAttempt] Received request to focus view ${id}.`);
-    const view = views.get(id);
 
-    if (!view) {
-        console.error(`[Main - FocusView] CRITICAL: View with id ${id} NOT FOUND in views map at time of focus request.`);
-        return;
-    }
+    // Defer the core logic to the next tick of the event loop
+    process.nextTick(() => {
+        console.log(`[Main - FocusView - NextTick] Executing deferred focus logic for ${id}.`);
+        const view = views.get(id);
 
-    if (!(view instanceof BrowserView)) {
-        console.error(`[Main - FocusView] CRITICAL: Item with id ${id} found in views map IS NOT an instance of BrowserView. Type: ${typeof view}, Value:`, view);
-        return;
-    }
+        if (!view) {
+            console.error(`[Main - FocusView - NextTick] CRITICAL: View with id ${id} NOT FOUND in views map (deferred check).`);
+            return;
+        }
+        console.log(`[Main - FocusView - NextTick - Check 1] View ${id} retrieved from map.`);
 
-    console.log(`[Main - FocusView] View ${id} is an instance of BrowserView.`);
+        if (!(view instanceof BrowserView)) {
+            console.error(`[Main - FocusView - NextTick] CRITICAL: Item with id ${id} in map IS NOT an instance of BrowserView. Type: ${typeof view}`);
+            return;
+        }
+        console.log(`[Main - FocusView - NextTick - Check 2] View ${id} IS an instance of BrowserView.`);
 
-    if (view.isDestroyed()) {
-        console.warn(`[Main - FocusView] View ${id} IS ALREADY DESTROYED (native object). Cannot focus.`);
-        return;
-    }
-    console.log(`[Main - FocusView] View ${id} is not destroyed (native object check passed).`);
+        try {
+            console.log(`[Main - FocusView - NextTick - Check 3] About to check view.isDestroyed() for ${id}.`);
+            // THIS IS THE LINE WE BELIEVE IS CRASHING
+            if (view.isDestroyed()) {
+                console.warn(`[Main - FocusView - NextTick - Check 4a] View ${id} IS ALREADY DESTROYED. Cannot focus.`);
+                return;
+            }
+            console.log(`[Main - FocusView - NextTick - Check 4b] View ${id} is not destroyed.`);
+        } catch (e) {
+            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.isDestroyed() check for ${id}:`, e);
+            // A SIGSEGV will NOT be caught here. This is for synchronous JS errors.
+            return;
+        }
 
-    if (!view.webContents) {
-        console.error(`[Main - FocusView] CRITICAL: View ${id} has NO webContents property. This should not happen for a valid BrowserView.`);
-        return;
-    }
-    console.log(`[Main - FocusView] View ${id} has a webContents property.`);
+        // If it passes Check 4b, proceed with webContents checks
+        if (!view.webContents) {
+            console.error(`[Main - FocusView - NextTick - Check 5] CRITICAL: View ${id} has NO webContents property.`);
+            return;
+        }
+        console.log(`[Main - FocusView - NextTick - Check 6] View ${id} HAS a webContents property.`);
 
-    if (view.webContents.isDestroyed()) {
-        console.warn(`[Main - FocusView] View ${id} webContents IS DESTROYED (webContents specific). Cannot focus.`);
-        return;
-    }
-    console.log(`[Main - FocusView] View ${id} webContents is not destroyed.`);
+        try {
+            console.log(`[Main - FocusView - NextTick - Check 7] About to check view.webContents.isDestroyed() for ${id}.`);
+            if (view.webContents.isDestroyed()) {
+                console.warn(`[Main - FocusView - NextTick - Check 8a] View ${id} webContents IS DESTROYED. Cannot focus.`);
+                return;
+            }
+            console.log(`[Main - FocusView - NextTick - Check 8b] View ${id} webContents is not destroyed.`);
+        } catch (e) {
+            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.webContents.isDestroyed() check for ${id}:`, e);
+            return;
+        }
+        
+        console.log(`[Main - FocusView - NextTick - Check 9] View ${id} webContents is confirmed not destroyed.`);
 
-    try {
-        console.log(`[Main - FocusView] Attempting to call webContents.focus() for view ${id}.`);
-        view.webContents.focus();
-        console.log(`[Main - FocusView] Successfully CALLED webContents.focus() for view ${id}. (This does not guarantee focus was acquired by OS).`);
-    } catch (error) {
-        console.error(`[Main - FocusView] !!! EXCEPTION DURING webContents.focus() CALL for view ${id}:`, error);
-    }
+        try {
+            console.log(`[Main - FocusView - NextTick - Check 10] ATTEMPTING to call webContents.focus() for view ${id}.`);
+            view.webContents.focus();
+            console.log(`[Main - FocusView - NextTick - Check 11] SUCCESSFULLY CALLED webContents.focus() for view ${id}.`);
+        } catch (error) {
+            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION DURING webContents.focus() CALL for view ${id}:`, error);
+        }
+    });
 });

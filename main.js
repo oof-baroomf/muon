@@ -267,74 +267,48 @@ ipcMain.on('focus-view', (event, id) => {
         const view = views.get(id);
 
         if (!view) {
-            console.error(`[Main - FocusView - NextTick] View with id ${id} NOT FOUND in views map (deferred check). The view might have crashed and been cleaned up.`);
+            console.log(`[Main - FocusView - NextTick - Info] View with id ${id} NOT FOUND in views map. This is the expected path if render-process-gone cleaned it up.`);
             return;
         }
-        console.log(`[Main - FocusView - NextTick - Check 1] View ${id} retrieved from map.`);
+        console.log(`[Main - FocusView - NextTick - Check 1] View ${id} retrieved from map. Type: ${typeof view}`);
 
-        if (!(view instanceof BrowserView)) {
-            console.error(`[Main - FocusView - NextTick] Item with id ${id} in map IS NOT an instance of BrowserView. Type: ${typeof view}. Value:`, view);
-            // If this happens, it implies something else put a non-BrowserView into the map.
-            views.delete(id); // Clean up the erroneous map entry
+        // Primary Guard: Check for a functional BrowserView JS object
+        if (
+            !(view instanceof BrowserView) ||
+            typeof view.isDestroyed !== 'function' ||
+            typeof view.webContents !== 'object' ||
+            (view.webContents && typeof view.webContents.isDestroyed !== 'function') ||
+            Object.keys(view).length === 0
+        ) {
+            console.warn(`[Main - FocusView - NextTick - Warning] View ${id} (instanceof BrowserView: ${view instanceof BrowserView}) appears to be an incomplete or gutted JS object. typeof isDestroyed: ${typeof view.isDestroyed}, typeof webContents: ${typeof view.webContents}, Object.keys.length: ${Object.keys(view).length}. Assuming it's unusable.`);
+            
+            views.delete(id);
             return;
         }
-        console.log(`[Main - FocusView - NextTick - Check 2] View ${id} IS an instance of BrowserView.`);
-
-        // --- NEW CHECK for the TypeError ---
-        if (typeof view.isDestroyed !== 'function') {
-            console.error(`[Main - FocusView - NextTick - Check 3A_TYPE_ERROR] view.isDestroyed IS NOT A FUNCTION for id ${id}. Object keys: ${Object.keys(view)}. This indicates an inconsistent state for the BrowserView object.`);
-            // Treat this as if the view is unusable or already gone.
-            // It's possible render-process-gone started cleanup but hasn't fully removed from Electron's internal list
-            // or our map yet if there's a race condition.
-            views.delete(id); // Ensure it's removed from our tracking
-            return;
-        }
-        console.log(`[Main - FocusView - NextTick - Check 3B_TYPE_OK] view.isDestroyed IS a function for ${id}.`);
+        console.log(`[Main - FocusView - NextTick - Check 2] View ${id} appears to be a sufficiently complete BrowserView JS object.`);
 
         try {
             if (view.isDestroyed()) {
-                console.warn(`[Main - FocusView - NextTick - Check 4a] View ${id} IS ALREADY DESTROYED (reported by isDestroyed). Cannot focus.`);
-                views.delete(id); // Ensure it's removed if isDestroyed() is true but it was still in map
+                console.warn(`[Main - FocusView - NextTick - Info] View ${id} IS ALREADY DESTROYED (reported by isDestroyed). Removing from map.`);
+                views.delete(id);
                 return;
             }
             console.log(`[Main - FocusView - NextTick - Check 4b] View ${id} is not destroyed.`);
-        } catch (e) {
-            // This catch would be for other errors if isDestroyed was a function but still threw
-            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.isDestroyed() call for ${id} (though it was a function):`, e);
-            views.delete(id); // Clean up
-            return;
-        }
 
-        // Proceed with webContents checks if view is not considered destroyed
-        if (!view.webContents || typeof view.webContents.isDestroyed !== 'function') {
-            console.error(`[Main - FocusView - NextTick - Check 5_WC_INVALID] View ${id} has NO webContents or webContents.isDestroyed is not a function. Keys: ${view.webContents ? Object.keys(view.webContents) : 'N/A'}`);
-            views.delete(id); // Clean up
-            return;
-        }
-        console.log(`[Main - FocusView - NextTick - Check 6] View ${id} HAS valid webContents property with isDestroyed function.`);
-        
-        try {
             if (view.webContents.isDestroyed()) {
-                console.warn(`[Main - FocusView - NextTick - Check 8a] View ${id} webContents IS DESTROYED. Cannot focus.`);
+                console.warn(`[Main - FocusView - NextTick - Info] View ${id} webContents IS DESTROYED. Removing from map.`);
                 views.delete(id);
                 return;
             }
             console.log(`[Main - FocusView - NextTick - Check 8b] View ${id} webContents is not destroyed.`);
-        } catch (e) {
-            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view.webContents.isDestroyed() check for ${id}:`, e);
-            views.delete(id);
-            return;
-        }
-        
-        console.log(`[Main - FocusView - NextTick - Check 9] View ${id} webContents is confirmed not destroyed.`);
 
-        try {
             console.log(`[Main - FocusView - NextTick - Check 10] ATTEMPTING to call webContents.focus() for view ${id}.`);
             view.webContents.focus();
             console.log(`[Main - FocusView - NextTick - Check 11] SUCCESSFULLY CALLED webContents.focus() for view ${id}.`);
-        } catch (error) {
-            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION DURING webContents.focus() CALL for view ${id}:`, error);
-            views.delete(id); // Clean up on error
+
+        } catch (e) {
+            console.error(`[Main - FocusView - NextTick] !!! JS EXCEPTION during view/webContents operations for ${id} (after initial checks passed):`, e);
+            views.delete(id);
         }
     });
 });

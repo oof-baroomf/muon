@@ -65,17 +65,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateAllViewBoundsInMain() {
         views.forEach(view => {
-            const scaledX = (view.x * canvasState.scale) + canvasState.offsetX;
-            const scaledY = (view.y * canvasState.scale) + canvasState.offsetY;
-            const scaledWidth = view.width * canvasState.scale;
-            const scaledHeight = view.height * canvasState.scale;
+            const currentVisualX = (view.x * canvasState.scale) + canvasState.offsetX;
+            const currentVisualY = (view.y * canvasState.scale) + canvasState.offsetY;
+            const currentVisualWidth = view.width * canvasState.scale;
+            const currentVisualHeight = view.height * canvasState.scale;
 
             window.electronAPI.updateViewVisuals({
                 id: view.id,
-                visualX: visualX,
-                visualY: visualY,
-                visualWidth: visualWidth,
-                visualHeight: visualHeight,
+                visualX: currentVisualX,
+                visualY: currentVisualY,
+                visualWidth: currentVisualWidth,
+                visualHeight: currentVisualHeight,
                 newScale: canvasState.scale
             });
         });

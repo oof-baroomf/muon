@@ -1,0 +1,27 @@
+{
+  "name": "infinite-browser",
+  "version": "1.0.0",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k \"vite\" \"wait-on http://localhost:5173 && electron .\"",
+    "build": "vite build && electron-builder",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^30",
+    "electron-builder": "^24",
+    "typescript": "^5",
+    "vite": "^5",
+    "concurrently": "^8",
+    "wait-on": "^7",
+    "tailwindcss": "^3",
+    "postcss": "^8",
+    "autoprefixer": "^10"
+  },
+  "dependencies": {
+    "@use-gesture/react": "^10",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-draggable": "^4"
+  }
+}

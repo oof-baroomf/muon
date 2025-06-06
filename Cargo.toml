@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 # CEF wrapper with off‑screen (windowless) rendering and thread‑safe handles
-browser-window = { version = "0.12.3", default-features = false, features = ["cef", "offscreen", "threadsafe"] }
+browser-window = { version = "0.12.3", default-features = false, features = ["cef", "threadsafe"] }
 # Game‑style engine for the infinite 2D world
 bevy           = { version = "0.14", default-features = false, features = ["bevy_winit", "bevy_render", "bevy_sprite"] }
 # Pannable / zoomable 2D camera

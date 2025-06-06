@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
         }))
         .add_plugin(PanCamPlugin::default())
         .add_systems(Startup, setup_camera)
-        .add_systems(Update, (spawn_requests, draw_frames, keyboard_shortcuts))
+        .add_systems(Update, (draw_frames, keyboard_shortcuts))
         .run_async(bevy::tasks::IoTaskPool::get(), async move {
             // CEF runtime must keep pumping events –  do that in parallel.
             runtime.join();

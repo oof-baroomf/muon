@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+
+@font-face {
+  font-family: 'MuonMono';
+  src: url('../../monospace.woff2') format('woff2');
+  font-display: swap;
+}
+body, #root, #desktop, input, button, .muon-window {
+  font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  color: #e5e5e5;
+  background: #18181b;
+}
+.muon-window {
+  background: #23232a;
+  border-color: #444;
+  box-shadow: 0 2px 16px #000a;
+}
+.muon-urlbar {
+  background: #23232a;
+  color: #e5e5e5;
+  border-bottom: 1px solid #444;
+}
+.muon-remove {
+  color: #aaa;
+  transition: color 0.15s;
+  border-radius: 4px;
+}
+.muon-remove:hover {
+  color: #fff;
+  background: #333;
+}
+
+.muon-urlbar-container {
+  display: flex;
+  align-items: center;
+  background: #23232a;
+  border-bottom: 1px solid #444;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 24px;
+}
+
+/* Resize handles */
+.muon-resize-handle {
+  position: absolute;
+  z-index: 20;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  background: transparent;
+  pointer-events: auto;
+}
+.muon-resize-corner {
+  width: 12px;
+  height: 12px;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 50%, #3b82f6 50%);
+  cursor: nwse-resize;
+  opacity: 1;
+}
+.muon-resize-right {
+  width: 8px;
+  top: 12px;
+  right: 0;
+  bottom: 12px;
+  cursor: ew-resize;
+}
+.muon-resize-bottom {
+  height: 8px;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  cursor: ns-resize;
+}
+.muon-resize-left {
+  width: 8px;
+  top: 12px;
+  left: 0;
+  bottom: 12px;
+  cursor: ew-resize;
+}
+.muon-resize-top {
+  height: 8px;
+  left: 12px;
+  right: 12px;
+  top: 0;
+  cursor: ns-resize;
+}
+
+.muon-window:hover .muon-resize-handle {
+  opacity: 1;
+}
+
+/* Move cursor for address bar */
+.muon-urlbar.cursor-move {
+  cursor: move;
+}

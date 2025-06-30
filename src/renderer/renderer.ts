@@ -492,7 +492,7 @@ root.addEventListener('wheel', e => {
   const webviewArea = totalArea - nonWebviewArea;
   
   // Block zoom if too much of screen is webview/address bar
-  if (webviewArea > totalArea * 0.95) {
+  if (webviewArea > totalArea * 0.8) {
     return;
   }
 

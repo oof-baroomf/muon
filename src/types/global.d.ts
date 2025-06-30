@@ -5,7 +5,6 @@ declare global {
     electronAPI: {
       loadState(): Promise<any>;
       saveState(state: any): void;
-      setWebviewZoom(id: number, factor: number): void;
     };
   }
 }

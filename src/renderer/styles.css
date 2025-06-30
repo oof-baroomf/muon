@@ -14,7 +14,10 @@
 body, #root, #desktop, input, button, .muon-window {
   font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: #e5e5e5;
-  background: #18181b;
+  background-color: #18181b;
+}
+#root {
+  background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);
 }
 .muon-window {
   background: #23232a;
@@ -50,6 +53,69 @@ body, #root, #desktop, input, button, .muon-window {
   height: 24px;
 }
 
+.muon-topbar-container {
+  display: flex;
+  align-items: center;
+  background: #23232a;
+  border-bottom: 1px solid #444;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 3;
+  height: 24px;
+}
+
+.muon-drag-area {
+  flex: 1 1 0%;
+  height: 24px;
+  cursor: grab;
+  user-select: none;
+  background: transparent;
+}
+
+.muon-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.muon-nav-btn {
+  font-size: 14px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  color: #aaa;
+  transition: color 0.15s, background 0.15s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.muon-nav-btn:hover {
+  color: #fff;
+  background: #333;
+}
+
+.muon-urlbar-container {
+  display: flex;
+  align-items: center;
+  background: #23232a;
+  border-bottom: 1px solid #444;
+  width: 100%;
+  position: absolute;
+  top: 24px;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 24px;
+}
+
+ 
 /* Resize handles */
 .muon-resize-handle {
   position: absolute;

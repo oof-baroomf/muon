@@ -1,5 +1,5 @@
 import './styles.css';
-import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
+import { WindowData, addResizeHandle, addAddressBarDrag, GRID_SIZE } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -19,10 +19,13 @@ root.appendChild(desk);
 // Debounce timer for UI re-rendering
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
+function snap(value: number): number {
+  return Math.round(value / GRID_SIZE) * GRID_SIZE;
+}
+
 function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
-  const bgSize = 32 * scale;
-  root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
+  root.style.backgroundSize = `${GRID_SIZE}px ${GRID_SIZE}px`;
   root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
   
   // Force immediate background repaint to prevent glitches during rapid transforms
@@ -547,10 +550,14 @@ root.addEventListener('mousedown', e => {
     const gw = Math.abs(ev.clientX - dragStartX);
     const gh = Math.abs(ev.clientY - dragStartY);
     const deskRect = root.getBoundingClientRect();
-    ghost.style.left = ((gx - deskRect.left - offsetX) / scale) + 'px';
-    ghost.style.top = ((gy - deskRect.top - offsetY) / scale) + 'px';
-    ghost.style.width = gw / scale + 'px';
-    ghost.style.height = gh / scale + 'px';
+    const left = snap((gx - deskRect.left - offsetX) / scale);
+    const top = snap((gy - deskRect.top - offsetY) / scale);
+    const width = snap(gw / scale);
+    const height = snap(gh / scale);
+    ghost.style.left = left + 'px';
+    ghost.style.top = top + 'px';
+    ghost.style.width = width + 'px';
+    ghost.style.height = height + 'px';
   };
 
   const move = (ev: MouseEvent) => updateGhost(ev);
@@ -561,14 +568,14 @@ root.addEventListener('mousedown', e => {
 
     const gw = parseFloat(ghost.style.width);
     const gh = parseFloat(ghost.style.height);
-    if (gw > 32 && gh > 32) {
+    if (gw > GRID_SIZE && gh > GRID_SIZE) {
       // Always create window with default URL, focus address bar for entry
       const wdata: WindowData = {
         id: crypto.randomUUID(),
-        x: parseFloat(ghost.style.left),
-        y: parseFloat(ghost.style.top),
-        w: gw,
-        h: gh,
+        x: snap(parseFloat(ghost.style.left)),
+        y: snap(parseFloat(ghost.style.top)),
+        w: snap(gw),
+        h: snap(gh),
         url: 'https://www.google.com/search'
       };
       windows.push(wdata);

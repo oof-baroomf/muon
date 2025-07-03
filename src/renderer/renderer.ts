@@ -11,6 +11,14 @@ let offsetY = 0;
 let windows: WindowData[] = [];
 let muonActiveWindow: HTMLElement | null = null;
 
+const windowElements = new Map<string, HTMLElement>();
+
+let searchOverlay: HTMLElement | null = null;
+let searchInput: HTMLInputElement | null = null;
+let searchList: HTMLElement | null = null;
+let searchResults: { win: WindowData; element: HTMLElement }[] = [];
+let searchIndex = -1;
+
 const desk = document.createElement('div');
 desk.id = 'muon-desktop';
 desk.className = 'absolute inset-0 origin-top-left will-change-transform';
@@ -206,6 +214,7 @@ function zoomAndCenterWindow(cont: HTMLElement) {
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const cont = document.createElement('div');
+  windowElements.set(w.id, cont);
   cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
   cont.style.left = w.x + 'px';
   cont.style.top = w.y + 'px';
@@ -315,6 +324,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   removeBtn.onclick = (e) => {
     e.stopPropagation();
     windows = windows.filter(win => win.id !== w.id);
+    windowElements.delete(w.id);
     cont.remove();
     save();
   };
@@ -426,11 +436,17 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   webview.addEventListener('did-navigate', (event: any) => {
     urlBar.value = webview.getURL();
     w.url = webview.getURL();
+    updateTitle();
   });
   webview.addEventListener('did-navigate-in-page', (event: any) => {
     urlBar.value = webview.getURL();
     w.url = webview.getURL();
+    updateTitle();
   });
+
+  const updateTitle = () => { w.title = (webview as any).getTitle?.() || ''; };
+  webview.addEventListener('page-title-updated', updateTitle);
+  webview.addEventListener('did-finish-load', updateTitle);
 
   // Adjust zoom based on the container's width, assuming 800px is the "default"
   const adjustZoom = () => {
@@ -488,6 +504,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
 function rebuild () {
   desk.innerHTML = '';
+  windowElements.clear();
   windows.forEach((w, index) => {
     const cont = createWindowElement(w, false);
 
@@ -512,6 +529,88 @@ function rebuild () {
  */
 async function askUrl(def = 'https://www.google.com'): Promise<string | null> {
   return Promise.resolve(def);
+}
+
+function fuzzyMatch(text: string, query: string) {
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  text = text.toLowerCase();
+  return tokens.every(t => text.includes(t));
+}
+
+function showSearch() {
+  if (searchOverlay) return;
+  searchOverlay = document.createElement('div');
+  searchOverlay.className = 'absolute inset-0 bg-black/60 flex items-start justify-center pt-24';
+  searchOverlay.style.zIndex = '50';
+
+  const box = document.createElement('div');
+  box.className = 'bg-zinc-800 border border-zinc-600 rounded-lg w-96 overflow-hidden';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.placeholder = 'Search windows...';
+  input.className = 'w-full bg-transparent px-3 py-2 border-b border-zinc-600 outline-none text-zinc-200';
+
+  const list = document.createElement('div');
+  list.className = 'max-h-72 overflow-y-auto';
+
+  box.appendChild(input);
+  box.appendChild(list);
+  searchOverlay.appendChild(box);
+  root.appendChild(searchOverlay);
+
+  searchInput = input;
+  searchList = list;
+  searchIndex = -1;
+  updateSearchResults();
+
+  setTimeout(() => input.focus(), 0);
+
+  input.addEventListener('input', () => { searchIndex = 0; updateSearchResults(); });
+}
+
+function hideSearch() {
+  if (!searchOverlay) return;
+  searchOverlay.remove();
+  searchOverlay = null;
+  searchInput = null;
+  searchList = null;
+  searchResults = [];
+  searchIndex = -1;
+}
+
+function updateSearchResults() {
+  if (!searchList || !searchInput) return;
+  const query = searchInput.value;
+  searchResults = windows
+    .map(w => ({ win: w, element: windowElements.get(w.id) as HTMLElement }))
+    .filter(r => r.element && fuzzyMatch(r.win.title || r.win.url, query));
+
+  searchList.innerHTML = '';
+  searchResults.forEach((r, idx) => {
+    const item = document.createElement('div');
+    item.textContent = r.win.title || r.win.url;
+    item.className = 'px-3 py-2 text-sm cursor-pointer hover:bg-zinc-700';
+    item.addEventListener('mouseenter', () => { searchIndex = idx; refreshSearchHighlight(); });
+    item.addEventListener('click', () => selectSearchResult(idx));
+    searchList!.appendChild(item);
+  });
+  refreshSearchHighlight();
+}
+
+function refreshSearchHighlight() {
+  if (!searchList) return;
+  Array.from(searchList.children).forEach((el, i) => {
+    (el as HTMLElement).style.background = i === searchIndex ? '#333' : 'transparent';
+  });
+}
+
+function selectSearchResult(index: number) {
+  const res = searchResults[index];
+  if (!res) return;
+  muonActiveWindow = res.element;
+  hideSearch();
+  zoomAndCenterWindow(res.element);
 }
 
 // ----- interaction -----
@@ -623,6 +722,19 @@ root.addEventListener('wheel', e => {
 // Keyboard shortcuts - listen on document to ensure they work globally
 document.addEventListener('keydown', e => {
   console.log('Key event:', e.key, 'meta:', e.metaKey, 'ctrl:', e.ctrlKey, 'activeWindow:', muonActiveWindow);
+
+  if (searchOverlay) {
+    if (e.key === 'Escape') { hideSearch(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); if (searchResults.length){ searchIndex = (searchIndex + 1) % searchResults.length; refreshSearchHighlight(); } return; }
+    if (e.key === 'ArrowUp') { e.preventDefault(); if (searchResults.length){ searchIndex = (searchIndex - 1 + searchResults.length) % searchResults.length; refreshSearchHighlight(); } return; }
+    if (e.key === 'Enter') { e.preventDefault(); if (searchIndex === -1 && searchResults.length) searchIndex = 0; selectSearchResult(searchIndex); return; }
+  }
+
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    showSearch();
+    return;
+  }
   
   // Save shortcut
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {

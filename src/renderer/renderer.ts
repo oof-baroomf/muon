@@ -16,13 +16,192 @@ desk.id = 'muon-desktop';
 desk.className = 'absolute inset-0 origin-top-left will-change-transform';
 root.appendChild(desk);
 
+// Debounce timer for UI re-rendering
+let uiRerenderTimeout: NodeJS.Timeout | null = null;
+
 function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
   const bgSize = 32 * scale;
   root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
   root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
-  // update each webview zoomFactor via Electron so pixel density remains constant
-  // No longer adjusting webview zoom; scaling is handled by CSS transform.
+  
+  // Force immediate background repaint to prevent glitches during rapid transforms
+  root.style.backgroundRepeat = 'repeat';
+  // Trigger a layout to ensure background is properly updated
+  root.offsetHeight;
+  
+  // Debounce UI re-rendering to only happen when transform operations stop
+  debouncedUIRerender();
+}
+
+function debouncedUIRerender() {
+  // Clear any existing timeout
+  if (uiRerenderTimeout) {
+    clearTimeout(uiRerenderTimeout);
+  }
+  
+  // Set a new timeout to re-render UI after operations stop
+  uiRerenderTimeout = setTimeout(() => {
+    forceUIRerender();
+    uiRerenderTimeout = null;
+  }, 150); // Wait 150ms after last transform change
+}
+
+function forceUIRerender() {
+  console.log('Force UI rerender called, scale:', scale);
+  
+  // Force repaint of ALL UI elements including icons
+  const allUIElements = document.querySelectorAll('.muon-topbar-container, .muon-urlbar-container, .muon-nav-btn, .muon-urlbar, .muon-remove, .muon-drag-area, .muon-nav-controls');
+  
+  allUIElements.forEach((element: Element) => {
+    const htmlElement = element as HTMLElement;
+    
+    // Force multiple repaints with different techniques
+    
+    // Method 1: Force layout recalculation
+    const originalDisplay = htmlElement.style.display;
+    htmlElement.style.display = 'none';
+    htmlElement.offsetHeight; // Trigger layout
+    htmlElement.style.display = originalDisplay;
+    
+    // Method 2: Force opacity change
+    const originalOpacity = htmlElement.style.opacity;
+    htmlElement.style.opacity = '0.999';
+    htmlElement.offsetHeight; // Trigger layout
+    htmlElement.style.opacity = originalOpacity || '';
+    
+    // Method 3: Force transform change
+    const originalTransform = htmlElement.style.transform;
+    htmlElement.style.transform = 'translateZ(0.1px)';
+    htmlElement.offsetHeight; // Trigger layout
+    htmlElement.style.transform = originalTransform || '';
+    
+    // Method 4: Force font size recalculation for text elements
+    if (htmlElement.tagName === 'BUTTON' || htmlElement.tagName === 'INPUT' || htmlElement.textContent) {
+      const computedStyle = window.getComputedStyle(htmlElement);
+      const fontSize = parseFloat(computedStyle.fontSize);
+      if (fontSize) {
+        // Temporarily change font size to force re-render
+        const originalFontSize = htmlElement.style.fontSize;
+        htmlElement.style.fontSize = (fontSize + 0.001) + 'px';
+        htmlElement.offsetHeight; // Trigger layout
+        htmlElement.style.fontSize = originalFontSize || '';
+      }
+    }
+  });
+  
+  // Also force a global repaint by temporarily modifying the container
+  const originalZoom = desk.style.zoom;
+  desk.style.zoom = (1.0001).toString();
+  desk.offsetHeight; // Trigger layout
+  desk.style.zoom = originalZoom || '';
+  
+  console.log('UI rerender completed');
+}
+
+// Extracted zoom/center functionality for reuse
+function zoomAndCenterWindow(cont: HTMLElement) {
+  // --- Per-window zoom state using WeakMap to avoid TS errors ---
+  type ZoomState = { zoomed: boolean, origScale: number, origOffsetX: number, origOffsetY: number };
+  const zoomStateMap = (window as any)._muonZoomStateMap as WeakMap<HTMLElement, ZoomState> || new WeakMap<HTMLElement, ZoomState>();
+  (window as any)._muonZoomStateMap = zoomStateMap;
+
+  let state = zoomStateMap.get(cont);
+  if (!state) {
+    // Initialize with current global transform values
+    state = { zoomed: false, origScale: scale, origOffsetX: offsetX, origOffsetY: offsetY };
+    zoomStateMap.set(cont, state);
+  }
+
+  if (state.zoomed) {
+    // Animate back to original
+    const targetScale = state.origScale;
+    const targetOffsetX = state.origOffsetX;
+    const targetOffsetY = state.origOffsetY;
+    const startScale = scale;
+    const startOffsetX = offsetX;
+    const startOffsetY = offsetY;
+    const duration = 300;
+    const startTime = performance.now();
+
+    function animateRestore(now: number) {
+      const t = Math.min(1, (now - startTime) / duration);
+      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      scale = startScale + (targetScale - startScale) * ease;
+      offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
+      offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
+      applyTransform();
+      if (t < 1) {
+        requestAnimationFrame(animateRestore);
+      } else {
+        scale = targetScale;
+        offsetX = targetOffsetX;
+        offsetY = targetOffsetY;
+        applyTransform();
+      }
+    }
+    requestAnimationFrame(animateRestore);
+    state.zoomed = false;
+    return;
+  }
+
+  // Store original transform
+  state.origScale = scale;
+  state.origOffsetX = offsetX;
+  state.origOffsetY = offsetY;
+
+  // Use desk/world coordinates for accurate fit
+  const margin = 32;
+  const winW = cont.offsetWidth;
+  const winH = cont.offsetHeight;
+  const winX = parseFloat(cont.style.left);
+  const winY = parseFloat(cont.style.top);
+
+  const viewportW = root.clientWidth;
+  const viewportH = root.clientHeight;
+
+  // Calculate scale to fit window in viewport with margins
+  const scaleX = (viewportW - 2 * margin) / winW;
+  const scaleY = (viewportH - 2 * margin) / winH;
+  const targetScale = Math.min(scaleX, scaleY, 4);
+
+  // Center window in viewport after scaling
+  const winCenterX = winX + winW / 2;
+  const winCenterY = winY + winH / 2;
+  const viewportCenterX = viewportW / 2;
+  const viewportCenterY = viewportH / 2;
+
+  // Offset so that after scaling, window center is at viewport center
+  const targetOffsetX = viewportCenterX - winCenterX * targetScale;
+  const targetOffsetY = viewportCenterY - winCenterY * targetScale;
+
+  // Animate transform
+  const startScale = scale;
+  const startOffsetX = offsetX;
+  const startOffsetY = offsetY;
+  const duration = 300;
+  const startTime = performance.now();
+
+  function animateZoom(now: number) {
+    const t = Math.min(1, (now - startTime) / duration);
+    // Ease in-out
+    const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    scale = startScale + (targetScale - startScale) * ease;
+    offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
+    offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
+    applyTransform();
+    if (t < 1) {
+      requestAnimationFrame(animateZoom);
+    } else {
+      // Snap to final values
+      scale = targetScale;
+      offsetX = targetOffsetX;
+      offsetY = targetOffsetY;
+      applyTransform();
+    }
+  }
+  requestAnimationFrame(animateZoom);
+  state.zoomed = true;
 }
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
@@ -60,102 +239,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   topBar.addEventListener('dblclick', (e) => {
     e.preventDefault();
     e.stopPropagation();
-
-    let state = zoomStateMap.get(cont);
-    if (!state) {
-      state = { zoomed: false, origScale: 1, origOffsetX: 0, origOffsetY: 0 };
-      zoomStateMap.set(cont, state);
-    }
-
-    if (state.zoomed) {
-      // Animate back to original
-      const targetScale = state.origScale;
-      const targetOffsetX = state.origOffsetX;
-      const targetOffsetY = state.origOffsetY;
-      const startScale = scale;
-      const startOffsetX = offsetX;
-      const startOffsetY = offsetY;
-      const duration = 300;
-      const startTime = performance.now();
-
-      function animateRestore(now: number) {
-        const t = Math.min(1, (now - startTime) / duration);
-        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        scale = startScale + (targetScale - startScale) * ease;
-        offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
-        offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
-        applyTransform();
-        if (t < 1) {
-          requestAnimationFrame(animateRestore);
-        } else {
-          scale = targetScale;
-          offsetX = targetOffsetX;
-          offsetY = targetOffsetY;
-          applyTransform();
-        }
-      }
-      requestAnimationFrame(animateRestore);
-      state.zoomed = false;
-      return;
-    }
-
-    // Store original transform
-    state.origScale = scale;
-    state.origOffsetX = offsetX;
-    state.origOffsetY = offsetY;
-
-    // Use desk/world coordinates for accurate fit
-    const margin = 32;
-    const winW = cont.offsetWidth;
-    const winH = cont.offsetHeight;
-    const winX = parseFloat(cont.style.left);
-    const winY = parseFloat(cont.style.top);
-
-    const viewportW = root.clientWidth;
-    const viewportH = root.clientHeight;
-
-    // Calculate scale to fit window in viewport with margins
-    const scaleX = (viewportW - 2 * margin) / winW;
-    const scaleY = (viewportH - 2 * margin) / winH;
-    const targetScale = Math.min(scaleX, scaleY, 4);
-
-    // Center window in viewport after scaling
-    const winCenterX = winX + winW / 2;
-    const winCenterY = winY + winH / 2;
-    const viewportCenterX = viewportW / 2;
-    const viewportCenterY = viewportH / 2;
-
-    // Offset so that after scaling, window center is at viewport center
-    const targetOffsetX = viewportCenterX - winCenterX * targetScale;
-    const targetOffsetY = viewportCenterY - winCenterY * targetScale;
-
-    // Animate transform
-    const startScale = scale;
-    const startOffsetX = offsetX;
-    const startOffsetY = offsetY;
-    const duration = 300;
-    const startTime = performance.now();
-
-    function animateZoom(now: number) {
-      const t = Math.min(1, (now - startTime) / duration);
-      // Ease in-out
-      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      scale = startScale + (targetScale - startScale) * ease;
-      offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
-      offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
-      applyTransform();
-      if (t < 1) {
-        requestAnimationFrame(animateZoom);
-      } else {
-        // Snap to final values
-        scale = targetScale;
-        offsetX = targetOffsetX;
-        offsetY = targetOffsetY;
-        applyTransform();
-      }
-    }
-    requestAnimationFrame(animateZoom);
-    state.zoomed = true;
+    zoomAndCenterWindow(cont);
   });
 
   // Navigation controls
@@ -365,9 +449,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     setTimeout(() => urlBar.focus(), 0);
   }
 
-  // double click to center this window (ignore if dblclick was on url bar)
+  // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {
-    if ((e.target as HTMLElement).closest('.muon-urlbar')) return;
+    if ((e.target as HTMLElement).closest('.muon-urlbar') || 
+        (e.target as HTMLElement).closest('.muon-resize-handle')) return;
     e.stopPropagation();
     // center on window
     const bounds = cont.getBoundingClientRect();
@@ -378,6 +463,24 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     applyTransform();
   });
 
+  // Track this window as active when clicked anywhere
+  const setActiveWindow = () => {
+    console.log('Setting active window:', cont);
+    muonActiveWindow = cont;
+    console.log('Active window is now:', muonActiveWindow);
+  };
+
+  // Add click handlers to all clickable elements
+  cont.addEventListener('mousedown', setActiveWindow);
+  topBar.addEventListener('mousedown', setActiveWindow);
+  barContainer.addEventListener('mousedown', setActiveWindow);
+  urlBar.addEventListener('mousedown', setActiveWindow);
+  
+  // Add handler to webview when it's ready
+  webview.addEventListener('dom-ready', () => {
+    webview.addEventListener('mousedown', setActiveWindow);
+  });
+
   addResizeHandle(cont, w, scale, windows, save);
   desk.appendChild(cont);
   return cont;
@@ -385,14 +488,19 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
 function rebuild () {
   desk.innerHTML = '';
-  windows.forEach(w => {
+  windows.forEach((w, index) => {
     const cont = createWindowElement(w, false);
-    addResizeHandle(cont, w, scale, windows, save);
 
     // Add drag to address bar
     const urlBar = cont.querySelector('.muon-urlbar') as HTMLInputElement;
     if (urlBar) {
       addAddressBarDrag(urlBar, cont, w, scale, windows, save);
+    }
+    
+    // Set the first window as active if no active window is set
+    if (index === 0 && !muonActiveWindow) {
+      muonActiveWindow = cont;
+      console.log('Set first window as active during rebuild:', cont);
     }
   });
   applyTransform();
@@ -465,6 +573,8 @@ root.addEventListener('mousedown', e => {
       };
       windows.push(wdata);
       const el = createWindowElement(wdata, true); // focus address bar
+      muonActiveWindow = el; // Set newly created window as active
+      console.log('Set newly created window as active:', el);
       save();
     }
     ghost.remove();
@@ -477,25 +587,6 @@ root.addEventListener('mousedown', e => {
 
 // Pan or zoom with wheel
 root.addEventListener('wheel', e => {
-  // Allow zooming only if >5% of screen is visible desktop
-  const deskRect = root.getBoundingClientRect();
-  
-  // Calculate visible non-webview area
-  let nonWebviewArea = 0;
-  document.querySelectorAll('.muon-window').forEach((el: Element) => {
-    const win = el as HTMLElement;
-    const winRect = win.getBoundingClientRect();
-    nonWebviewArea += winRect.width * winRect.height;
-  });
-  
-  const totalArea = deskRect.width * deskRect.height;
-  const webviewArea = totalArea - nonWebviewArea;
-  
-  // Block zoom if too much of screen is webview/address bar
-  if (webviewArea > totalArea * 0.8) {
-    return;
-  }
-
   // Allow panning/zooming unless actively editing an input
   if ((e.target as HTMLElement).tagName === 'INPUT' &&
       (e.target as HTMLElement).matches(':focus')) {
@@ -527,20 +618,44 @@ root.addEventListener('wheel', e => {
   applyTransform();
 }, { passive: false });
 
-// Click on a window locks interaction, click on desktop unlocks
-desk.addEventListener('mousedown', e => {
-  muonActiveWindow = null;
-});
-desk.addEventListener('click', e => {
-  muonActiveWindow = null;
-});
 
 
-// Save shortcut
-root.addEventListener('keydown', e => {
+// Keyboard shortcuts - listen on document to ensure they work globally
+document.addEventListener('keydown', e => {
+  console.log('Key event:', e.key, 'meta:', e.metaKey, 'ctrl:', e.ctrlKey, 'activeWindow:', muonActiveWindow);
+  
+  // Save shortcut
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+    console.log('Save shortcut triggered');
     e.preventDefault();
     save();
+    return;
+  }
+  
+  // Zoom/center hotkey for active window (Cmd/Ctrl + D)
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+    console.log('Zoom shortcut triggered, activeWindow exists:', !!muonActiveWindow);
+    e.preventDefault();
+    
+    let targetWindow = muonActiveWindow;
+    
+    // Fallback: if no active window, use the first available window
+    if (!targetWindow && windows.length > 0) {
+      const firstWindowElement = desk.querySelector('.muon-window') as HTMLElement;
+      if (firstWindowElement) {
+        targetWindow = firstWindowElement;
+        muonActiveWindow = firstWindowElement; // Set it as active for future use
+        console.log('Using fallback window:', targetWindow);
+      }
+    }
+    
+    if (targetWindow) {
+      console.log('Calling zoomAndCenterWindow');
+      zoomAndCenterWindow(targetWindow);
+    } else {
+      console.log('No window available for zoom');
+    }
+    return;
   }
 });
 

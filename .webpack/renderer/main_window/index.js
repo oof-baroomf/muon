@@ -758,9 +758,6 @@ video {
     max-width: 1536px;
   }
 }
-.visible {
-  visibility: visible;
-}
 .absolute {
   position: absolute;
 }
@@ -778,6 +775,9 @@ video {
 }
 .origin-top-left {
   transform-origin: top left;
+}
+.\\!transform {
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)) !important;
 }
 .transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -877,9 +877,21 @@ body, #root, #desktop, input, button, .muon-window {
   font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: #e5e5e5;
   background-color: #18181b;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
 }
 #root {
   background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);
+  background-repeat: repeat;
+  background-attachment: local;
+  /* Force GPU acceleration for background rendering */
+  will-change: background-position, background-size;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-window {
   background: #23232a;
@@ -890,11 +902,27 @@ body, #root, #desktop, input, button, .muon-window {
   background: #23232a;
   color: #e5e5e5;
   border-bottom: 1px solid #444;
+  /* Force pixel-perfect text rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: pixelated;
 }
 .muon-remove {
   color: #aaa;
   transition: color 0.15s;
   border-radius: 4px;
+  /* Force pixel-perfect rendering of close button */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-remove:hover {
   color: #fff;
@@ -927,6 +955,15 @@ body, #root, #desktop, input, button, .muon-window {
   right: 0;
   z-index: 3;
   height: 24px;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .muon-drag-area {
@@ -959,6 +996,14 @@ body, #root, #desktop, input, button, .muon-window {
   background: transparent;
   border: none;
   cursor: pointer;
+  /* Force pixel-perfect rendering of icons */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-nav-btn:hover {
   color: #fff;
@@ -977,6 +1022,15 @@ body, #root, #desktop, input, button, .muon-window {
   right: 0;
   z-index: 2;
   height: 24px;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
  
@@ -1035,7 +1089,7 @@ body, #root, #desktop, input, button, .muon-window {
 .muon-urlbar.cursor-move {
   cursor: move;
 }
-`, "",{"version":3,"sources":["webpack://./src/renderer/styles.css"],"names":[],"mappings":"AAAA;EAAA,wBAAc;EAAd,wBAAc;EAAd,mBAAc;EAAd,mBAAc;EAAd,cAAc;EAAd,cAAc;EAAd,cAAc;EAAd,eAAc;EAAd,eAAc;EAAd,aAAc;EAAd,aAAc;EAAd,kBAAc;EAAd,sCAAc;EAAd,8BAAc;EAAd,6BAAc;EAAd,4BAAc;EAAd,eAAc;EAAd,oBAAc;EAAd,sBAAc;EAAd,uBAAc;EAAd,wBAAc;EAAd,kBAAc;EAAd,2BAAc;EAAd,4BAAc;EAAd,sCAAc;EAAd,kCAAc;EAAd,2BAAc;EAAd,sBAAc;EAAd,8BAAc;EAAd,YAAc;EAAd,kBAAc;EAAd,gBAAc;EAAd,iBAAc;EAAd,kBAAc;EAAd,cAAc;EAAd,gBAAc;EAAd,aAAc;EAAd,mBAAc;EAAd,qBAAc;EAAd,2BAAc;EAAd,yBAAc;EAAd,0BAAc;EAAd,2BAAc;EAAd,uBAAc;EAAd,wBAAc;EAAd,yBAAc;EAAd,sBAAc;EAAd,oBAAc;EAAd,sBAAc;EAAd,qBAAc;EAAd;AAAc;;AAAd;EAAA,wBAAc;EAAd,wBAAc;EAAd,mBAAc;EAAd,mBAAc;EAAd,cAAc;EAAd,cAAc;EAAd,cAAc;EAAd,eAAc;EAAd,eAAc;EAAd,aAAc;EAAd,aAAc;EAAd,kBAAc;EAAd,sCAAc;EAAd,8BAAc;EAAd,6BAAc;EAAd,4BAAc;EAAd,eAAc;EAAd,oBAAc;EAAd,sBAAc;EAAd,uBAAc;EAAd,wBAAc;EAAd,kBAAc;EAAd,2BAAc;EAAd,4BAAc;EAAd,sCAAc;EAAd,kCAAc;EAAd,2BAAc;EAAd,sBAAc;EAAd,8BAAc;EAAd,YAAc;EAAd,kBAAc;EAAd,gBAAc;EAAd,iBAAc;EAAd,kBAAc;EAAd,cAAc;EAAd,gBAAc;EAAd,aAAc;EAAd,mBAAc;EAAd,qBAAc;EAAd,2BAAc;EAAd,yBAAc;EAAd,0BAAc;EAAd,2BAAc;EAAd,uBAAc;EAAd,wBAAc;EAAd,yBAAc;EAAd,sBAAc;EAAd,oBAAc;EAAd,sBAAc;EAAd,qBAAc;EAAd;AAAc,CAAd;;CAAc,CAAd;;;CAAc;;AAAd;;;EAAA,sBAAc,EAAd,MAAc;EAAd,eAAc,EAAd,MAAc;EAAd,mBAAc,EAAd,MAAc;EAAd,qBAAc,EAAd,MAAc;AAAA;;AAAd;;EAAA,gBAAc;AAAA;;AAAd;;;;;;;;CAAc;;AAAd;;EAAA,gBAAc,EAAd,MAAc;EAAd,8BAAc,EAAd,MAAc;EAAd,gBAAc,EAAd,MAAc;EAAd,cAAc;KAAd,WAAc,EAAd,MAAc;EAAd,+HAAc,EAAd,MAAc;EAAd,6BAAc,EAAd,MAAc;EAAd,+BAAc,EAAd,MAAc;EAAd,wCAAc,EAAd,MAAc;AAAA;;AAAd;;;CAAc;;AAAd;EAAA,SAAc,EAAd,MAAc;EAAd,oBAAc,EAAd,MAAc;AAAA;;AAAd;;;;CAAc;;AAAd;EAAA,SAAc,EAAd,MAAc;EAAd,cAAc,EAAd,MAAc;EAAd,qBAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,yCAAc;UAAd,iCAAc;AAAA;;AAAd;;CAAc;;AAAd;;;;;;EAAA,kBAAc;EAAd,oBAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,cAAc;EAAd,wBAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,mBAAc;AAAA;;AAAd;;;;;CAAc;;AAAd;;;;EAAA,+GAAc,EAAd,MAAc;EAAd,6BAAc,EAAd,MAAc;EAAd,+BAAc,EAAd,MAAc;EAAd,cAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,cAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,cAAc;EAAd,cAAc;EAAd,kBAAc;EAAd,wBAAc;AAAA;;AAAd;EAAA,eAAc;AAAA;;AAAd;EAAA,WAAc;AAAA;;AAAd;;;;CAAc;;AAAd;EAAA,cAAc,EAAd,MAAc;EAAd,qBAAc,EAAd,MAAc;EAAd,yBAAc,EAAd,MAAc;AAAA;;AAAd;;;;CAAc;;AAAd;;;;;EAAA,oBAAc,EAAd,MAAc;EAAd,8BAAc,EAAd,MAAc;EAAd,gCAAc,EAAd,MAAc;EAAd,eAAc,EAAd,MAAc;EAAd,oBAAc,EAAd,MAAc;EAAd,oBAAc,EAAd,MAAc;EAAd,uBAAc,EAAd,MAAc;EAAd,cAAc,EAAd,MAAc;EAAd,SAAc,EAAd,MAAc;EAAd,UAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,oBAAc;AAAA;;AAAd;;;CAAc;;AAAd;;;;EAAA,0BAAc,EAAd,MAAc;EAAd,6BAAc,EAAd,MAAc;EAAd,sBAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,aAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,gBAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,wBAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,YAAc;AAAA;;AAAd;;;CAAc;;AAAd;EAAA,6BAAc,EAAd,MAAc;EAAd,oBAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,wBAAc;AAAA;;AAAd;;;CAAc;;AAAd;EAAA,0BAAc,EAAd,MAAc;EAAd,aAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,kBAAc;AAAA;;AAAd;;CAAc;;AAAd;;;;;;;;;;;;;EAAA,SAAc;AAAA;;AAAd;EAAA,SAAc;EAAd,UAAc;AAAA;;AAAd;EAAA,UAAc;AAAA;;AAAd;;;EAAA,gBAAc;EAAd,SAAc;EAAd,UAAc;AAAA;;AAAd;;CAAc;AAAd;EAAA,UAAc;AAAA;;AAAd;;CAAc;;AAAd;EAAA,gBAAc;AAAA;;AAAd;;;CAAc;;AAAd;EAAA,UAAc,EAAd,MAAc;EAAd,cAAc,EAAd,MAAc;AAAA;;AAAd;;EAAA,UAAc,EAAd,MAAc;EAAd,cAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,eAAc;AAAA;;AAAd;;CAAc;AAAd;EAAA,eAAc;AAAA;;AAAd;;;;CAAc;;AAAd;;;;;;;;EAAA,cAAc,EAAd,MAAc;EAAd,sBAAc,EAAd,MAAc;AAAA;;AAAd;;CAAc;;AAAd;;EAAA,eAAc;EAAd,YAAc;AAAA;;AAAd,wEAAc;AAAd;EAAA,aAAc;AAAA;AACd;EAAA;AAAoB;AAApB;;EAAA;IAAA;EAAoB;AAAA;AAApB;;EAAA;IAAA;EAAoB;AAAA;AAApB;;EAAA;IAAA;EAAoB;AAAA;AAApB;;EAAA;IAAA;EAAoB;AAAA;AAApB;;EAAA;IAAA;EAAoB;AAAA;AACpB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA,yBAAmB;KAAnB,sBAAmB;UAAnB;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA,sBAAmB;EAAnB;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA,kBAAmB;EAAnB;AAAmB;AAAnB;EAAA,oBAAmB;EAAnB;AAAmB;AAAnB;EAAA,oBAAmB;EAAnB;AAAmB;AAAnB;EAAA,kBAAmB;EAAnB;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA,oBAAmB;EAAnB;AAAmB;AAAnB;EAAA,+EAAmB;EAAnB,mGAAmB;EAAnB;AAAmB;AAAnB;EAAA,8BAAmB;EAAnB;AAAmB;AAAnB;EAAA;AAAmB;AAAnB;EAAA,gKAAmB;EAAnB,wJAAmB;EAAnB,iLAAmB;EAAnB,wDAAmB;EAAnB;AAAmB;AAAnB;EAAA;AAAmB;;AAEnB,qBAAqB;AACrB,sBAAsB,UAAU,EAAE,WAAW,EAAE;AAC/C,4BAA4B,iCAAiC,EAAE,kBAAkB,EAAE;;AAEnF;EACE,uBAAuB;EACvB,4DAAiD;EACjD,kBAAkB;AACpB;AACA;EACE,yFAAyF;EACzF,cAAc;EACd,yBAAyB;AAC3B;AACA;EACE,uJAAuJ;AACzJ;AACA;EACE,mBAAmB;EACnB,kBAAkB;EAClB,4BAA4B;AAC9B;AACA;EACE,mBAAmB;EACnB,cAAc;EACd,6BAA6B;AAC/B;AACA;EACE,WAAW;EACX,uBAAuB;EACvB,kBAAkB;AACpB;AACA;EACE,WAAW;EACX,gBAAgB;AAClB;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,mBAAmB;EACnB,6BAA6B;EAC7B,WAAW;EACX,kBAAkB;EAClB,MAAM;EACN,OAAO;EACP,QAAQ;EACR,UAAU;EACV,YAAY;AACd;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,mBAAmB;EACnB,6BAA6B;EAC7B,WAAW;EACX,kBAAkB;EAClB,MAAM;EACN,OAAO;EACP,QAAQ;EACR,UAAU;EACV,YAAY;AACd;;AAEA;EACE,YAAY;EACZ,YAAY;EACZ,YAAY;EACZ,yBAAiB;KAAjB,sBAAiB;UAAjB,iBAAiB;EACjB,uBAAuB;AACzB;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,QAAQ;EACR,gBAAgB;AAClB;;AAEA;EACE,eAAe;EACf,WAAW;EACX,YAAY;EACZ,aAAa;EACb,mBAAmB;EACnB,uBAAuB;EACvB,kBAAkB;EAClB,WAAW;EACX,yCAAyC;EACzC,uBAAuB;EACvB,YAAY;EACZ,eAAe;AACjB;AACA;EACE,WAAW;EACX,gBAAgB;AAClB;;AAEA;EACE,aAAa;EACb,mBAAmB;EACnB,mBAAmB;EACnB,6BAA6B;EAC7B,WAAW;EACX,kBAAkB;EAClB,SAAS;EACT,OAAO;EACP,QAAQ;EACR,UAAU;EACV,YAAY;AACd;;;AAGA,mBAAmB;AACnB;EACE,kBAAkB;EAClB,WAAW;EACX,YAAY;EACZ,wBAAwB;EACxB,uBAAuB;EACvB,oBAAoB;AACtB;AACA;EACE,WAAW;EACX,YAAY;EACZ,QAAQ;EACR,SAAS;EACT,iEAAiE;EACjE,mBAAmB;EACnB,UAAU;AACZ;AACA;EACE,UAAU;EACV,SAAS;EACT,QAAQ;EACR,YAAY;EACZ,iBAAiB;AACnB;AACA;EACE,WAAW;EACX,UAAU;EACV,WAAW;EACX,SAAS;EACT,iBAAiB;AACnB;AACA;EACE,UAAU;EACV,SAAS;EACT,OAAO;EACP,YAAY;EACZ,iBAAiB;AACnB;AACA;EACE,WAAW;EACX,UAAU;EACV,WAAW;EACX,MAAM;EACN,iBAAiB;AACnB;;AAEA;EACE,UAAU;AACZ;;AAEA,gCAAgC;AAChC;EACE,YAAY;AACd","sourcesContent":["@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n/* Custom scrollbar */\n::-webkit-scrollbar { width: 8px; height: 8px; }\n::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }\n\n@font-face {\n  font-family: 'MuonMono';\n  src: url('../../monospace.woff2') format('woff2');\n  font-display: swap;\n}\nbody, #root, #desktop, input, button, .muon-window {\n  font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;\n  color: #e5e5e5;\n  background-color: #18181b;\n}\n#root {\n  background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);\n}\n.muon-window {\n  background: #23232a;\n  border-color: #444;\n  box-shadow: 0 2px 16px #000a;\n}\n.muon-urlbar {\n  background: #23232a;\n  color: #e5e5e5;\n  border-bottom: 1px solid #444;\n}\n.muon-remove {\n  color: #aaa;\n  transition: color 0.15s;\n  border-radius: 4px;\n}\n.muon-remove:hover {\n  color: #fff;\n  background: #333;\n}\n\n.muon-urlbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  z-index: 2;\n  height: 24px;\n}\n\n.muon-topbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  z-index: 3;\n  height: 24px;\n}\n\n.muon-drag-area {\n  flex: 1 1 0%;\n  height: 24px;\n  cursor: grab;\n  user-select: none;\n  background: transparent;\n}\n\n.muon-nav-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  margin-left: 4px;\n}\n\n.muon-nav-btn {\n  font-size: 14px;\n  width: 18px;\n  height: 18px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 4px;\n  color: #aaa;\n  transition: color 0.15s, background 0.15s;\n  background: transparent;\n  border: none;\n  cursor: pointer;\n}\n.muon-nav-btn:hover {\n  color: #fff;\n  background: #333;\n}\n\n.muon-urlbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 24px;\n  left: 0;\n  right: 0;\n  z-index: 2;\n  height: 24px;\n}\n\n \n/* Resize handles */\n.muon-resize-handle {\n  position: absolute;\n  z-index: 20;\n  opacity: 0.6;\n  transition: opacity 0.2s;\n  background: transparent;\n  pointer-events: auto;\n}\n.muon-resize-corner {\n  width: 12px;\n  height: 12px;\n  right: 0;\n  bottom: 0;\n  background: linear-gradient(135deg, transparent 50%, #3b82f6 50%);\n  cursor: nwse-resize;\n  opacity: 1;\n}\n.muon-resize-right {\n  width: 8px;\n  top: 12px;\n  right: 0;\n  bottom: 12px;\n  cursor: ew-resize;\n}\n.muon-resize-bottom {\n  height: 8px;\n  left: 12px;\n  right: 12px;\n  bottom: 0;\n  cursor: ns-resize;\n}\n.muon-resize-left {\n  width: 8px;\n  top: 12px;\n  left: 0;\n  bottom: 12px;\n  cursor: ew-resize;\n}\n.muon-resize-top {\n  height: 8px;\n  left: 12px;\n  right: 12px;\n  top: 0;\n  cursor: ns-resize;\n}\n\n.muon-window:hover .muon-resize-handle {\n  opacity: 1;\n}\n\n/* Move cursor for address bar */\n.muon-urlbar.cursor-move {\n  cursor: move;\n}\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/renderer/styles.css"],"names":[],"mappings":"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","sourcesContent":["@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n/* Custom scrollbar */\n::-webkit-scrollbar { width: 8px; height: 8px; }\n::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }\n\n@font-face {\n  font-family: 'MuonMono';\n  src: url('../../monospace.woff2') format('woff2');\n  font-display: swap;\n}\nbody, #root, #desktop, input, button, .muon-window {\n  font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;\n  color: #e5e5e5;\n  background-color: #18181b;\n  /* Force pixel-perfect rendering */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  image-rendering: pixelated;\n}\n#root {\n  background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);\n  background-repeat: repeat;\n  background-attachment: local;\n  /* Force GPU acceleration for background rendering */\n  will-change: background-position, background-size;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n}\n.muon-window {\n  background: #23232a;\n  border-color: #444;\n  box-shadow: 0 2px 16px #000a;\n}\n.muon-urlbar {\n  background: #23232a;\n  color: #e5e5e5;\n  border-bottom: 1px solid #444;\n  /* Force pixel-perfect text rendering */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n  image-rendering: pixelated;\n}\n.muon-remove {\n  color: #aaa;\n  transition: color 0.15s;\n  border-radius: 4px;\n  /* Force pixel-perfect rendering of close button */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  image-rendering: pixelated;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n}\n.muon-remove:hover {\n  color: #fff;\n  background: #333;\n}\n\n.muon-urlbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  z-index: 2;\n  height: 24px;\n}\n\n.muon-topbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  z-index: 3;\n  height: 24px;\n  /* Force pixel-perfect rendering */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  image-rendering: pixelated;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n  will-change: transform;\n}\n\n.muon-drag-area {\n  flex: 1 1 0%;\n  height: 24px;\n  cursor: grab;\n  user-select: none;\n  background: transparent;\n}\n\n.muon-nav-controls {\n  display: flex;\n  align-items: center;\n  gap: 2px;\n  margin-left: 4px;\n}\n\n.muon-nav-btn {\n  font-size: 14px;\n  width: 18px;\n  height: 18px;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  border-radius: 4px;\n  color: #aaa;\n  transition: color 0.15s, background 0.15s;\n  background: transparent;\n  border: none;\n  cursor: pointer;\n  /* Force pixel-perfect rendering of icons */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  image-rendering: pixelated;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n}\n.muon-nav-btn:hover {\n  color: #fff;\n  background: #333;\n}\n\n.muon-urlbar-container {\n  display: flex;\n  align-items: center;\n  background: #23232a;\n  border-bottom: 1px solid #444;\n  width: 100%;\n  position: absolute;\n  top: 24px;\n  left: 0;\n  right: 0;\n  z-index: 2;\n  height: 24px;\n  /* Force pixel-perfect rendering */\n  text-rendering: geometricPrecision;\n  -webkit-font-smoothing: subpixel-antialiased;\n  -moz-osx-font-smoothing: auto;\n  font-kerning: none;\n  image-rendering: pixelated;\n  backface-visibility: hidden;\n  transform: translateZ(0);\n  will-change: transform;\n}\n\n \n/* Resize handles */\n.muon-resize-handle {\n  position: absolute;\n  z-index: 20;\n  opacity: 0.6;\n  transition: opacity 0.2s;\n  background: transparent;\n  pointer-events: auto;\n}\n.muon-resize-corner {\n  width: 12px;\n  height: 12px;\n  right: 0;\n  bottom: 0;\n  background: linear-gradient(135deg, transparent 50%, #3b82f6 50%);\n  cursor: nwse-resize;\n  opacity: 1;\n}\n.muon-resize-right {\n  width: 8px;\n  top: 12px;\n  right: 0;\n  bottom: 12px;\n  cursor: ew-resize;\n}\n.muon-resize-bottom {\n  height: 8px;\n  left: 12px;\n  right: 12px;\n  bottom: 0;\n  cursor: ns-resize;\n}\n.muon-resize-left {\n  width: 8px;\n  top: 12px;\n  left: 0;\n  bottom: 12px;\n  cursor: ew-resize;\n}\n.muon-resize-top {\n  height: 8px;\n  left: 12px;\n  right: 12px;\n  top: 0;\n  cursor: ns-resize;\n}\n\n.muon-window:hover .muon-resize-handle {\n  opacity: 1;\n}\n\n/* Move cursor for address bar */\n.muon-urlbar.cursor-move {\n  cursor: move;\n}\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -4792,513 +4846,789 @@ module.exports.formatError = function (err) {
 
 /***/ }),
 
-/***/ "./src/renderer/renderer.ts":
-/*!**********************************!*\
-  !*** ./src/renderer/renderer.ts ***!
-  \**********************************/
+/***/ "./src/renderer/DesktopManager.ts":
+/*!****************************************!*\
+  !*** ./src/renderer/DesktopManager.ts ***!
+  \****************************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DesktopManager = void 0;
 __webpack_require__(/*! ./styles.css */ "./src/renderer/styles.css");
-const windowManager_1 = __webpack_require__(/*! ./windowManager */ "./src/renderer/windowManager.ts");
+const muon_1 = __webpack_require__(/*! ../types/muon */ "./src/types/muon.ts");
 const state_1 = __webpack_require__(/*! ./state */ "./src/renderer/state.ts");
-const root = document.getElementById('root');
-root.tabIndex = 0; // allow key focus
-let scale = 1;
-let offsetX = 0;
-let offsetY = 0;
-let windows = [];
-let muonActiveWindow = null;
-const desk = document.createElement('div');
-desk.id = 'muon-desktop';
-desk.className = 'absolute inset-0 origin-top-left will-change-transform';
-root.appendChild(desk);
-function applyTransform() {
-    desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
-    const bgSize = 32 * scale;
-    root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
-    root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
-    // update each webview zoomFactor via Electron so pixel density remains constant
-    // No longer adjusting webview zoom; scaling is handled by CSS transform.
-}
-function createWindowElement(w, focusBar = false) {
-    const cont = document.createElement('div');
-    cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
-    cont.style.left = w.x + 'px';
-    cont.style.top = w.y + 'px';
-    cont.style.width = w.w + 'px';
-    cont.style.height = w.h + 'px';
-    cont.style.transform = '';
-    cont.style.transformOrigin = 'top left';
-    cont.dataset.id = w.id;
-    cont.style.zIndex = '1'; // Ensure window container has base z-index
-    // --- New Top Bar (Layer 1): Navigation + Drag area + Close tab ---
-    const barHeight = 24;
-    const topBar = document.createElement('div');
-    topBar.className = 'muon-topbar-container';
-    topBar.style.position = 'absolute';
-    topBar.style.top = '0';
-    topBar.style.left = '0';
-    topBar.style.right = '0';
-    topBar.style.height = `${barHeight}px`;
-    topBar.style.display = 'flex';
-    topBar.style.alignItems = 'center';
-    topBar.style.zIndex = '3';
-    topBar.style.background = '#23232a';
-    const zoomStateMap = window._muonZoomStateMap || new WeakMap();
-    window._muonZoomStateMap = zoomStateMap;
-    // Double-click on top bar (or any child) to zoom/center window, double-click again to restore
-    topBar.addEventListener('dblclick', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        let state = zoomStateMap.get(cont);
-        if (!state) {
-            state = { zoomed: false, origScale: 1, origOffsetX: 0, origOffsetY: 0 };
-            zoomStateMap.set(cont, state);
+const WindowFactory_1 = __webpack_require__(/*! ./components/WindowFactory */ "./src/renderer/components/WindowFactory.ts");
+const windowManager_1 = __webpack_require__(/*! ./windowManager */ "./src/renderer/windowManager.ts");
+const zoom_1 = __webpack_require__(/*! ./utils/zoom */ "./src/renderer/utils/zoom.ts");
+const animations_1 = __webpack_require__(/*! ./utils/animations */ "./src/renderer/utils/animations.ts");
+const dom_1 = __webpack_require__(/*! ./utils/dom */ "./src/renderer/utils/dom.ts");
+/**
+ * Main desktop manager class that orchestrates the entire application
+ */
+class DesktopManager {
+    constructor() {
+        this.windows = [];
+        this.activeWindow = null;
+        this.transform = { scale: 1, x: 0, y: 0 };
+        this.isDragging = false;
+        // Debounced functions
+        this.debouncedUIRerender = (0, animations_1.debounce)(() => (0, animations_1.forceUIRepaint)(), muon_1.CONSTANTS.DEBOUNCE_DELAY);
+        this.debouncedSave = (0, animations_1.debounce)(() => this.saveState(), 100);
+        this.transformDirty = false;
+        this.animationFrameId = null;
+        this.initializeDOM();
+        this.setupWindowFactory();
+        this.setupEventListeners();
+        this.loadInitialState();
+    }
+    /**
+     * Initialize DOM structure
+     */
+    initializeDOM() {
+        try {
+            this.root = (0, dom_1.getElementById)('root');
+            this.root.tabIndex = 0; // Allow key focus
+            this.desk = (0, dom_1.createElement)('div', {
+                id: 'muon-desktop',
+                className: 'absolute inset-0 origin-top-left will-change-transform'
+            });
+            (0, dom_1.appendChild)(this.root, this.desk);
         }
-        if (state.zoomed) {
-            // Animate back to original
-            const targetScale = state.origScale;
-            const targetOffsetX = state.origOffsetX;
-            const targetOffsetY = state.origOffsetY;
-            const startScale = scale;
-            const startOffsetX = offsetX;
-            const startOffsetY = offsetY;
-            const duration = 300;
-            const startTime = performance.now();
-            function animateRestore(now) {
-                const t = Math.min(1, (now - startTime) / duration);
-                const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-                scale = startScale + (targetScale - startScale) * ease;
-                offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
-                offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
-                applyTransform();
-                if (t < 1) {
-                    requestAnimationFrame(animateRestore);
-                }
-                else {
-                    scale = targetScale;
-                    offsetX = targetOffsetX;
-                    offsetY = targetOffsetY;
-                    applyTransform();
-                }
+        catch (error) {
+            console.error('Failed to initialize DOM:', error);
+            throw new Error('Desktop initialization failed');
+        }
+    }
+    /**
+     * Setup window factory with options
+     */
+    setupWindowFactory() {
+        const options = {
+            onWindowRemove: (windowId) => this.removeWindow(windowId),
+            onWindowDrag: (windowElement, windowData) => {
+                // Window drag is handled internally by WindowFactory
+            },
+            onWindowZoom: (windowElement) => this.zoomWindow(windowElement),
+            onActiveWindowChange: (windowElement) => this.setActiveWindow(windowElement),
+            onSave: () => this.debouncedSave(),
+            scale: this.transform.scale
+        };
+        this.windowFactory = new WindowFactory_1.WindowFactory(options);
+    }
+    /**
+     * Setup global event listeners
+     */
+    setupEventListeners() {
+        this.setupMouseEventListeners();
+        this.setupWheelEventListeners();
+        this.setupKeyboardEventListeners();
+    }
+    /**
+     * Setup mouse event listeners for window creation and interaction
+     */
+    setupMouseEventListeners() {
+        this.root.addEventListener('mousedown', (e) => {
+            if (e.button !== 0)
+                return;
+            // Prevent new window creation if clicking on certain elements
+            const target = e.target;
+            if (target.closest('.muon-urlbar') || target.closest('.muon-resize-handle')) {
+                return;
             }
-            requestAnimationFrame(animateRestore);
-            state.zoomed = false;
-            return;
-        }
-        // Store original transform
-        state.origScale = scale;
-        state.origOffsetX = offsetX;
-        state.origOffsetY = offsetY;
-        // Use desk/world coordinates for accurate fit
-        const margin = 32;
-        const winW = cont.offsetWidth;
-        const winH = cont.offsetHeight;
-        const winX = parseFloat(cont.style.left);
-        const winY = parseFloat(cont.style.top);
-        const viewportW = root.clientWidth;
-        const viewportH = root.clientHeight;
-        // Calculate scale to fit window in viewport with margins
-        const scaleX = (viewportW - 2 * margin) / winW;
-        const scaleY = (viewportH - 2 * margin) / winH;
-        const targetScale = Math.min(scaleX, scaleY, 4);
-        // Center window in viewport after scaling
-        const winCenterX = winX + winW / 2;
-        const winCenterY = winY + winH / 2;
-        const viewportCenterX = viewportW / 2;
-        const viewportCenterY = viewportH / 2;
-        // Offset so that after scaling, window center is at viewport center
-        const targetOffsetX = viewportCenterX - winCenterX * targetScale;
-        const targetOffsetY = viewportCenterY - winCenterY * targetScale;
-        // Animate transform
-        const startScale = scale;
-        const startOffsetX = offsetX;
-        const startOffsetY = offsetY;
-        const duration = 300;
-        const startTime = performance.now();
-        function animateZoom(now) {
-            const t = Math.min(1, (now - startTime) / duration);
-            // Ease in-out
-            const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-            scale = startScale + (targetScale - startScale) * ease;
-            offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
-            offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
-            applyTransform();
-            if (t < 1) {
-                requestAnimationFrame(animateZoom);
+            this.startWindowCreation(e);
+        });
+    }
+    /**
+     * Setup wheel event listeners for pan and zoom
+     */
+    setupWheelEventListeners() {
+        this.root.addEventListener('wheel', (e) => {
+            // Allow panning/zooming unless actively editing an input
+            const target = e.target;
+            if (target.tagName === 'INPUT' && target.matches(':focus')) {
+                return;
+            }
+            e.preventDefault();
+            if (e.metaKey || e.ctrlKey) {
+                (0, zoom_1.handleWheelZoom)(e, this.transform, () => { });
             }
             else {
-                // Snap to final values
-                scale = targetScale;
-                offsetX = targetOffsetX;
-                offsetY = targetOffsetY;
-                applyTransform();
+                (0, zoom_1.handleWheelPan)(e, this.transform, () => { });
             }
-        }
-        requestAnimationFrame(animateZoom);
-        state.zoomed = true;
-    });
-    // Navigation controls
-    const navControls = document.createElement('div');
-    navControls.className = 'muon-nav-controls';
-    navControls.style.display = 'flex';
-    navControls.style.alignItems = 'center';
-    navControls.style.gap = '2px';
-    navControls.style.marginLeft = '4px';
-    // Button helper (removed duplicate makeNavBtn)
-    // Navigation button references (handlers will be assigned after webview is created)
-    let backBtn, fwdBtn, reloadBtn, stopBtn;
-    // Drag area (fills most of the top bar, draggable)
-    const dragArea = document.createElement('div');
-    dragArea.className = 'muon-drag-area';
-    dragArea.style.flex = '1 1 0%';
-    dragArea.style.height = `${barHeight}px`;
-    dragArea.style.cursor = 'grab';
-    dragArea.style.userSelect = 'none';
-    dragArea.style.background = 'transparent';
-    // Drag logic for dragArea
-    dragArea.addEventListener('mousedown', (e) => {
-        if (e.button !== 0)
+            this.requestTransformUpdate();
+        }, { passive: false });
+    }
+    /**
+     * Setup keyboard event listeners for shortcuts
+     */
+    setupKeyboardEventListeners() {
+        document.addEventListener('keydown', (e) => {
+            // Save shortcut
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
+                e.preventDefault();
+                this.saveState();
+                return;
+            }
+            // Zoom/center hotkey for active window (Cmd/Ctrl + D)
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'd') {
+                e.preventDefault();
+                this.zoomActiveWindow();
+                return;
+            }
+        });
+    }
+    /**
+     * Start window creation process with drag selection
+     */
+    startWindowCreation(event) {
+        if (this.isDragging)
             return;
-        e.preventDefault();
-        e.stopPropagation();
-        let startX = e.clientX;
-        let startY = e.clientY;
-        let startLeft = parseFloat(cont.style.left);
-        let startTop = parseFloat(cont.style.top);
-        const doDrag = (ev) => {
-            const dx = (ev.clientX - startX) / scale;
-            const dy = (ev.clientY - startY) / scale;
-            cont.style.left = (startLeft + dx) + 'px';
-            cont.style.top = (startTop + dy) + 'px';
+        const dragStartX = event.clientX;
+        const dragStartY = event.clientY;
+        this.isDragging = true;
+        // Create ghost rectangle for visual feedback
+        const ghost = this.createGhostRectangle();
+        const updateGhost = (ev) => {
+            this.updateGhostRectangle(ghost, dragStartX, dragStartY, ev.clientX, ev.clientY);
         };
-        const stopDrag = (ev) => {
-            document.removeEventListener('mousemove', doDrag);
-            document.removeEventListener('mouseup', stopDrag);
-            // Save position if moved
-            if (Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) {
-                const win = windows.find(win => win.id === w.id);
-                if (win) {
-                    win.x = parseFloat(cont.style.left);
-                    win.y = parseFloat(cont.style.top);
-                    save();
-                }
-            }
+        const finishCreation = (ev) => {
+            document.removeEventListener('mousemove', updateGhost);
+            document.removeEventListener('mouseup', finishCreation);
+            this.finishWindowCreation(ghost, dragStartX, dragStartY, ev.clientX, ev.clientY);
+            (0, dom_1.removeElement)(ghost);
+            this.isDragging = false;
         };
-        document.addEventListener('mousemove', doDrag);
-        document.addEventListener('mouseup', stopDrag);
-    });
-    // Close tab button (right side)
-    const removeBtn = document.createElement('button');
-    removeBtn.textContent = '×';
-    removeBtn.title = 'Remove window';
-    removeBtn.className = 'muon-remove bg-transparent border-none leading-none cursor-pointer';
-    removeBtn.style.fontSize = `18px`;
-    removeBtn.style.width = `${barHeight - 4}px`;
-    removeBtn.style.height = `${barHeight - 4}px`;
-    removeBtn.style.display = 'flex';
-    removeBtn.style.alignItems = 'center';
-    removeBtn.style.justifyContent = 'center';
-    removeBtn.style.marginRight = '2px';
-    removeBtn.style.zIndex = '4';
-    removeBtn.onclick = (e) => {
-        e.stopPropagation();
-        windows = windows.filter(win => win.id !== w.id);
-        cont.remove();
-        save();
-    };
-    topBar.appendChild(navControls);
-    topBar.appendChild(dragArea);
-    topBar.appendChild(removeBtn);
-    // --- Address Bar (Layer 2): Only URL input ---
-    const barContainer = document.createElement('div');
-    barContainer.className = 'muon-urlbar-container';
-    barContainer.style.position = 'absolute';
-    barContainer.style.top = `${barHeight}px`;
-    barContainer.style.left = '0';
-    barContainer.style.right = '0';
-    barContainer.style.height = `${barHeight}px`;
-    barContainer.style.display = 'flex';
-    barContainer.style.alignItems = 'center';
-    barContainer.style.zIndex = '2';
-    barContainer.style.background = '#23232a';
-    // URL bar input
-    const urlBar = document.createElement('input');
-    urlBar.type = 'text';
-    urlBar.value = w.url;
-    urlBar.addEventListener('focus', () => {
-        setTimeout(() => urlBar.select(), 0);
-    });
-    urlBar.addEventListener('click', (e) => {
-        if (document.activeElement !== urlBar) {
-            urlBar.focus();
-            e.preventDefault();
-        }
-    });
-    urlBar.className = 'muon-urlbar px-2 py-1 text-xs outline-none';
-    urlBar.style.flex = '1 1 0%';
-    urlBar.style.height = `${barHeight - 4}px`;
-    urlBar.style.fontSize = `12px`;
-    urlBar.style.border = 'none';
-    urlBar.style.background = 'transparent';
-    urlBar.style.color = '#e5e5e5';
-    urlBar.style.marginRight = '2px';
-    urlBar.style.textOverflow = 'ellipsis';
-    urlBar.style.overflow = 'hidden';
-    urlBar.style.whiteSpace = 'nowrap';
-    barContainer.appendChild(urlBar);
-    // Webview fills the window except for the two bars
-    const webview = document.createElement('webview');
-    webview.className = 'w-full';
-    webview.src = w.url || 'https://www.google.com/search';
-    webview.partition = `persist:muon-${w.id}`;
-    webview.style.position = 'absolute';
-    webview.style.left = '0';
-    webview.style.width = '100%';
-    webview.style.border = 'none';
-    webview.style.top = `${barHeight * 2}px`;
-    webview.style.height = `calc(100% - ${barHeight * 2}px)`;
-    webview.style.zIndex = '0'; // Ensure webview stays behind bars
-    // Now that webview exists, create nav buttons and wire up handlers
-    function makeNavBtn(label, title, handler) {
-        const btn = document.createElement('button');
-        btn.textContent = label;
-        btn.title = title;
-        btn.className = 'muon-nav-btn bg-transparent border-none leading-none cursor-pointer';
-        btn.style.fontSize = '14px';
-        btn.style.width = `${barHeight - 6}px`;
-        btn.style.height = `${barHeight - 6}px`;
-        btn.style.display = 'flex';
-        btn.style.alignItems = 'center';
-        btn.style.justifyContent = 'center';
-        btn.style.borderRadius = '4px';
-        btn.style.color = '#aaa';
-        btn.style.transition = 'color 0.15s, background 0.15s';
-        btn.onmouseenter = () => { btn.style.color = '#fff'; btn.style.background = '#333'; };
-        btn.onmouseleave = () => { btn.style.color = '#aaa'; btn.style.background = 'transparent'; };
-        btn.onclick = (e) => { e.stopPropagation(); handler(); };
-        return btn;
+        document.addEventListener('mousemove', updateGhost);
+        document.addEventListener('mouseup', finishCreation);
     }
-    backBtn = makeNavBtn('←', 'Back', () => { if (webview)
-        webview.goBack(); });
-    fwdBtn = makeNavBtn('→', 'Forward', () => { if (webview)
-        webview.goForward(); });
-    reloadBtn = makeNavBtn('⟳', 'Reload', () => { if (webview)
-        webview.reload(); });
-    stopBtn = makeNavBtn('⨉', 'Stop', () => { if (webview)
-        webview.stop(); });
-    // Insert nav controls at the start of the topBar (before drag area and close button)
-    topBar.insertBefore(stopBtn, topBar.firstChild);
-    topBar.insertBefore(reloadBtn, topBar.firstChild);
-    topBar.insertBefore(fwdBtn, topBar.firstChild);
-    topBar.insertBefore(backBtn, topBar.firstChild);
-    urlBar.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-            let val = urlBar.value.trim();
-            if (!/^(https?:|file:)/i.test(val)) {
-                if (/^[\w-]+\.[\w-]+/.test(val)) {
-                    val = 'https://' + val;
-                }
-                else {
-                    val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
-                }
-            }
-            w.url = val;
-            webview.src = val;
-        }
-    });
-    // Keep address bar in sync with webview navigation
-    webview.addEventListener('did-navigate', (event) => {
-        urlBar.value = webview.getURL();
-        w.url = webview.getURL();
-    });
-    webview.addEventListener('did-navigate-in-page', (event) => {
-        urlBar.value = webview.getURL();
-        w.url = webview.getURL();
-    });
-    // Adjust zoom based on the container's width, assuming 800px is the "default"
-    const adjustZoom = () => {
-        const newZoom = cont.offsetWidth / 800;
-        webview.setZoomFactor(newZoom);
-    };
-    webview.addEventListener('dom-ready', adjustZoom);
-    cont.appendChild(topBar);
-    cont.appendChild(barContainer);
-    cont.appendChild(webview);
-    // Autofocus address bar if requested
-    if (focusBar) {
-        setTimeout(() => urlBar.focus(), 0);
+    /**
+     * Create ghost rectangle for window creation feedback
+     */
+    createGhostRectangle() {
+        const ghost = (0, dom_1.createElement)('div', {
+            id: 'ghost',
+            className: 'absolute border border-dashed border-sky-400 bg-sky-400/10'
+        });
+        (0, dom_1.appendChild)(this.desk, ghost);
+        return ghost;
     }
-    // double click to center this window (ignore if dblclick was on url bar)
-    cont.addEventListener('dblclick', e => {
-        if (e.target.closest('.muon-urlbar'))
-            return;
-        e.stopPropagation();
-        // center on window
-        const bounds = cont.getBoundingClientRect();
-        const cx = bounds.left + bounds.width / 2 - root.clientWidth / 2;
-        const cy = bounds.top + bounds.height / 2 - root.clientHeight / 2;
-        offsetX -= cx / scale;
-        offsetY -= cy / scale;
-        applyTransform();
-    });
-    (0, windowManager_1.addResizeHandle)(cont, w, scale, windows, save);
-    desk.appendChild(cont);
-    return cont;
-}
-function rebuild() {
-    desk.innerHTML = '';
-    windows.forEach(w => {
-        const cont = createWindowElement(w, false);
-        (0, windowManager_1.addResizeHandle)(cont, w, scale, windows, save);
-        // Add drag to address bar
-        const urlBar = cont.querySelector('.muon-urlbar');
-        if (urlBar) {
-            (0, windowManager_1.addAddressBarDrag)(urlBar, cont, w, scale, windows, save);
-        }
-    });
-    applyTransform();
-}
-// Tiny custom URL-input overlay to replace prompt()
-/**
- * askUrl is now a no-op; window creation will focus the address bar directly.
- */
-async function askUrl(def = 'https://www.google.com') {
-    return Promise.resolve(def);
-}
-// ----- interaction -----
-let isDragging = false;
-let dragStartX = 0;
-let dragStartY = 0;
-root.addEventListener('mousedown', e => {
-    if (e.button !== 0)
-        return;
-    // Prevent new window creation if clicking on address bar or resize handles
-    const target = e.target;
-    if (target.closest('.muon-urlbar') ||
-        target.closest('.muon-resize-handle')) {
-        return;
+    /**
+     * Update ghost rectangle position and size
+     */
+    updateGhostRectangle(ghost, startX, startY, currentX, currentY) {
+        const gx = Math.min(startX, currentX);
+        const gy = Math.min(startY, currentY);
+        const gw = Math.abs(currentX - startX);
+        const gh = Math.abs(currentY - startY);
+        const deskRect = this.root.getBoundingClientRect();
+        ghost.style.left = ((gx - deskRect.left - this.transform.x) / this.transform.scale) + 'px';
+        ghost.style.top = ((gy - deskRect.top - this.transform.y) / this.transform.scale) + 'px';
+        ghost.style.width = gw / this.transform.scale + 'px';
+        ghost.style.height = gh / this.transform.scale + 'px';
     }
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    isDragging = true;
-    // create ghost rectangle
-    const ghost = document.createElement('div');
-    ghost.id = 'ghost';
-    ghost.className = 'absolute border border-dashed border-sky-400 bg-sky-400/10';
-    desk.appendChild(ghost);
-    const updateGhost = (ev) => {
-        const gx = Math.min(dragStartX, ev.clientX);
-        const gy = Math.min(dragStartY, ev.clientY);
-        const gw = Math.abs(ev.clientX - dragStartX);
-        const gh = Math.abs(ev.clientY - dragStartY);
-        const deskRect = root.getBoundingClientRect();
-        ghost.style.left = ((gx - deskRect.left - offsetX) / scale) + 'px';
-        ghost.style.top = ((gy - deskRect.top - offsetY) / scale) + 'px';
-        ghost.style.width = gw / scale + 'px';
-        ghost.style.height = gh / scale + 'px';
-    };
-    const move = (ev) => updateGhost(ev);
-    const up = async (ev) => {
-        document.removeEventListener('mousemove', move);
-        document.removeEventListener('mouseup', up);
-        updateGhost(ev);
-        const gw = parseFloat(ghost.style.width);
-        const gh = parseFloat(ghost.style.height);
-        if (gw > 32 && gh > 32) {
-            // Always create window with default URL, focus address bar for entry
-            const wdata = {
+    /**
+     * Finish window creation if dimensions are sufficient
+     */
+    finishWindowCreation(ghost, startX, startY, endX, endY) {
+        const width = (0, dom_1.parsePixelValue)(ghost.style.width);
+        const height = (0, dom_1.parsePixelValue)(ghost.style.height);
+        if (width > 32 && height > 32) {
+            const windowData = {
                 id: crypto.randomUUID(),
-                x: parseFloat(ghost.style.left),
-                y: parseFloat(ghost.style.top),
-                w: gw,
-                h: gh,
+                x: (0, dom_1.parsePixelValue)(ghost.style.left),
+                y: (0, dom_1.parsePixelValue)(ghost.style.top),
+                w: width,
+                h: height,
                 url: 'https://www.google.com/search'
             };
-            windows.push(wdata);
-            const el = createWindowElement(wdata, true); // focus address bar
-            save();
+            this.createWindow(windowData, true);
         }
-        ghost.remove();
-        isDragging = false;
-    };
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup', up);
-});
-// Pan or zoom with wheel
-root.addEventListener('wheel', e => {
-    // Allow zooming only if >5% of screen is visible desktop
-    const deskRect = root.getBoundingClientRect();
-    // Calculate visible non-webview area
-    let nonWebviewArea = 0;
-    document.querySelectorAll('.muon-window').forEach((el) => {
-        const win = el;
-        const winRect = win.getBoundingClientRect();
-        nonWebviewArea += winRect.width * winRect.height;
-    });
-    const totalArea = deskRect.width * deskRect.height;
-    const webviewArea = totalArea - nonWebviewArea;
-    // Block zoom if too much of screen is webview/address bar
-    if (webviewArea > totalArea * 0.95) {
-        return;
     }
-    // Allow panning/zooming unless actively editing an input
-    if (e.target.tagName === 'INPUT' &&
-        e.target.matches(':focus')) {
-        return;
+    /**
+     * Create a new window and add it to the desktop
+     */
+    createWindow(windowData, focusAddressBar = false) {
+        try {
+            // Update factory scale
+            this.windowFactory['options'].scale = this.transform.scale;
+            const windowComponents = this.windowFactory.createWindow(windowData, focusAddressBar);
+            // Add resize handles
+            (0, windowManager_1.addResizeHandle)(windowComponents.container, windowData, this.transform.scale, this.windows, () => this.debouncedSave());
+            // Add address bar drag functionality
+            (0, windowManager_1.addAddressBarDrag)(windowComponents.urlInput, windowComponents.container, windowData, this.transform.scale, this.windows, () => this.debouncedSave());
+            // Add to desktop and data structures
+            (0, dom_1.appendChild)(this.desk, windowComponents.container);
+            this.windows.push(windowData);
+            // Set as active window
+            this.setActiveWindow(windowComponents.container);
+            // Save state
+            this.debouncedSave();
+            return windowComponents;
+        }
+        catch (error) {
+            console.error('Error creating window:', error);
+            throw error;
+        }
     }
-    e.preventDefault();
-    if (e.metaKey || e.ctrlKey) {
-        // zoom centered on cursor
-        const zoomIntensity = 0.001;
-        const delta = -e.deltaY * zoomIntensity;
-        const prevScale = scale;
-        const mx = e.clientX - root.getBoundingClientRect().left;
-        const my = e.clientY - root.getBoundingClientRect().top;
-        // compute world coords before zoom
-        const wx = (mx - offsetX) / scale;
-        const wy = (my - offsetY) / scale;
-        scale = Math.min(Math.max(0.25, scale * (1 + delta)), 4);
-        // after zoom, adjust offset so (wx, wy) stays under cursor
-        offsetX = mx - wx * scale;
-        offsetY = my - wy * scale;
+    /**
+     * Remove a window by ID
+     */
+    removeWindow(windowId) {
+        try {
+            this.windows = this.windows.filter(window => window.id !== windowId);
+            // If removed window was active, clear active window
+            if (this.activeWindow?.dataset.id === windowId) {
+                this.activeWindow = null;
+            }
+            this.debouncedSave();
+        }
+        catch (error) {
+            console.error('Error removing window:', error);
+        }
     }
-    else {
-        // pan
-        offsetX -= e.deltaX / scale;
-        offsetY -= e.deltaY / scale;
+    /**
+     * Set active window
+     */
+    setActiveWindow(windowElement) {
+        this.activeWindow = windowElement;
     }
-    applyTransform();
-}, { passive: false });
-// Click on a window locks interaction, click on desktop unlocks
-desk.addEventListener('mousedown', e => {
-    muonActiveWindow = null;
-});
-desk.addEventListener('click', e => {
-    muonActiveWindow = null;
-});
-// Save shortcut
-root.addEventListener('keydown', e => {
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        save();
+    /**
+     * Zoom the specified window
+     */
+    zoomWindow(windowElement) {
+        const viewport = this.getViewportDimensions();
+        (0, zoom_1.zoomAndCenterWindow)(windowElement, this.transform, viewport, () => this.applyTransform());
     }
-});
-function save() {
-    (0, state_1.saveState)(windows, { scale, x: offsetX, y: offsetY });
+    /**
+     * Zoom the currently active window
+     */
+    zoomActiveWindow() {
+        let targetWindow = this.activeWindow;
+        // Fallback: if no active window, use the first available window
+        if (!targetWindow && this.windows.length > 0) {
+            targetWindow = (0, dom_1.querySelector)('.muon-window', this.desk);
+            if (targetWindow) {
+                this.setActiveWindow(targetWindow);
+            }
+        }
+        if (targetWindow) {
+            this.zoomWindow(targetWindow);
+        }
+    }
+    /**
+     * Get current viewport dimensions
+     */
+    getViewportDimensions() {
+        return {
+            width: this.root.clientWidth,
+            height: this.root.clientHeight
+        };
+    }
+    /**
+     * Request a transform update on the next animation frame
+     */
+    requestTransformUpdate() {
+        this.transformDirty = true;
+        if (!this.animationFrameId) {
+            this.animationFrameId = requestAnimationFrame(() => this.updateTransform());
+        }
+    }
+    /**
+     * Update the transform if it's dirty
+     */
+    updateTransform() {
+        if (this.transformDirty) {
+            this.applyTransform();
+            this.transformDirty = false;
+        }
+        this.animationFrameId = null;
+    }
+    /**
+     * Apply current transform to the desktop
+     */
+    applyTransform() {
+        try {
+            this.desk.style.transform = `translate(${this.transform.x}px,${this.transform.y}px) scale(${this.transform.scale})`;
+            const bgSize = 32 * this.transform.scale;
+            this.root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
+            this.root.style.backgroundPosition = `${this.transform.x}px ${this.transform.y}px`;
+            this.root.style.backgroundRepeat = 'repeat';
+            // Trigger layout to ensure background is properly updated
+            this.root.offsetHeight;
+            // Debounce UI re-rendering to only happen when transform operations stop
+            this.debouncedUIRerender();
+        }
+        catch (error) {
+            console.error('Error applying transform:', error);
+        }
+    }
+    /**
+     * Rebuild all windows from current data
+     */
+    rebuildWindows() {
+        try {
+            this.desk.innerHTML = '';
+            this.windows.forEach((windowData, index) => {
+                const windowComponents = this.createWindow(windowData, false);
+                // Set the first window as active if no active window is set
+                if (index === 0 && !this.activeWindow) {
+                    this.setActiveWindow(windowComponents.container);
+                }
+            });
+            this.applyTransform();
+        }
+        catch (error) {
+            console.error('Error rebuilding windows:', error);
+        }
+    }
+    /**
+     * Save current state
+     */
+    saveState() {
+        try {
+            (0, state_1.saveState)(this.windows, this.transform);
+        }
+        catch (error) {
+            console.error('Error saving state:', error);
+        }
+    }
+    /**
+     * Load initial state from storage
+     */
+    async loadInitialState() {
+        try {
+            const state = await (0, state_1.loadState)();
+            this.windows = state.windows;
+            this.transform = state.transform;
+            this.rebuildWindows();
+        }
+        catch (error) {
+            console.error('Error loading initial state:', error);
+            // Continue with empty state if loading fails
+        }
+    }
 }
-// ---- load state ----
-(async () => {
-    const state = await (0, state_1.loadState)();
-    windows = state.windows;
-    scale = state.transform.scale;
-    offsetX = state.transform.x;
-    offsetY = state.transform.y;
-    rebuild();
-})();
+exports.DesktopManager = DesktopManager;
+
+
+/***/ }),
+
+/***/ "./src/renderer/components/WindowFactory.ts":
+/*!**************************************************!*\
+  !*** ./src/renderer/components/WindowFactory.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WindowFactory = void 0;
+const muon_1 = __webpack_require__(/*! ../../types/muon */ "./src/types/muon.ts");
+const dom_1 = __webpack_require__(/*! ../utils/dom */ "./src/renderer/utils/dom.ts");
+const zoom_1 = __webpack_require__(/*! ../utils/zoom */ "./src/renderer/utils/zoom.ts");
+/**
+ * Factory class for creating window elements with all necessary components
+ */
+class WindowFactory {
+    constructor(options) {
+        this.options = options;
+    }
+    /**
+     * Create a complete window element with all components
+     */
+    createWindow(windowData, focusAddressBar = false) {
+        try {
+            const container = this.createWindowContainer(windowData);
+            const topBar = this.createTopBar(container, windowData);
+            const addressBar = this.createAddressBar(windowData);
+            const webview = this.createWebviewComponent(windowData);
+            // Get URL input from address bar
+            const urlInput = (0, dom_1.querySelector)('.muon-urlbar', addressBar);
+            if (!urlInput) {
+                throw new Error('URL input not found in address bar');
+            }
+            // Assemble the window
+            (0, dom_1.appendChild)(container, topBar);
+            (0, dom_1.appendChild)(container, addressBar);
+            (0, dom_1.appendChild)(container, webview);
+            // Set up event handlers
+            this.setupWindowEvents(container, windowData, webview, urlInput);
+            this.setupNavigationButtons(topBar, webview);
+            // Focus address bar if requested
+            if (focusAddressBar) {
+                setTimeout(() => urlInput.focus(), 0);
+            }
+            return {
+                container,
+                topBar,
+                addressBar,
+                webview,
+                urlInput
+            };
+        }
+        catch (error) {
+            console.error('Error creating window:', error);
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            throw new Error(`Failed to create window: ${errorMessage}`);
+        }
+    }
+    /**
+     * Create the main window container
+     */
+    createWindowContainer(windowData) {
+        return (0, dom_1.createElement)('div', {
+            className: 'muon-window absolute border rounded overflow-hidden shadow-lg',
+            style: {
+                left: windowData.x + 'px',
+                top: windowData.y + 'px',
+                width: windowData.w + 'px',
+                height: windowData.h + 'px',
+                transform: '',
+                transformOrigin: 'top left',
+                zIndex: '1'
+            },
+            attributes: {
+                'data-id': windowData.id
+            }
+        });
+    }
+    /**
+     * Create the top bar with navigation and controls
+     */
+    createTopBar(container, windowData) {
+        const topBar = (0, dom_1.createElement)('div', {
+            className: 'muon-topbar-container',
+            style: {
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                right: '0',
+                height: `${muon_1.CONSTANTS.BAR_HEIGHT}px`,
+                display: 'flex',
+                alignItems: 'center',
+                zIndex: '3',
+                background: '#23232a'
+            }
+        });
+        // Add navigation controls container
+        const navControls = (0, dom_1.createElement)('div', {
+            className: 'muon-nav-controls',
+            style: {
+                display: 'flex',
+                alignItems: 'center',
+                gap: '2px',
+                marginLeft: '4px'
+            }
+        });
+        // Add drag area
+        const dragArea = (0, dom_1.createDragArea)();
+        this.setupDragHandler(dragArea, container, windowData);
+        // Add close button
+        const closeButton = (0, dom_1.createCloseButton)(() => {
+            this.removeWindow(container, windowData.id);
+        });
+        // Add double-click zoom handler to top bar
+        topBar.addEventListener('dblclick', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.options.onWindowZoom(container);
+        });
+        (0, dom_1.appendChild)(topBar, navControls);
+        (0, dom_1.appendChild)(topBar, dragArea);
+        (0, dom_1.appendChild)(topBar, closeButton);
+        return topBar;
+    }
+    /**
+     * Create the address bar
+     */
+    createAddressBar(windowData) {
+        const addressBarContainer = (0, dom_1.createElement)('div', {
+            className: 'muon-urlbar-container',
+            style: {
+                position: 'absolute',
+                top: `${muon_1.CONSTANTS.BAR_HEIGHT}px`,
+                left: '0',
+                right: '0',
+                height: `${muon_1.CONSTANTS.BAR_HEIGHT}px`,
+                display: 'flex',
+                alignItems: 'center',
+                zIndex: '2',
+                background: '#23232a'
+            }
+        });
+        const urlInput = (0, dom_1.createUrlBar)(windowData.url);
+        (0, dom_1.appendChild)(addressBarContainer, urlInput);
+        return addressBarContainer;
+    }
+    /**
+     * Create the webview component
+     */
+    createWebviewComponent(windowData) {
+        return (0, dom_1.createWebview)(windowData.url, windowData.id);
+    }
+    /**
+     * Setup navigation buttons in the top bar
+     */
+    setupNavigationButtons(topBar, webview) {
+        try {
+            const navControls = (0, dom_1.querySelector)('.muon-nav-controls', topBar);
+            if (!navControls)
+                return;
+            const backButton = (0, dom_1.createNavButton)('←', 'Back', () => {
+                if (webview)
+                    webview.goBack();
+            });
+            const forwardButton = (0, dom_1.createNavButton)('→', 'Forward', () => {
+                if (webview)
+                    webview.goForward();
+            });
+            const reloadButton = (0, dom_1.createNavButton)('⟳', 'Reload', () => {
+                if (webview)
+                    webview.reload();
+            });
+            const stopButton = (0, dom_1.createNavButton)('⨉', 'Stop', () => {
+                if (webview)
+                    webview.stop();
+            });
+            // Add buttons in order
+            (0, dom_1.appendChild)(navControls, backButton);
+            (0, dom_1.appendChild)(navControls, forwardButton);
+            (0, dom_1.appendChild)(navControls, reloadButton);
+            (0, dom_1.appendChild)(navControls, stopButton);
+        }
+        catch (error) {
+            console.error('Error setting up navigation buttons:', error);
+        }
+    }
+    /**
+     * Setup window event handlers
+     */
+    setupWindowEvents(container, windowData, webview, urlInput) {
+        try {
+            // URL input handlers
+            urlInput.addEventListener('focus', () => {
+                setTimeout(() => urlInput.select(), 0);
+            });
+            urlInput.addEventListener('click', (e) => {
+                if (document.activeElement !== urlInput) {
+                    urlInput.focus();
+                    e.preventDefault();
+                }
+            });
+            urlInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleUrlNavigation(urlInput.value.trim(), windowData, webview);
+                }
+            });
+            // Webview navigation handlers
+            webview.addEventListener('did-navigate', () => {
+                urlInput.value = webview.getURL();
+                windowData.url = webview.getURL();
+            });
+            webview.addEventListener('did-navigate-in-page', () => {
+                urlInput.value = webview.getURL();
+                windowData.url = webview.getURL();
+            });
+            // Webview zoom adjustment
+            webview.addEventListener('dom-ready', () => {
+                this.adjustWebviewZoom(container, webview);
+                // Set up webview click handler for active window tracking
+                webview.addEventListener('mousedown', () => {
+                    this.options.onActiveWindowChange(container);
+                });
+            });
+            // Window active state tracking
+            this.setupActiveWindowTracking(container);
+            // Double-click centering (excluding URL bar and resize handles)
+            container.addEventListener('dblclick', (e) => {
+                const target = e.target;
+                if (target.closest('.muon-urlbar') || target.closest('.muon-resize-handle')) {
+                    return;
+                }
+                e.stopPropagation();
+                this.options.onWindowZoom(container);
+            });
+        }
+        catch (error) {
+            console.error('Error setting up window events:', error);
+        }
+    }
+    /**
+     * Handle URL navigation with smart URL processing
+     */
+    handleUrlNavigation(url, windowData, webview) {
+        try {
+            let processedUrl = url;
+            if (!/^(https?:|file:)/i.test(url)) {
+                if (/^[\w-]+\.[\w-]+/.test(url)) {
+                    processedUrl = 'https://' + url;
+                }
+                else {
+                    processedUrl = 'https://www.google.com/search?q=' + encodeURIComponent(url);
+                }
+            }
+            windowData.url = processedUrl;
+            webview.src = processedUrl;
+        }
+        catch (error) {
+            console.error('Error handling URL navigation:', error);
+        }
+    }
+    /**
+     * Adjust webview zoom based on container width
+     */
+    adjustWebviewZoom(container, webview) {
+        try {
+            const newZoom = container.offsetWidth / muon_1.CONSTANTS.DEFAULT_ZOOM_BASE;
+            webview.setZoomFactor(newZoom);
+        }
+        catch (error) {
+            console.error('Error adjusting webview zoom:', error);
+        }
+    }
+    /**
+     * Setup drag handling for window movement
+     */
+    setupDragHandler(dragArea, container, windowData) {
+        dragArea.addEventListener('mousedown', (e) => {
+            if (e.button !== 0)
+                return;
+            try {
+                e.preventDefault();
+                e.stopPropagation();
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseFloat(container.style.left);
+                const startTop = parseFloat(container.style.top);
+                const doDrag = (ev) => {
+                    const dx = (ev.clientX - startX) / this.options.scale;
+                    const dy = (ev.clientY - startY) / this.options.scale;
+                    container.style.left = (startLeft + dx) + 'px';
+                    container.style.top = (startTop + dy) + 'px';
+                };
+                const stopDrag = (ev) => {
+                    document.removeEventListener('mousemove', doDrag);
+                    document.removeEventListener('mouseup', stopDrag);
+                    // Save position if moved significantly
+                    if (Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) {
+                        windowData.x = parseFloat(container.style.left);
+                        windowData.y = parseFloat(container.style.top);
+                        this.options.onSave();
+                    }
+                };
+                document.addEventListener('mousemove', doDrag);
+                document.addEventListener('mouseup', stopDrag);
+            }
+            catch (error) {
+                console.error('Error in drag handler:', error);
+            }
+        });
+    }
+    /**
+     * Setup active window tracking
+     */
+    setupActiveWindowTracking(container) {
+        const setActiveWindow = () => {
+            this.options.onActiveWindowChange(container);
+        };
+        // Add event listeners for various interactions
+        container.addEventListener('mousedown', setActiveWindow);
+        const topBar = (0, dom_1.querySelector)('.muon-topbar-container', container);
+        const addressBar = (0, dom_1.querySelector)('.muon-urlbar-container', container);
+        const urlInput = (0, dom_1.querySelector)('.muon-urlbar', container);
+        if (topBar)
+            topBar.addEventListener('mousedown', setActiveWindow);
+        if (addressBar)
+            addressBar.addEventListener('mousedown', setActiveWindow);
+        if (urlInput)
+            urlInput.addEventListener('mousedown', setActiveWindow);
+    }
+    /**
+     * Remove a window and clean up resources
+     */
+    removeWindow(container, windowId) {
+        try {
+            // Clean up zoom state
+            (0, zoom_1.resetZoomState)(container);
+            // Remove from DOM
+            container.remove();
+            // Notify parent of removal
+            this.options.onWindowRemove(windowId);
+        }
+        catch (error) {
+            console.error('Error removing window:', error);
+        }
+    }
+}
+exports.WindowFactory = WindowFactory;
+
+
+/***/ }),
+
+/***/ "./src/renderer/main.ts":
+/*!******************************!*\
+  !*** ./src/renderer/main.ts ***!
+  \******************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const DesktopManager_1 = __webpack_require__(/*! ./DesktopManager */ "./src/renderer/DesktopManager.ts");
+/**
+ * Application entry point
+ * Initialize the desktop manager when the DOM is ready
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        new DesktopManager_1.DesktopManager();
+        console.log('Muon desktop initialized successfully');
+    }
+    catch (error) {
+        console.error('Failed to initialize Muon desktop:', error);
+        // Show user-friendly error message
+        const root = document.getElementById('root');
+        if (root) {
+            root.innerHTML = `
+        <div style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100vh;
+          font-family: system-ui, -apple-system, sans-serif;
+          background: #1a1a1a;
+          color: #ffffff;
+          text-align: center;
+        ">
+          <div>
+            <h1 style="color: #ff6b6b; margin-bottom: 1rem;">
+              Failed to Initialize Desktop
+            </h1>
+            <p style="color: #cccccc; margin-bottom: 1rem;">
+              An error occurred while starting the application.
+            </p>
+            <details style="margin-top: 1rem; text-align: left;">
+              <summary style="cursor: pointer; color: #4dabf7;">
+                Show Error Details
+              </summary>
+              <pre style="
+                background: #2d2d2d;
+                padding: 1rem;
+                border-radius: 4px;
+                margin-top: 0.5rem;
+                overflow: auto;
+                font-size: 0.875rem;
+                color: #ff6b6b;
+              ">${error instanceof Error ? error.stack : String(error)}</pre>
+            </details>
+          </div>
+        </div>
+      `;
+        }
+    }
+});
 
 
 /***/ }),
@@ -5307,26 +5637,92 @@ function save() {
 /*!*******************************!*\
   !*** ./src/renderer/state.ts ***!
   \*******************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.loadState = loadState;
 exports.saveState = saveState;
+const muon_1 = __webpack_require__(/*! ../types/muon */ "./src/types/muon.ts");
+/**
+ * Load application state with error handling and validation
+ */
 async function loadState() {
-    const saved = await window.electronAPI.loadState();
-    return {
-        windows: saved?.windows || [],
-        transform: {
-            scale: saved?.transform?.scale || 1,
-            x: saved?.transform?.x || 0,
-            y: saved?.transform?.y || 0
+    try {
+        const saved = await window.electronAPI.loadState();
+        // Validate and sanitize loaded data
+        const windows = Array.isArray(saved?.windows) ? saved.windows.filter(isValidWindowData) : [];
+        const transform = validateTransform(saved?.transform);
+        return { windows, transform };
+    }
+    catch (error) {
+        console.error('Failed to load state:', error);
+        throw new muon_1.StateLoadError(error);
+    }
+}
+/**
+ * Save application state with error handling
+ */
+function saveState(windows, transform) {
+    try {
+        // Validate inputs before saving
+        if (!Array.isArray(windows)) {
+            throw new Error('Windows must be an array');
         }
+        if (!isValidTransform(transform)) {
+            throw new Error('Invalid transform object');
+        }
+        const state = { windows, transform };
+        window.electronAPI.saveState(state);
+    }
+    catch (error) {
+        console.error('Failed to save state:', error);
+        throw new muon_1.StateSaveError(error);
+    }
+}
+/**
+ * Validate window data object
+ */
+function isValidWindowData(data) {
+    return (data &&
+        typeof data === 'object' &&
+        typeof data.id === 'string' &&
+        typeof data.x === 'number' &&
+        typeof data.y === 'number' &&
+        typeof data.w === 'number' &&
+        typeof data.h === 'number' &&
+        typeof data.url === 'string' &&
+        data.w > 0 &&
+        data.h > 0);
+}
+/**
+ * Validate and sanitize transform object
+ */
+function validateTransform(transform) {
+    const defaultTransform = { scale: 1, x: 0, y: 0 };
+    if (!transform || typeof transform !== 'object') {
+        return defaultTransform;
+    }
+    return {
+        scale: typeof transform.scale === 'number' && !isNaN(transform.scale) ?
+            Math.max(0.1, Math.min(10, transform.scale)) : 1,
+        x: typeof transform.x === 'number' && !isNaN(transform.x) ? transform.x : 0,
+        y: typeof transform.y === 'number' && !isNaN(transform.y) ? transform.y : 0
     };
 }
-function saveState(windows, transform) {
-    window.electronAPI.saveState({ windows, transform });
+/**
+ * Check if transform object is valid
+ */
+function isValidTransform(transform) {
+    return (transform &&
+        typeof transform === 'object' &&
+        typeof transform.scale === 'number' &&
+        typeof transform.x === 'number' &&
+        typeof transform.y === 'number' &&
+        !isNaN(transform.scale) &&
+        !isNaN(transform.x) &&
+        !isNaN(transform.y));
 }
 
 
@@ -5439,6 +5835,692 @@ if (true) {
 
 /***/ }),
 
+/***/ "./src/renderer/utils/animations.ts":
+/*!******************************************!*\
+  !*** ./src/renderer/utils/animations.ts ***!
+  \******************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.easeInOut = easeInOut;
+exports.animate = animate;
+exports.debounce = debounce;
+exports.forceElementRepaint = forceElementRepaint;
+exports.forceUIRepaint = forceUIRepaint;
+const muon_1 = __webpack_require__(/*! ../../types/muon */ "./src/types/muon.ts");
+/**
+ * Easing function for smooth animations
+ */
+function easeInOut(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
+/**
+ * Generic animation utility with error handling
+ */
+function animate(duration, updateCallback, completeCallback) {
+    const startTime = performance.now();
+    function frame(now) {
+        try {
+            const elapsed = now - startTime;
+            const progress = Math.min(1, elapsed / duration);
+            const easedProgress = easeInOut(progress);
+            updateCallback(progress, easedProgress);
+            if (progress < 1) {
+                requestAnimationFrame(frame);
+            }
+            else {
+                completeCallback?.();
+            }
+        }
+        catch (error) {
+            console.error('Animation error:', error);
+            completeCallback?.();
+        }
+    }
+    requestAnimationFrame(frame);
+}
+/**
+ * Debounced function executor with error handling
+ */
+function debounce(func, delay = muon_1.CONSTANTS.DEBOUNCE_DELAY) {
+    let timeoutId = null;
+    return (...args) => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(() => {
+            try {
+                func(...args);
+            }
+            catch (error) {
+                console.error('Debounced function error:', error);
+            }
+            finally {
+                timeoutId = null;
+            }
+        }, delay);
+    };
+}
+/**
+ * Force UI element repaint with multiple techniques
+ */
+function forceElementRepaint(element) {
+    try {
+        // Method 1: Force layout recalculation
+        const originalDisplay = element.style.display;
+        element.style.display = 'none';
+        element.offsetHeight; // Trigger layout
+        element.style.display = originalDisplay;
+        // Method 2: Force opacity change
+        const originalOpacity = element.style.opacity;
+        element.style.opacity = '0.999';
+        element.offsetHeight; // Trigger layout
+        element.style.opacity = originalOpacity || '';
+        // Method 3: Force transform change
+        const originalTransform = element.style.transform;
+        element.style.transform = 'translateZ(0.1px)';
+        element.offsetHeight; // Trigger layout
+        element.style.transform = originalTransform || '';
+        // Method 4: Force font size recalculation for text elements
+        if (element.tagName === 'BUTTON' || element.tagName === 'INPUT' || element.textContent) {
+            const computedStyle = window.getComputedStyle(element);
+            const fontSize = parseFloat(computedStyle.fontSize);
+            if (fontSize && !isNaN(fontSize)) {
+                // Temporarily change font size to force re-render
+                const originalFontSize = element.style.fontSize;
+                element.style.fontSize = (fontSize + 0.001) + 'px';
+                element.offsetHeight; // Trigger layout
+                element.style.fontSize = originalFontSize || '';
+            }
+        }
+    }
+    catch (error) {
+        console.error('Error forcing element repaint:', error);
+    }
+}
+/**
+ * Force repaint of multiple UI elements
+ */
+function forceUIRepaint() {
+    try {
+        const selectors = [
+            '.muon-topbar-container',
+            '.muon-urlbar-container',
+            '.muon-nav-btn',
+            '.muon-urlbar',
+            '.muon-remove',
+            '.muon-drag-area',
+            '.muon-nav-controls'
+        ];
+        const allUIElements = document.querySelectorAll(selectors.join(', '));
+        allUIElements.forEach((element) => {
+            forceElementRepaint(element);
+        });
+        // Also force a global repaint by temporarily modifying the container
+        const desk = document.getElementById('muon-desktop');
+        if (desk) {
+            const originalZoom = desk.style.zoom;
+            desk.style.zoom = (1.0001).toString();
+            desk.offsetHeight; // Trigger layout
+            desk.style.zoom = originalZoom || '';
+        }
+        console.log('UI repaint completed');
+    }
+    catch (error) {
+        console.error('Error forcing UI repaint:', error);
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/renderer/utils/dom.ts":
+/*!***********************************!*\
+  !*** ./src/renderer/utils/dom.ts ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getElementById = getElementById;
+exports.querySelector = querySelector;
+exports.querySelectorAll = querySelectorAll;
+exports.createElement = createElement;
+exports.createNavButton = createNavButton;
+exports.createDragArea = createDragArea;
+exports.createCloseButton = createCloseButton;
+exports.createUrlBar = createUrlBar;
+exports.createWebview = createWebview;
+exports.removeElement = removeElement;
+exports.appendChild = appendChild;
+exports.getElementBounds = getElementBounds;
+exports.parsePixelValue = parsePixelValue;
+const muon_1 = __webpack_require__(/*! ../../types/muon */ "./src/types/muon.ts");
+/**
+ * Safely get element by ID with error handling
+ */
+function getElementById(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+        throw new Error(`Element with ID '${id}' not found`);
+    }
+    return element;
+}
+/**
+ * Safely query selector with error handling
+ */
+function querySelector(selector, parent = document) {
+    try {
+        return parent.querySelector(selector);
+    }
+    catch (error) {
+        console.error(`Error querying selector '${selector}':`, error);
+        return null;
+    }
+}
+/**
+ * Safely query all selectors with error handling
+ */
+function querySelectorAll(selector, parent = document) {
+    try {
+        return Array.from(parent.querySelectorAll(selector));
+    }
+    catch (error) {
+        console.error(`Error querying all selectors '${selector}':`, error);
+        return [];
+    }
+}
+/**
+ * Create element with type safety and error handling
+ */
+function createElement(tagName, options) {
+    try {
+        const element = document.createElement(tagName);
+        if (options) {
+            if (options.className)
+                element.className = options.className;
+            if (options.id)
+                element.id = options.id;
+            if (options.textContent)
+                element.textContent = options.textContent;
+            if (options.title)
+                element.title = options.title;
+            if (options.style) {
+                Object.assign(element.style, options.style);
+            }
+            if (options.attributes) {
+                Object.entries(options.attributes).forEach(([key, value]) => {
+                    element.setAttribute(key, value);
+                });
+            }
+        }
+        return element;
+    }
+    catch (error) {
+        console.error(`Error creating element '${tagName}':`, error);
+        throw new Error(`Failed to create element '${tagName}'`);
+    }
+}
+/**
+ * Create a navigation button with consistent styling
+ */
+function createNavButton(label, title, handler) {
+    const button = createElement('button', {
+        textContent: label,
+        title: title,
+        className: 'muon-nav-btn bg-transparent border-none leading-none cursor-pointer',
+        style: {
+            fontSize: '14px',
+            width: `${muon_1.CONSTANTS.BAR_HEIGHT - 6}px`,
+            height: `${muon_1.CONSTANTS.BAR_HEIGHT - 6}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '4px',
+            color: '#aaa',
+            transition: 'color 0.15s, background 0.15s'
+        }
+    });
+    // Add hover effects
+    button.addEventListener('mouseenter', () => {
+        button.style.color = '#fff';
+        button.style.background = '#333';
+    });
+    button.addEventListener('mouseleave', () => {
+        button.style.color = '#aaa';
+        button.style.background = 'transparent';
+    });
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+            handler();
+        }
+        catch (error) {
+            console.error('Navigation button handler error:', error);
+        }
+    });
+    return button;
+}
+/**
+ * Create a draggable area element
+ */
+function createDragArea() {
+    return createElement('div', {
+        className: 'muon-drag-area',
+        style: {
+            flex: '1 1 0%',
+            height: `${muon_1.CONSTANTS.BAR_HEIGHT}px`,
+            cursor: 'grab',
+            userSelect: 'none',
+            background: 'transparent'
+        }
+    });
+}
+/**
+ * Create a close button for windows
+ */
+function createCloseButton(onClose) {
+    const button = createElement('button', {
+        textContent: '×',
+        title: 'Remove window',
+        className: 'muon-remove bg-transparent border-none leading-none cursor-pointer',
+        style: {
+            fontSize: '18px',
+            width: `${muon_1.CONSTANTS.BAR_HEIGHT - 4}px`,
+            height: `${muon_1.CONSTANTS.BAR_HEIGHT - 4}px`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginRight: '2px',
+            zIndex: '4'
+        }
+    });
+    button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+            onClose();
+        }
+        catch (error) {
+            console.error('Close button handler error:', error);
+        }
+    });
+    return button;
+}
+/**
+ * Create a URL input bar
+ */
+function createUrlBar(initialUrl = '') {
+    return createElement('input', {
+        className: 'muon-urlbar px-2 py-1 text-xs outline-none',
+        attributes: {
+            type: 'text',
+            value: initialUrl
+        },
+        style: {
+            flex: '1 1 0%',
+            height: `${muon_1.CONSTANTS.BAR_HEIGHT - 4}px`,
+            fontSize: '12px',
+            border: 'none',
+            background: 'transparent',
+            color: '#e5e5e5',
+            marginRight: '2px',
+            textOverflow: 'ellipsis',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap'
+        }
+    });
+}
+/**
+ * Create a webview element with proper configuration
+ */
+function createWebview(url, windowId) {
+    try {
+        const webview = document.createElement('webview');
+        webview.className = 'w-full';
+        webview.src = url || 'https://www.google.com/search';
+        webview.partition = `persist:muon-${windowId}`;
+        Object.assign(webview.style, {
+            position: 'absolute',
+            left: '0',
+            width: '100%',
+            border: 'none',
+            top: `${muon_1.CONSTANTS.BAR_HEIGHT * 2}px`,
+            height: `calc(100% - ${muon_1.CONSTANTS.BAR_HEIGHT * 2}px)`,
+            zIndex: '0'
+        });
+        return webview;
+    }
+    catch (error) {
+        console.error('Error creating webview:', error);
+        throw new Error('Failed to create webview element');
+    }
+}
+/**
+ * Safely remove element with error handling
+ */
+function removeElement(element) {
+    try {
+        if (element && element.parentNode) {
+            element.parentNode.removeChild(element);
+        }
+    }
+    catch (error) {
+        console.error('Error removing element:', error);
+    }
+}
+/**
+ * Safely append child with error handling
+ */
+function appendChild(parent, child) {
+    try {
+        parent.appendChild(child);
+    }
+    catch (error) {
+        console.error('Error appending child:', error);
+        throw new Error('Failed to append child element');
+    }
+}
+/**
+ * Get element bounds with error handling
+ */
+function getElementBounds(element) {
+    try {
+        return element.getBoundingClientRect();
+    }
+    catch (error) {
+        console.error('Error getting element bounds:', error);
+        return null;
+    }
+}
+/**
+ * Parse CSS pixel value safely
+ */
+function parsePixelValue(value) {
+    try {
+        const parsed = parseFloat(value);
+        return isNaN(parsed) ? 0 : parsed;
+    }
+    catch (error) {
+        console.error('Error parsing pixel value:', error);
+        return 0;
+    }
+}
+
+
+/***/ }),
+
+/***/ "./src/renderer/utils/zoom.ts":
+/*!************************************!*\
+  !*** ./src/renderer/utils/zoom.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.calculateZoomParams = calculateZoomParams;
+exports.zoomAndCenterWindow = zoomAndCenterWindow;
+exports.handleWheelZoom = handleWheelZoom;
+exports.handleWheelPan = handleWheelPan;
+exports.centerWindow = centerWindow;
+exports.resetZoomState = resetZoomState;
+exports.invalidateAllZoomStates = invalidateAllZoomStates;
+exports.isWindowZoomed = isWindowZoomed;
+const muon_1 = __webpack_require__(/*! ../../types/muon */ "./src/types/muon.ts");
+const animations_1 = __webpack_require__(/*! ./animations */ "./src/renderer/utils/animations.ts");
+const dom_1 = __webpack_require__(/*! ./dom */ "./src/renderer/utils/dom.ts");
+/**
+ * Global zoom state management using WeakMap for proper memory management
+ */
+const zoomStateMap = new WeakMap();
+/**
+ * Get or create zoom state for a window element
+ */
+function getZoomState(element, currentTransform) {
+    let state = zoomStateMap.get(element);
+    if (!state) {
+        state = {
+            zoomed: false,
+            origScale: currentTransform.scale,
+            origOffsetX: currentTransform.x,
+            origOffsetY: currentTransform.y
+        };
+        zoomStateMap.set(element, state);
+    }
+    return state;
+}
+/**
+ * Check if current transform appears to be zoomed to fit a window
+ */
+function isCurrentlyZoomedToWindow(windowElement, currentTransform, viewport) {
+    try {
+        const windowBounds = {
+            left: (0, dom_1.parsePixelValue)(windowElement.style.left),
+            top: (0, dom_1.parsePixelValue)(windowElement.style.top),
+            width: (0, dom_1.parsePixelValue)(windowElement.style.width),
+            height: (0, dom_1.parsePixelValue)(windowElement.style.height)
+        };
+        const optimalZoom = calculateZoomParams(windowBounds, viewport);
+        // Check if current transform is close to the optimal zoom parameters
+        const scaleTolerance = 0.1;
+        const offsetTolerance = 50;
+        return (Math.abs(currentTransform.scale - optimalZoom.scale) < scaleTolerance &&
+            Math.abs(currentTransform.x - optimalZoom.offsetX) < offsetTolerance &&
+            Math.abs(currentTransform.y - optimalZoom.offsetY) < offsetTolerance);
+    }
+    catch (error) {
+        console.error('Error checking zoom state:', error);
+        return false;
+    }
+}
+/**
+ * Calculate optimal zoom parameters for centering a window
+ */
+function calculateZoomParams(windowBounds, viewport) {
+    const margin = muon_1.CONSTANTS.WINDOW_MARGIN;
+    // Calculate scale to fit window in viewport with margins
+    const scaleX = (viewport.width - 2 * margin) / windowBounds.width;
+    const scaleY = (viewport.height - 2 * margin) / windowBounds.height;
+    const targetScale = Math.min(scaleX, scaleY, muon_1.CONSTANTS.ZOOM_LIMITS.max);
+    // Center window in viewport after scaling
+    const winCenterX = windowBounds.left + windowBounds.width / 2;
+    const winCenterY = windowBounds.top + windowBounds.height / 2;
+    const viewportCenterX = viewport.width / 2;
+    const viewportCenterY = viewport.height / 2;
+    // Offset so that after scaling, window center is at viewport center
+    const targetOffsetX = viewportCenterX - winCenterX * targetScale;
+    const targetOffsetY = viewportCenterY - winCenterY * targetScale;
+    return { scale: targetScale, offsetX: targetOffsetX, offsetY: targetOffsetY };
+}
+/**
+ * Zoom and center a window with animation
+ */
+function zoomAndCenterWindow(windowElement, currentTransform, viewport, onTransformUpdate) {
+    try {
+        const state = getZoomState(windowElement, currentTransform);
+        // Check if we're currently zoomed to this window (either by tracking state or by analyzing current position)
+        const isCurrentlyZoomed = state.zoomed || isCurrentlyZoomedToWindow(windowElement, currentTransform, viewport);
+        if (isCurrentlyZoomed) {
+            // If we don't have valid original state (e.g., user manually zoomed), use sensible defaults
+            const targetScale = state.origScale || 1;
+            const targetOffsetX = state.origOffsetX || 0;
+            const targetOffsetY = state.origOffsetY || 0;
+            // Animate back to original position
+            animateTransformTo(currentTransform, {
+                scale: targetScale,
+                x: targetOffsetX,
+                y: targetOffsetY
+            }, onTransformUpdate, () => {
+                state.zoomed = false;
+            });
+            return;
+        }
+        // Store original transform before zooming
+        state.origScale = currentTransform.scale;
+        state.origOffsetX = currentTransform.x;
+        state.origOffsetY = currentTransform.y;
+        // Get window bounds
+        const bounds = (0, dom_1.getElementBounds)(windowElement);
+        if (!bounds) {
+            console.error('Could not get window bounds for zoom');
+            return;
+        }
+        const windowBounds = {
+            left: (0, dom_1.parsePixelValue)(windowElement.style.left),
+            top: (0, dom_1.parsePixelValue)(windowElement.style.top),
+            width: (0, dom_1.parsePixelValue)(windowElement.style.width),
+            height: (0, dom_1.parsePixelValue)(windowElement.style.height)
+        };
+        const zoomParams = calculateZoomParams(windowBounds, viewport);
+        // Animate to zoom position
+        animateTransformTo(currentTransform, {
+            scale: zoomParams.scale,
+            x: zoomParams.offsetX,
+            y: zoomParams.offsetY
+        }, onTransformUpdate, () => {
+            state.zoomed = true;
+        });
+    }
+    catch (error) {
+        console.error('Error in zoomAndCenterWindow:', error);
+    }
+}
+/**
+ * Animate transform from current state to target state
+ */
+function animateTransformTo(current, target, onUpdate, onComplete) {
+    const startScale = current.scale;
+    const startOffsetX = current.x;
+    const startOffsetY = current.y;
+    (0, animations_1.animate)(muon_1.CONSTANTS.ANIMATION_DURATION, (progress, easedProgress) => {
+        const newTransform = {
+            scale: startScale + (target.scale - startScale) * easedProgress,
+            x: startOffsetX + (target.x - startOffsetX) * easedProgress,
+            y: startOffsetY + (target.y - startOffsetY) * easedProgress
+        };
+        // Update the current transform object
+        current.scale = newTransform.scale;
+        current.x = newTransform.x;
+        current.y = newTransform.y;
+        onUpdate(newTransform);
+    }, () => {
+        // Snap to final values
+        current.scale = target.scale;
+        current.x = target.x;
+        current.y = target.y;
+        onUpdate(current);
+        onComplete?.();
+    });
+}
+/**
+ * Handle wheel-based zoom with cursor focus
+ */
+function handleWheelZoom(event, currentTransform, onTransformUpdate) {
+    try {
+        const delta = -event.deltaY * muon_1.CONSTANTS.ZOOM_INTENSITY;
+        const rootElement = document.getElementById('root');
+        if (!rootElement)
+            return;
+        const rootRect = rootElement.getBoundingClientRect();
+        const mx = event.clientX - rootRect.left;
+        const my = event.clientY - rootRect.top;
+        // Compute world coordinates before zoom
+        const wx = (mx - currentTransform.x) / currentTransform.scale;
+        const wy = (my - currentTransform.y) / currentTransform.scale;
+        // Apply zoom with limits
+        const newScale = Math.min(Math.max(muon_1.CONSTANTS.ZOOM_LIMITS.min, currentTransform.scale * (1 + delta)), muon_1.CONSTANTS.ZOOM_LIMITS.max);
+        // Adjust offset so (wx, wy) stays under cursor
+        const newTransform = {
+            scale: newScale,
+            x: mx - wx * newScale,
+            y: my - wy * newScale
+        };
+        // Update current transform
+        currentTransform.scale = newTransform.scale;
+        currentTransform.x = newTransform.x;
+        currentTransform.y = newTransform.y;
+        // Invalidate zoom states for all windows since user manually zoomed
+        invalidateAllZoomStates();
+        onTransformUpdate(newTransform);
+    }
+    catch (error) {
+        console.error('Error in handleWheelZoom:', error);
+    }
+}
+/**
+ * Handle wheel-based pan
+ */
+function handleWheelPan(event, currentTransform, onTransformUpdate) {
+    try {
+        const newTransform = {
+            scale: currentTransform.scale,
+            x: currentTransform.x - event.deltaX / currentTransform.scale,
+            y: currentTransform.y - event.deltaY / currentTransform.scale
+        };
+        // Update current transform
+        currentTransform.x = newTransform.x;
+        currentTransform.y = newTransform.y;
+        onTransformUpdate(newTransform);
+    }
+    catch (error) {
+        console.error('Error in handleWheelPan:', error);
+    }
+}
+/**
+ * Center a window without zooming
+ */
+function centerWindow(windowElement, currentTransform, viewport, onTransformUpdate) {
+    try {
+        const bounds = (0, dom_1.getElementBounds)(windowElement);
+        if (!bounds) {
+            console.error('Could not get window bounds for centering');
+            return;
+        }
+        const cx = bounds.left + bounds.width / 2 - viewport.width / 2;
+        const cy = bounds.top + bounds.height / 2 - viewport.height / 2;
+        const newTransform = {
+            scale: currentTransform.scale,
+            x: currentTransform.x - cx / currentTransform.scale,
+            y: currentTransform.y - cy / currentTransform.scale
+        };
+        // Update current transform
+        currentTransform.x = newTransform.x;
+        currentTransform.y = newTransform.y;
+        onTransformUpdate(newTransform);
+    }
+    catch (error) {
+        console.error('Error in centerWindow:', error);
+    }
+}
+/**
+ * Reset zoom state for a window (useful when window is removed)
+ */
+function resetZoomState(windowElement) {
+    zoomStateMap.delete(windowElement);
+}
+/**
+ * Invalidate all zoom states (call when user manually zooms or pans)
+ */
+function invalidateAllZoomStates() {
+    // WeakMap does not support direct iteration, so we clear by re-instantiating.
+    // This is safe since all keys are DOM elements and the map is only used for zoom state.
+    // @ts-ignore
+    zoomStateMap = new WeakMap();
+}
+/**
+ * Check if a window is currently zoomed
+ */
+function isWindowZoomed(windowElement) {
+    const state = zoomStateMap.get(windowElement);
+    return state?.zoomed ?? false;
+}
+
+
+/***/ }),
+
 /***/ "./src/renderer/windowManager.ts":
 /*!***************************************!*\
   !*** ./src/renderer/windowManager.ts ***!
@@ -5471,18 +6553,22 @@ function addResizeHandle(cont, w, scale, windows, save) {
                 const dx = (ev.clientX - startX) / scale;
                 const dy = (ev.clientY - startY) / scale;
                 resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
-                // Update webview size and zoom
+                // Update webview size only (no zoom on every mousemove)
                 const webview = cont.querySelector('webview');
                 if (webview) {
                     const barHeight = 24;
                     webview.style.height = `calc(100% - ${barHeight}px)`;
-                    const newZoom = cont.offsetWidth / 800;
-                    webview.setZoomFactor(newZoom);
                 }
             };
             const stopResize = () => {
                 document.removeEventListener('mousemove', doResize);
                 document.removeEventListener('mouseup', stopResize);
+                // Update webview zoom factor once on mouseup for performance
+                const webview = cont.querySelector('webview');
+                if (webview) {
+                    const newZoom = cont.offsetWidth / 800;
+                    webview.setZoomFactor(newZoom);
+                }
                 const win = windows.find(win => win.id === w.id);
                 if (win) {
                     win.w = parseFloat(cont.style.width);
@@ -5497,10 +6583,51 @@ function addResizeHandle(cont, w, scale, windows, save) {
         });
         cont.appendChild(handle);
     }
-    makeHandle('corner', 'nwse-resize', { right: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' }, (dx, dy, { startWidth, startHeight }) => {
+    // Bottom-right corner (se-resize)
+    makeHandle('corner-se', 'nwse-resize', { right: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' }, (dx, dy, { startWidth, startHeight }) => {
         const minWidth = 200, minHeight = 200;
         const newWidth = Math.max(minWidth, startWidth + dx);
         const newHeight = Math.max(minHeight, startHeight + dy);
+        cont.style.width = newWidth + 'px';
+        cont.style.height = newHeight + 'px';
+    });
+    // Top-left corner (nw-resize)
+    makeHandle('corner-nw', 'nwse-resize', { left: '0', top: '0', width: '12px', height: '12px', background: 'transparent' }, (dx, dy, { startWidth, startHeight, startLeft, startTop }) => {
+        const minWidth = 200, minHeight = 200;
+        let newWidth = Math.max(minWidth, startWidth - dx);
+        let newHeight = Math.max(minHeight, startHeight - dy);
+        let newLeft = startLeft + dx;
+        let newTop = startTop + dy;
+        if (newWidth === minWidth)
+            newLeft = startLeft + (startWidth - minWidth);
+        if (newHeight === minHeight)
+            newTop = startTop + (startHeight - minHeight);
+        cont.style.left = newLeft + 'px';
+        cont.style.top = newTop + 'px';
+        cont.style.width = newWidth + 'px';
+        cont.style.height = newHeight + 'px';
+    });
+    // Top-right corner (ne-resize)
+    makeHandle('corner-ne', 'nesw-resize', { right: '0', top: '0', width: '12px', height: '12px', background: 'transparent' }, (dx, dy, { startWidth, startHeight, startTop }) => {
+        const minWidth = 200, minHeight = 200;
+        const newWidth = Math.max(minWidth, startWidth + dx);
+        let newHeight = Math.max(minHeight, startHeight - dy);
+        let newTop = startTop + dy;
+        if (newHeight === minHeight)
+            newTop = startTop + (startHeight - minHeight);
+        cont.style.top = newTop + 'px';
+        cont.style.width = newWidth + 'px';
+        cont.style.height = newHeight + 'px';
+    });
+    // Bottom-left corner (sw-resize)
+    makeHandle('corner-sw', 'nesw-resize', { left: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' }, (dx, dy, { startWidth, startHeight, startLeft }) => {
+        const minWidth = 200, minHeight = 200;
+        let newWidth = Math.max(minWidth, startWidth - dx);
+        const newHeight = Math.max(minHeight, startHeight + dy);
+        let newLeft = startLeft + dx;
+        if (newWidth === minWidth)
+            newLeft = startLeft + (startWidth - minWidth);
+        cont.style.left = newLeft + 'px';
         cont.style.width = newWidth + 'px';
         cont.style.height = newHeight + 'px';
     });
@@ -5516,19 +6643,23 @@ function addResizeHandle(cont, w, scale, windows, save) {
     });
     makeHandle('left', 'ew-resize', { left: '0', top: '12px', width: '8px', bottom: '12px', background: 'transparent' }, (dx, _, { startWidth, startLeft }) => {
         const minWidth = 200;
-        let newWidth = Math.max(minWidth, startWidth - dx);
+        let newWidth = startWidth - dx;
         let newLeft = startLeft + dx;
-        if (newWidth === minWidth)
+        if (newWidth < minWidth) {
             newLeft = startLeft + (startWidth - minWidth);
+            newWidth = minWidth;
+        }
         cont.style.left = newLeft + 'px';
         cont.style.width = newWidth + 'px';
     });
     makeHandle('top', 'ns-resize', { left: '12px', right: '12px', top: '0', height: '8px', background: 'transparent' }, (_, dy, { startHeight, startTop }) => {
         const minHeight = 200;
-        let newHeight = Math.max(minHeight, startHeight - dy);
+        let newHeight = startHeight - dy;
         let newTop = startTop + dy;
-        if (newHeight === minHeight)
+        if (newHeight < minHeight) {
             newTop = startTop + (startHeight - minHeight);
+            newHeight = minHeight;
+        }
         cont.style.top = newTop + 'px';
         cont.style.height = newHeight + 'px';
     });
@@ -5567,6 +6698,60 @@ function addAddressBarDrag(urlBar, cont, w, scale, windows, save) {
         e.preventDefault();
     });
 }
+
+
+/***/ }),
+
+/***/ "./src/types/muon.ts":
+/*!***************************!*\
+  !*** ./src/types/muon.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+// Core interfaces for the Muon desktop application
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.StateSaveError = exports.StateLoadError = exports.WindowNotFoundError = exports.MuonError = exports.CONSTANTS = void 0;
+// Constants
+exports.CONSTANTS = {
+    BAR_HEIGHT: 24,
+    MIN_WINDOW_SIZE: { width: 200, height: 200 },
+    ZOOM_LIMITS: { min: 0.25, max: 4 },
+    ZOOM_INTENSITY: 0.001,
+    ANIMATION_DURATION: 300,
+    DEBOUNCE_DELAY: 150,
+    DEFAULT_ZOOM_BASE: 800,
+    WINDOW_MARGIN: 32,
+    RESIZE_HANDLE_SIZE: { corner: 12, edge: 8 }
+};
+// Error types
+class MuonError extends Error {
+    constructor(message, code) {
+        super(message);
+        this.code = code;
+        this.name = 'MuonError';
+    }
+}
+exports.MuonError = MuonError;
+class WindowNotFoundError extends MuonError {
+    constructor(windowId) {
+        super(`Window with ID ${windowId} not found`, 'WINDOW_NOT_FOUND');
+    }
+}
+exports.WindowNotFoundError = WindowNotFoundError;
+class StateLoadError extends MuonError {
+    constructor(originalError) {
+        super(`Failed to load application state: ${originalError}`, 'STATE_LOAD_ERROR');
+    }
+}
+exports.StateLoadError = StateLoadError;
+class StateSaveError extends MuonError {
+    constructor(originalError) {
+        super(`Failed to save application state: ${originalError}`, 'STATE_SAVE_ERROR');
+    }
+}
+exports.StateSaveError = StateSaveError;
 
 
 /***/ })
@@ -5650,7 +6835,7 @@ function addAddressBarDrag(urlBar, cont, w, scale, windows, save) {
 /******/ 	
 /******/ 	/* webpack/runtime/getFullHash */
 /******/ 	(() => {
-/******/ 		__webpack_require__.h = () => ("3aeefd04f63bbd381877")
+/******/ 		__webpack_require__.h = () => ("3910d4a35420f854f219")
 /******/ 	})();
 /******/ 	
 /******/ 	/* webpack/runtime/hasOwnProperty shorthand */
@@ -6634,7 +7819,7 @@ function addAddressBarDrag(urlBar, cont, w, scale, windows, save) {
 /******/ 	// Load entry module and return exports
 /******/ 	__webpack_require__("./node_modules/webpack-dev-server/client/index.js?protocol=ws%3A&hostname=0.0.0.0&port=3000&pathname=%2Fws&logging=none&overlay=true&reconnect=10&hot=true&live-reload=true");
 /******/ 	__webpack_require__("./node_modules/webpack/hot/dev-server.js");
-/******/ 	var __webpack_exports__ = __webpack_require__("./src/renderer/renderer.ts");
+/******/ 	var __webpack_exports__ = __webpack_require__("./src/renderer/main.ts");
 /******/ 	
 /******/ })()
 ;

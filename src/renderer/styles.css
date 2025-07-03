@@ -15,9 +15,21 @@ body, #root, #desktop, input, button, .muon-window {
   font-family: 'MuonMono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   color: #e5e5e5;
   background-color: #18181b;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
 }
 #root {
   background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);
+  background-repeat: repeat;
+  background-attachment: local;
+  /* Force GPU acceleration for background rendering */
+  will-change: background-position, background-size;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-window {
   background: #23232a;
@@ -28,11 +40,27 @@ body, #root, #desktop, input, button, .muon-window {
   background: #23232a;
   color: #e5e5e5;
   border-bottom: 1px solid #444;
+  /* Force pixel-perfect text rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  image-rendering: pixelated;
 }
 .muon-remove {
   color: #aaa;
   transition: color 0.15s;
   border-radius: 4px;
+  /* Force pixel-perfect rendering of close button */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-remove:hover {
   color: #fff;
@@ -65,6 +93,15 @@ body, #root, #desktop, input, button, .muon-window {
   right: 0;
   z-index: 3;
   height: 24px;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
 .muon-drag-area {
@@ -95,6 +132,14 @@ body, #root, #desktop, input, button, .muon-window {
   background: transparent;
   border: none;
   cursor: pointer;
+  /* Force pixel-perfect rendering of icons */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 .muon-nav-btn:hover {
   color: #fff;
@@ -113,6 +158,15 @@ body, #root, #desktop, input, button, .muon-window {
   right: 0;
   z-index: 2;
   height: 24px;
+  /* Force pixel-perfect rendering */
+  text-rendering: geometricPrecision;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -moz-osx-font-smoothing: auto;
+  font-kerning: none;
+  image-rendering: pixelated;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform;
 }
 
  

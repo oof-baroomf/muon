@@ -49,19 +49,24 @@ export function addResizeHandle(
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
 
-        // Update webview size and zoom
+        // Update webview size only (no zoom on every mousemove)
         const webview = cont.querySelector('webview') as Electron.WebviewTag | null;
         if (webview) {
           const barHeight = 24;
           webview.style.height = `calc(100% - ${barHeight}px)`;
-          const newZoom = cont.offsetWidth / 800;
-          webview.setZoomFactor(newZoom);
         }
       };
 
       const stopResize = () => {
         document.removeEventListener('mousemove', doResize);
         document.removeEventListener('mouseup', stopResize);
+
+        // Update webview zoom factor once on mouseup for performance
+        const webview = cont.querySelector('webview') as Electron.WebviewTag | null;
+        if (webview) {
+          const newZoom = cont.offsetWidth / 800;
+          webview.setZoomFactor(newZoom);
+        }
 
         const win = windows.find(win => win.id === w.id);
         if (win) {
@@ -79,14 +84,66 @@ export function addResizeHandle(
     cont.appendChild(handle);
   }
 
+  // Bottom-right corner (se-resize)
   makeHandle(
-    'corner',
+    'corner-se',
     'nwse-resize',
     { right: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' },
     (dx, dy, { startWidth, startHeight }) => {
       const minWidth = 200, minHeight = 200;
       const newWidth = Math.max(minWidth, startWidth + dx);
       const newHeight = Math.max(minHeight, startHeight + dy);
+      cont.style.width = newWidth + 'px';
+      cont.style.height = newHeight + 'px';
+    }
+  );
+  // Top-left corner (nw-resize)
+  makeHandle(
+    'corner-nw',
+    'nwse-resize',
+    { left: '0', top: '0', width: '12px', height: '12px', background: 'transparent' },
+    (dx, dy, { startWidth, startHeight, startLeft, startTop }) => {
+      const minWidth = 200, minHeight = 200;
+      let newWidth = Math.max(minWidth, startWidth - dx);
+      let newHeight = Math.max(minHeight, startHeight - dy);
+      let newLeft = startLeft + dx;
+      let newTop = startTop + dy;
+      if (newWidth === minWidth) newLeft = startLeft + (startWidth - minWidth);
+      if (newHeight === minHeight) newTop = startTop + (startHeight - minHeight);
+      cont.style.left = newLeft + 'px';
+      cont.style.top = newTop + 'px';
+      cont.style.width = newWidth + 'px';
+      cont.style.height = newHeight + 'px';
+    }
+  );
+  // Top-right corner (ne-resize)
+  makeHandle(
+    'corner-ne',
+    'nesw-resize',
+    { right: '0', top: '0', width: '12px', height: '12px', background: 'transparent' },
+    (dx, dy, { startWidth, startHeight, startTop }) => {
+      const minWidth = 200, minHeight = 200;
+      const newWidth = Math.max(minWidth, startWidth + dx);
+      let newHeight = Math.max(minHeight, startHeight - dy);
+      let newTop = startTop + dy;
+      if (newHeight === minHeight) newTop = startTop + (startHeight - minHeight);
+      cont.style.top = newTop + 'px';
+      cont.style.width = newWidth + 'px';
+      cont.style.height = newHeight + 'px';
+    }
+  );
+  // Bottom-left corner (sw-resize)
+  makeHandle(
+    'corner-sw',
+    'nesw-resize',
+    { left: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' },
+    (dx, dy, { startWidth, startHeight, startLeft }) => {
+      const minWidth = 200, minHeight = 200;
+      let newWidth = Math.max(minWidth, startWidth - dx);
+      const newHeight = Math.max(minHeight, startHeight + dy);
+      let newLeft = startLeft + dx;
+      if (newWidth === minWidth) newLeft = startLeft + (startWidth - minWidth);
+      cont.style.left = newLeft + 'px';
       cont.style.width = newWidth + 'px';
       cont.style.height = newHeight + 'px';
     }
@@ -117,9 +174,12 @@ export function addResizeHandle(
     { left: '0', top: '12px', width: '8px', bottom: '12px', background: 'transparent' },
     (dx, _, { startWidth, startLeft }) => {
       const minWidth = 200;
-      let newWidth = Math.max(minWidth, startWidth - dx);
+      let newWidth = startWidth - dx;
       let newLeft = startLeft + dx;
-      if (newWidth === minWidth) newLeft = startLeft + (startWidth - minWidth);
+      if (newWidth < minWidth) {
+        newLeft = startLeft + (startWidth - minWidth);
+        newWidth = minWidth;
+      }
       cont.style.left = newLeft + 'px';
       cont.style.width = newWidth + 'px';
     }
@@ -130,9 +190,12 @@ export function addResizeHandle(
     { left: '12px', right: '12px', top: '0', height: '8px', background: 'transparent' },
     (_, dy, { startHeight, startTop }) => {
       const minHeight = 200;
-      let newHeight = Math.max(minHeight, startHeight - dy);
+      let newHeight = startHeight - dy;
       let newTop = startTop + dy;
-      if (newHeight === minHeight) newTop = startTop + (startHeight - minHeight);
+      if (newHeight < minHeight) {
+        newTop = startTop + (startHeight - minHeight);
+        newHeight = minHeight;
+      }
       cont.style.top = newTop + 'px';
       cont.style.height = newHeight + 'px';
     }

@@ -16,6 +16,42 @@ desk.id = 'muon-desktop';
 desk.className = 'absolute inset-0 origin-top-left will-change-transform';
 root.appendChild(desk);
 
+// --- quick search overlay ---
+const searchOverlay = document.createElement('div');
+searchOverlay.id = 'muon-search-overlay';
+const searchBox = document.createElement('div');
+searchBox.id = 'muon-search-box';
+const searchInput = document.createElement('input');
+searchInput.type = 'text';
+searchInput.placeholder = 'Search windows...';
+const searchResults = document.createElement('div');
+searchResults.id = 'muon-search-results';
+searchBox.appendChild(searchInput);
+searchBox.appendChild(searchResults);
+searchOverlay.appendChild(searchBox);
+root.appendChild(searchOverlay);
+
+let searchItems: WindowData[] = [];
+let selectedIndex = 0;
+
+searchInput.addEventListener('input', updateSearchResults);
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') {
+    if (selectedIndex < searchItems.length - 1) selectedIndex++;
+    refreshSelection();
+    e.preventDefault();
+  } else if (e.key === 'ArrowUp') {
+    if (selectedIndex > 0) selectedIndex--;
+    refreshSelection();
+    e.preventDefault();
+  } else if (e.key === 'Enter') {
+    activateSelected();
+    e.preventDefault();
+  } else if (e.key === 'Escape') {
+    searchOverlay.style.display = 'none';
+  }
+});
+
 // Debounce timer for UI re-rendering
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
@@ -97,6 +133,64 @@ function forceUIRerender() {
   desk.style.zoom = originalZoom || '';
   
   console.log('UI rerender completed');
+}
+
+// --- quick search logic ---
+function fuzzyScore(text: string, query: string): number {
+  text = text.toLowerCase();
+  query = query.toLowerCase();
+  let ti = 0;
+  let score = 0;
+  for (const qc of query) {
+    const idx = text.indexOf(qc, ti);
+    if (idx === -1) return Infinity;
+    score += idx - ti;
+    ti = idx + 1;
+  }
+  return score;
+}
+
+function updateSearchResults() {
+  const q = searchInput.value.trim();
+  const scored = windows
+    .map(w => ({ w, score: q ? fuzzyScore(w.title || w.url, q) : 0 }))
+    .filter(r => r.score !== Infinity)
+    .sort((a, b) => a.score - b.score);
+  searchItems = scored.map(s => s.w);
+  selectedIndex = 0;
+  searchResults.innerHTML = '';
+  searchItems.forEach((w, idx) => {
+    const item = document.createElement('div');
+    item.className = 'muon-search-item' + (idx === 0 ? ' selected' : '');
+    item.textContent = w.title || w.url;
+    item.onclick = () => {
+      selectedIndex = idx;
+      activateSelected();
+    };
+    item.onmouseenter = () => {
+      selectedIndex = idx;
+      refreshSelection();
+    };
+    searchResults.appendChild(item);
+  });
+}
+
+function refreshSelection() {
+  const children = searchResults.querySelectorAll('.muon-search-item');
+  children.forEach((c, i) => {
+    c.classList.toggle('selected', i === selectedIndex);
+  });
+}
+
+function activateSelected() {
+  const selected = searchItems[selectedIndex];
+  if (!selected) return;
+  searchOverlay.style.display = 'none';
+  const el = desk.querySelector(`.muon-window[data-id="${selected.id}"]`) as HTMLElement | null;
+  if (el) {
+    muonActiveWindow = el;
+    zoomAndCenterWindow(el);
+  }
 }
 
 // Extracted zoom/center functionality for reuse
@@ -432,6 +526,13 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     w.url = webview.getURL();
   });
 
+  // Update stored title for search
+  const updateTitle = () => {
+    w.title = webview.getTitle();
+  };
+  webview.addEventListener('page-title-updated', updateTitle);
+  webview.addEventListener('dom-ready', updateTitle);
+
   // Adjust zoom based on the container's width, assuming 800px is the "default"
   const adjustZoom = () => {
     const newZoom = cont.offsetWidth / 800;
@@ -569,7 +670,8 @@ root.addEventListener('mousedown', e => {
         y: parseFloat(ghost.style.top),
         w: gw,
         h: gh,
-        url: 'https://www.google.com/search'
+        url: 'https://www.google.com/search',
+        title: 'New Window'
       };
       windows.push(wdata);
       const el = createWindowElement(wdata, true); // focus address bar
@@ -623,12 +725,28 @@ root.addEventListener('wheel', e => {
 // Keyboard shortcuts - listen on document to ensure they work globally
 document.addEventListener('keydown', e => {
   console.log('Key event:', e.key, 'meta:', e.metaKey, 'ctrl:', e.ctrlKey, 'activeWindow:', muonActiveWindow);
-  
+
   // Save shortcut
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
     console.log('Save shortcut triggered');
     e.preventDefault();
     save();
+    return;
+  }
+
+  // Quick search (Cmd/Ctrl + K)
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    searchOverlay.style.display = 'flex';
+    searchInput.value = '';
+    updateSearchResults();
+    setTimeout(() => searchInput.focus(), 0);
+    return;
+  }
+
+  // Hide search on Escape
+  if (e.key === 'Escape' && searchOverlay.style.display === 'flex') {
+    searchOverlay.style.display = 'none';
     return;
   }
   

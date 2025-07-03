@@ -221,6 +221,58 @@ body, #root, #desktop, input, button, .muon-window {
   opacity: 1;
 }
 
+/* Quick search overlay */
+#muon-search-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 10%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+}
+
+#muon-search-box {
+  background: #23232a;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px #000a;
+  min-width: 320px;
+  max-width: 80%;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+}
+
+#muon-search-box input {
+  background: #18181b;
+  color: #e5e5e5;
+  border: none;
+  outline: none;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+#muon-search-results {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.muon-search-item {
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.muon-search-item.selected,
+.muon-search-item:hover {
+  background: #3b3b48;
+}
+
 /* Move cursor for address bar */
 .muon-urlbar.cursor-move {
   cursor: move;

@@ -13,6 +13,7 @@ interface WindowState {
   w: number;
   h: number;
   url: string;
+  title?: string;
 }
 
 interface DesktopState {

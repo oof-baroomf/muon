@@ -538,7 +538,7 @@ root.addEventListener('mousedown', e => {
   // create ghost rectangle
   const ghost = document.createElement('div');
   ghost.id = 'ghost';
-  ghost.className = 'absolute border border-dashed border-sky-400 bg-sky-400/10';
+  ghost.className = 'absolute border border-gray-500 bg-gray-500/10';
   desk.appendChild(ghost);
 
   const updateGhost = (ev: MouseEvent) => {

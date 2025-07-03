@@ -543,6 +543,12 @@ function showSearch() {
   searchOverlay.className = 'absolute inset-0 bg-black/60 flex items-start justify-center pt-24';
   searchOverlay.style.zIndex = '50';
 
+  searchOverlay.addEventListener('click', (e) => {
+    if (e.target === searchOverlay) {
+      hideSearch();
+    }
+  });
+
   const box = document.createElement('div');
   box.className = 'bg-zinc-800 border border-zinc-600 rounded-lg w-96 overflow-hidden';
 
@@ -732,7 +738,11 @@ document.addEventListener('keydown', e => {
 
   if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
     e.preventDefault();
-    showSearch();
+    if (searchOverlay) {
+      hideSearch();
+    } else {
+      showSearch();
+    }
     return;
   }
   

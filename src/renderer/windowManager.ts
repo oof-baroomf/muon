@@ -9,6 +9,8 @@ export interface WindowData {
   viewId?: number;
 }
 
+export const GRID_SIZE = 32;
+
 export interface Transform {
   scale: number;
   x: number;
@@ -68,12 +70,23 @@ export function addResizeHandle(
           webview.setZoomFactor(newZoom);
         }
 
+        const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+        const snappedW = snap(parseFloat(cont.style.width));
+        const snappedH = snap(parseFloat(cont.style.height));
+        const snappedX = snap(parseFloat(cont.style.left));
+        const snappedY = snap(parseFloat(cont.style.top));
+
+        cont.style.width = `${snappedW}px`;
+        cont.style.height = `${snappedH}px`;
+        cont.style.left = `${snappedX}px`;
+        cont.style.top = `${snappedY}px`;
+
         const win = windows.find(win => win.id === w.id);
         if (win) {
-          win.w = parseFloat(cont.style.width);
-          win.h = parseFloat(cont.style.height);
-          win.x = parseFloat(cont.style.left);
-          win.y = parseFloat(cont.style.top);
+          win.w = snappedW;
+          win.h = snappedH;
+          win.x = snappedX;
+          win.y = snappedY;
           save();
         }
       };
@@ -234,10 +247,17 @@ export function addAddressBarDrag(
       document.removeEventListener('mouseup', stopDrag);
 
       if (Math.abs(e.clientX - startX) > 2 || Math.abs(e.clientY - startY) > 2) {
+        const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+        const snappedX = snap(parseFloat(cont.style.left));
+        const snappedY = snap(parseFloat(cont.style.top));
+
+        cont.style.left = `${snappedX}px`;
+        cont.style.top = `${snappedY}px`;
+
         const win = windows.find(win => win.id === w.id);
         if (win) {
-          win.x = parseFloat(cont.style.left);
-          win.y = parseFloat(cont.style.top);
+          win.x = snappedX;
+          win.y = snappedY;
           save();
         }
       }

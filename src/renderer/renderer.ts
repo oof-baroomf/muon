@@ -1,5 +1,5 @@
 import './styles.css';
-import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
+import { WindowData, addResizeHandle, addAddressBarDrag, GRID_SIZE } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -21,8 +21,8 @@ let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
-  const bgSize = 32 * scale;
-  root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
+  // Keep the desktop grid a constant size
+  root.style.backgroundSize = `${GRID_SIZE}px ${GRID_SIZE}px`;
   root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
   
   // Force immediate background repaint to prevent glitches during rapid transforms
@@ -286,10 +286,17 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       document.removeEventListener('mouseup', stopDrag);
       // Save position if moved
       if (Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) {
+        const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
+        const snappedX = snap(parseFloat(cont.style.left));
+        const snappedY = snap(parseFloat(cont.style.top));
+
+        cont.style.left = `${snappedX}px`;
+        cont.style.top = `${snappedY}px`;
+
         const win = windows.find(win => win.id === w.id);
         if (win) {
-          win.x = parseFloat(cont.style.left);
-          win.y = parseFloat(cont.style.top);
+          win.x = snappedX;
+          win.y = snappedY;
           save();
         }
       }
@@ -561,14 +568,15 @@ root.addEventListener('mousedown', e => {
 
     const gw = parseFloat(ghost.style.width);
     const gh = parseFloat(ghost.style.height);
-    if (gw > 32 && gh > 32) {
+    if (gw > GRID_SIZE && gh > GRID_SIZE) {
       // Always create window with default URL, focus address bar for entry
+      const snap = (v: number) => Math.round(v / GRID_SIZE) * GRID_SIZE;
       const wdata: WindowData = {
         id: crypto.randomUUID(),
-        x: parseFloat(ghost.style.left),
-        y: parseFloat(ghost.style.top),
-        w: gw,
-        h: gh,
+        x: snap(parseFloat(ghost.style.left)),
+        y: snap(parseFloat(ghost.style.top)),
+        w: snap(gw),
+        h: snap(gh),
         url: 'https://www.google.com/search'
       };
       windows.push(wdata);

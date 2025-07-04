@@ -31,7 +31,7 @@ function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
   const gridSize = 32 * scale;
   root.style.backgroundSize = `${gridSize}px ${gridSize}px`;
-  root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+  root.style.backgroundPosition = `${offsetX * scale}px ${offsetY * scale}px`;
   
   // Force immediate background repaint to prevent glitches during rapid transforms
   root.style.backgroundRepeat = 'repeat';

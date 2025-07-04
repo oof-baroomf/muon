@@ -27,11 +27,41 @@ root.appendChild(desk);
 // Debounce timer for UI re-rendering
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
+function updateAllWindowsBounds() {
+  for (const w of windows) {
+    const cont = windowElements.get(w.id);
+    if (cont) {
+      const viewContainer = cont.querySelector('.muon-view-container') as HTMLElement;
+      if(viewContainer) {
+        const rect = viewContainer.getBoundingClientRect();
+        window.electronAPI.send('view:set-bounds', w.id, {
+          x: Math.round(rect.left),
+          y: Math.round(rect.top),
+          width: Math.round(rect.width),
+          height: Math.round(rect.height)
+        });
+      }
+    }
+  }
+}
+
+function updateAllWindowsZoom() {
+  for (const w of windows) {
+    const cont = windowElements.get(w.id);
+    if (cont) {
+      const newZoom = scale * (cont.offsetWidth / 800);
+      window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
+    }
+  }
+}
+
 function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
   const gridSize = 32 * scale;
   root.style.backgroundSize = `${gridSize}px ${gridSize}px`;
-  root.style.backgroundPosition = `${offsetX * scale}px ${offsetY * scale}px`;
+  root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+  updateAllWindowsBounds();
+  updateAllWindowsZoom();
   
   // Force immediate background repaint to prevent glitches during rapid transforms
   root.style.backgroundRepeat = 'repeat';
@@ -288,11 +318,13 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       const dy = (ev.clientY - startY) / scale;
       cont.style.left = (startLeft + dx) + 'px';
       cont.style.top = (startTop + dy) + 'px';
+      updateBounds();
     };
 
     const stopDrag = (ev: MouseEvent) => {
       document.removeEventListener('mousemove', doDrag);
       document.removeEventListener('mouseup', stopDrag);
+      updateBounds();
       // Save position if moved
       if (Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) {
         const win = windows.find(win => win.id === w.id);
@@ -325,6 +357,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     e.stopPropagation();
     windows = windows.filter(win => win.id !== w.id);
     windowElements.delete(w.id);
+    window.electronAPI.send('view:destroy', w.id);
     cont.remove();
     save();
   };
@@ -373,20 +406,28 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   barContainer.appendChild(urlBar);
 
-  // Webview fills the window except for the two bars
-  const webview = document.createElement('webview') as Electron.WebviewTag;
-  webview.className = 'w-full';
-  webview.src = w.url || 'https://www.google.com/search';
-  webview.partition = `persist:muon-${w.id}`;
-  webview.style.position = 'absolute';
-  webview.style.left = '0';
-  webview.style.width = '100%';
-  webview.style.border = 'none';
-  webview.style.top = `${barHeight * 2}px`;
-  webview.style.height = `calc(100% - ${barHeight * 2}px)`;
-  webview.style.zIndex = '0'; // Ensure webview stays behind bars
+  const viewContainer = document.createElement('div');
+  viewContainer.className = 'muon-view-container';
+  viewContainer.style.position = 'absolute';
+  viewContainer.style.left = '0';
+  viewContainer.style.top = `${barHeight * 2}px`;
+  viewContainer.style.width = '100%';
+  viewContainer.style.height = `calc(100% - ${barHeight * 2}px)`;
+  viewContainer.style.zIndex = '0';
 
-  // Now that webview exists, create nav buttons and wire up handlers
+  window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
+
+  const updateBounds = () => {
+    const rect = viewContainer.getBoundingClientRect();
+    window.electronAPI.send('view:set-bounds', w.id, {
+      x: Math.round(rect.left),
+      y: Math.round(rect.top),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height)
+    });
+  }
+
+  // Now that the view is created, create nav buttons and wire up handlers
   function makeNavBtn(label: string, title: string, handler: () => void) {
     const btn = document.createElement('button');
     btn.textContent = label;
@@ -406,10 +447,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     btn.onclick = (e) => { e.stopPropagation(); handler(); };
     return btn;
   }
-  backBtn = makeNavBtn('←', 'Back', () => { if (webview) webview.goBack(); });
-  fwdBtn = makeNavBtn('→', 'Forward', () => { if (webview) webview.goForward(); });
-  reloadBtn = makeNavBtn('⟳', 'Reload', () => { if (webview) webview.reload(); });
-  stopBtn = makeNavBtn('⨉', 'Stop', () => { if (webview) webview.stop(); });
+  backBtn = makeNavBtn('←', 'Back', () => window.electronAPI.send('view:back', w.id));
+  fwdBtn = makeNavBtn('→', 'Forward', () => window.electronAPI.send('view:forward', w.id));
+  reloadBtn = makeNavBtn('⟳', 'Reload', () => window.electronAPI.send('view:reload', w.id));
+  stopBtn = makeNavBtn('⨉', 'Stop', () => window.electronAPI.send('view:stop', w.id));
 
   // Insert nav controls at the start of the topBar (before drag area and close button)
   topBar.insertBefore(stopBtn, topBar.firstChild);
@@ -428,37 +469,36 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
         }
       }
       w.url = val;
-      webview.src = val;
+      window.electronAPI.send('view:load-url', w.id, val);
     }
   });
 
-  // Keep address bar in sync with webview navigation
-  webview.addEventListener('did-navigate', (event: any) => {
-    urlBar.value = webview.getURL();
-    w.url = webview.getURL();
-    updateTitle();
+  const updateTitle = (title: string) => { w.title = title; };
+  
+  window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
+    urlBar.value = url;
+    w.url = url;
   });
-  webview.addEventListener('did-navigate-in-page', (event: any) => {
-    urlBar.value = webview.getURL();
-    w.url = webview.getURL();
-    updateTitle();
+  window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
+    urlBar.value = url;
+    w.url = url;
   });
-
-  const updateTitle = () => { w.title = (webview as any).getTitle?.() || ''; };
-  webview.addEventListener('page-title-updated', updateTitle);
-  webview.addEventListener('did-finish-load', updateTitle);
+  window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
+    updateTitle(title);
+  });
 
   // Adjust zoom based on the container's width, assuming 800px is the "default"
   const adjustZoom = () => {
-    const newZoom = cont.offsetWidth / 800;
-    webview.setZoomFactor(newZoom);
+    const newZoom = scale * (cont.offsetWidth / 800);
+    window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
   };
 
-  webview.addEventListener('dom-ready', adjustZoom);
+  new ResizeObserver(updateBounds).observe(cont);
+  new ResizeObserver(adjustZoom).observe(cont);
 
   cont.appendChild(topBar);
   cont.appendChild(barContainer);
-  cont.appendChild(webview);
+  cont.appendChild(viewContainer);
 
   // Autofocus address bar if requested
   if (focusBar) {
@@ -492,12 +532,18 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Add handler to webview when it's ready
-  webview.addEventListener('dom-ready', () => {
-    webview.addEventListener('mousedown', setActiveWindow);
+  // Add handler to view when it's ready
+  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
+    // The view is now interactable, but we can't directly add a mousedown listener.
+    // The main process will handle focus.
   });
 
-  addResizeHandle(cont, w, scale, windows, save);
+  addResizeHandle(cont, w, scale, windows, save, updateBounds);
+  
+  if (urlBar) {
+    addAddressBarDrag(urlBar, cont, w, scale, windows, save, updateBounds);
+  }
+
   desk.appendChild(cont);
   return cont;
 }
@@ -507,12 +553,6 @@ function rebuild () {
   windowElements.clear();
   windows.forEach((w, index) => {
     const cont = createWindowElement(w, false);
-
-    // Add drag to address bar
-    const urlBar = cont.querySelector('.muon-urlbar') as HTMLInputElement;
-    if (urlBar) {
-      addAddressBarDrag(urlBar, cont, w, scale, windows, save);
-    }
     
     // Set the first window as active if no active window is set
     if (index === 0 && !muonActiveWindow) {

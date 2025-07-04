@@ -22,7 +22,8 @@ export function addResizeHandle(
   w: WindowData,
   scale: number,
   windows: WindowData[],
-  save: () => void
+  save: () => void,
+  updateBounds: () => void
 ) {
   function makeHandle(
     edge: string,
@@ -49,25 +50,14 @@ export function addResizeHandle(
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
-
-        // Update webview size only (no zoom on every mousemove)
-        const webview = cont.querySelector('webview') as Electron.WebviewTag | null;
-        if (webview) {
-          const barHeight = 24;
-          webview.style.height = `calc(100% - ${barHeight}px)`;
-        }
+        updateBounds();
       };
 
       const stopResize = () => {
         document.removeEventListener('mousemove', doResize);
         document.removeEventListener('mouseup', stopResize);
 
-        // Update webview zoom factor once on mouseup for performance
-        const webview = cont.querySelector('webview') as Electron.WebviewTag | null;
-        if (webview) {
-          const newZoom = cont.offsetWidth / 800;
-          webview.setZoomFactor(newZoom);
-        }
+        updateBounds();
 
         const win = windows.find(win => win.id === w.id);
         if (win) {
@@ -209,7 +199,8 @@ export function addAddressBarDrag(
   w: WindowData,
   scale: number,
   windows: WindowData[],
-  save: () => void
+  save: () => void,
+  updateBounds: () => void
 ) {
   let startX: number, startY: number;
   let startLeft: number, startTop: number;
@@ -228,11 +219,13 @@ export function addAddressBarDrag(
       const dy = (e.clientY - startY) / scale;
       cont.style.left = (startLeft + dx) + 'px';
       cont.style.top = (startTop + dy) + 'px';
+      updateBounds();
     };
 
     const stopDrag = (e: MouseEvent) => {
       document.removeEventListener('mousemove', doDrag);
       document.removeEventListener('mouseup', stopDrag);
+      updateBounds();
 
       if (Math.abs(e.clientX - startX) > 2 || Math.abs(e.clientY - startY) > 2) {
         const win = windows.find(win => win.id === w.id);

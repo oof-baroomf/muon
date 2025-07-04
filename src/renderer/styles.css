@@ -23,8 +23,7 @@ body, #root, #desktop, input, button, .muon-window {
   image-rendering: pixelated;
 }
 #root {
-  background-image: repeating-linear-gradient(0deg, #222 0 1px, transparent 1px 32px), repeating-linear-gradient(90deg, #222 0 1px, transparent 1px 32px);
-  background-repeat: repeat;
+  background-image: linear-gradient(#222 1px, transparent 1px), linear-gradient(90deg, #222 1px, transparent 1px);
   background-attachment: local;
   /* Force GPU acceleration for background rendering */
   will-change: background-position, background-size;

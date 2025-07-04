@@ -29,8 +29,8 @@ let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 function applyTransform () {
   desk.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
-  const bgSize = 32 * scale;
-  root.style.backgroundSize = `${bgSize}px ${bgSize}px`;
+  // Keep the grid at a constant size regardless of zoom
+  root.style.backgroundSize = '32px 32px';
   root.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
   
   // Force immediate background repaint to prevent glitches during rapid transforms

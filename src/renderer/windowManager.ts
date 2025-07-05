@@ -94,8 +94,8 @@ export function addResizeHandle(
     { left: '0', top: '0', width: '12px', height: '12px', background: 'transparent' },
     (dx, dy, { startWidth, startHeight, startLeft, startTop }) => {
       const minWidth = 200, minHeight = 200;
-      let newWidth = Math.max(minWidth, startWidth - dx);
-      let newHeight = Math.max(minHeight, startHeight - dy);
+      const newWidth = Math.max(minWidth, startWidth - dx);
+      const newHeight = Math.max(minHeight, startHeight - dy);
       let newLeft = startLeft + dx;
       let newTop = startTop + dy;
       if (newWidth === minWidth) newLeft = startLeft + (startWidth - minWidth);
@@ -114,7 +114,7 @@ export function addResizeHandle(
     (dx, dy, { startWidth, startHeight, startTop }) => {
       const minWidth = 200, minHeight = 200;
       const newWidth = Math.max(minWidth, startWidth + dx);
-      let newHeight = Math.max(minHeight, startHeight - dy);
+      const newHeight = Math.max(minHeight, startHeight - dy);
       let newTop = startTop + dy;
       if (newHeight === minHeight) newTop = startTop + (startHeight - minHeight);
       cont.style.top = newTop + 'px';
@@ -129,7 +129,7 @@ export function addResizeHandle(
     { left: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' },
     (dx, dy, { startWidth, startHeight, startLeft }) => {
       const minWidth = 200, minHeight = 200;
-      let newWidth = Math.max(minWidth, startWidth - dx);
+      const newWidth = Math.max(minWidth, startWidth - dx);
       const newHeight = Math.max(minHeight, startHeight + dy);
       let newLeft = startLeft + dx;
       if (newWidth === minWidth) newLeft = startLeft + (startWidth - minWidth);

@@ -10,7 +10,7 @@ module.exports = {
   },
   resolve: { extensions: ['.ts', '.js'] },
   output: {
-    path: path.resolve(__dirname, '.webpack'),
-    filename: 'main.js'
+    path: path.resolve(__dirname, '.webpack/main'),
+    filename: 'index.js'
   }
 };

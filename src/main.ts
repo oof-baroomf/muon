@@ -139,6 +139,13 @@ ipcMain.on('view:load-url', (evt, id: string, url: string) => {
   }
 });
 
+ipcMain.on('view:set-visible', (_evt, id: string, visible: boolean) => {
+  const view = views.get(id);
+  if (view) {
+    view.setVisible(visible);
+  }
+});
+
 ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   const view = views.get(id);
   if (view) {

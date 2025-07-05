@@ -309,10 +309,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
-    let startX = e.clientX;
-    let startY = e.clientY;
-    let startLeft = parseFloat(cont.style.left);
-    let startTop = parseFloat(cont.style.top);
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startLeft = parseFloat(cont.style.left);
+    const startTop = parseFloat(cont.style.top);
 
     const doDrag = (ev: MouseEvent) => {
       const dx = (ev.clientX - startX) / scale;
@@ -546,8 +546,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   }
 
   desk.appendChild(cont);
-  adjustZoom();
-  updateBounds();
+  requestAnimationFrame(() => {
+    adjustZoom();
+    updateBounds();
+  });
   return cont;
 }
 
@@ -576,8 +578,11 @@ function fuzzyMatch(text: string, query: string) {
 function showSearch() {
   if (searchOverlay) return;
   searchOverlay = document.createElement('div');
-  searchOverlay.className = 'absolute inset-0 bg-black/60 flex items-start justify-center pt-24';
+  searchOverlay.className = 'absolute inset-0 bg-black/40 flex items-center justify-center';
   searchOverlay.style.zIndex = '50';
+
+  // Hide all webviews so overlay isn't occluded
+  windows.forEach(w => window.electronAPI.send('view:set-visible', w.id, false));
 
   searchOverlay.addEventListener('click', (e) => {
     if (e.target === searchOverlay) {
@@ -619,6 +624,9 @@ function hideSearch() {
   searchList = null;
   searchResults = [];
   searchIndex = -1;
+
+  // Restore webviews
+  windows.forEach(w => window.electronAPI.send('view:set-visible', w.id, true));
 }
 
 function updateSearchResults() {

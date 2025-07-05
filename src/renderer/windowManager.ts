@@ -7,7 +7,6 @@ export interface WindowData {
   h: number;
   url: string;
   title?: string;
-  viewId?: number;
 }
 
 export interface Transform {

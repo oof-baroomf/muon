@@ -11,6 +11,15 @@ let offsetY = 0;
 let windows: WindowData[] = [];
 let muonActiveWindow: HTMLElement | null = null;
 
+interface ZoomState {
+  zoomed: boolean;
+  origScale: number;
+  origOffsetX: number;
+  origOffsetY: number;
+}
+
+const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
+
 const windowElements = new Map<string, HTMLElement>();
 
 let searchOverlay: HTMLElement | null = null;
@@ -139,10 +148,6 @@ function forceUIRerender() {
 
 // Extracted zoom/center functionality for reuse
 function zoomAndCenterWindow(cont: HTMLElement) {
-  // --- Per-window zoom state using WeakMap to avoid TS errors ---
-  type ZoomState = { zoomed: boolean, origScale: number, origOffsetX: number, origOffsetY: number };
-  const zoomStateMap = (window as any)._muonZoomStateMap as WeakMap<HTMLElement, ZoomState> || new WeakMap<HTMLElement, ZoomState>();
-  (window as any)._muonZoomStateMap = zoomStateMap;
 
   let state = zoomStateMap.get(cont);
   if (!state) {
@@ -269,10 +274,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   topBar.style.zIndex = '3';
   topBar.style.background = '#23232a';
 
-  // --- Per-window zoom state using WeakMap to avoid TS errors ---
-  type ZoomState = { zoomed: boolean, origScale: number, origOffsetX: number, origOffsetY: number };
-  const zoomStateMap = (window as any)._muonZoomStateMap as WeakMap<HTMLElement, ZoomState> || new WeakMap<HTMLElement, ZoomState>();
-  (window as any)._muonZoomStateMap = zoomStateMap;
 
   // Double-click on top bar (or any child) to zoom/center window, double-click again to restore
   topBar.addEventListener('dblclick', (e) => {

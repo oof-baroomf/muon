@@ -66,19 +66,6 @@ body, #root, #desktop, input, button, .muon-window {
   background: #333;
 }
 
-.muon-urlbar-container {
-  display: flex;
-  align-items: center;
-  background: #23232a;
-  border-bottom: 1px solid #444;
-  width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  height: 24px;
-}
 
 .muon-topbar-container {
   display: flex;

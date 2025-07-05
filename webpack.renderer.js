@@ -4,9 +4,9 @@ module.exports = {
   devtool: 'source-map',
   module: {
     rules: [
-      { test: /.ts$/, include: /src/, use: [{ loader: 'ts-loader' }] },
+      { test: /\.(ts|tsx)$/, include: /src/, use: [{ loader: 'ts-loader' }] },
       { test: /.css$/, use: ['style-loader', 'css-loader', 'postcss-loader'] }
     ]
   },
-  resolve: { extensions: ['.ts', '.js'] }
+  resolve: { extensions: ['.tsx', '.ts', '.js'] }
 };

@@ -11,7 +11,8 @@
     },
     "outDir": ".webpack",
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "jsx": "react-jsx"
   },
   "include": ["src/**/*"]
 }

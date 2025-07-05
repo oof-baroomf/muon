@@ -2,7 +2,7 @@ import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 
-const root = document.getElementById('root') as HTMLElement;
+export default function init(root: HTMLElement) {
 root.tabIndex = 0; // allow key focus
 
 let scale = 1;
@@ -828,3 +828,4 @@ function save () {
   offsetY = state.transform.y;
   rebuild();
 })();
+}

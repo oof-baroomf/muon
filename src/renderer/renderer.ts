@@ -563,13 +563,6 @@ function rebuild () {
   applyTransform();
 }
 
-// Tiny custom URL-input overlay to replace prompt()
-/**
- * askUrl is now a no-op; window creation will focus the address bar directly.
- */
-async function askUrl(def = 'https://www.google.com'): Promise<string | null> {
-  return Promise.resolve(def);
-}
 
 function fuzzyMatch(text: string, query: string) {
   const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);

@@ -8,7 +8,14 @@ const App: React.FC = () => {
       init(containerRef.current);
     }
   }, []);
-  return <div ref={containerRef} id="muon-root" className="w-full h-full" />;
+  return (
+    <div
+      ref={containerRef}
+      id="muon-root"
+      className="w-full h-full"
+      style={{ width: '100%', height: '100%', position: 'relative' }}
+    />
+  );
 };
 
 export default App;

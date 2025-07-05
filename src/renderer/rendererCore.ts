@@ -546,6 +546,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   }
 
   desk.appendChild(cont);
+  adjustZoom();
+  updateBounds();
   return cont;
 }
 

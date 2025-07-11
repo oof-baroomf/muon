@@ -58,7 +58,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     webPreferences: {
       sandbox: true,
       contextIsolation: true,
-      partition: `persist:muon-${id}`
+      partition: `persist:muon`
     }
   });
   if (mainWindow) {

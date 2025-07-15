@@ -533,11 +533,18 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Add handler to view when it's ready
-  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
-    // The view is now interactable, but we can't directly add a mousedown listener.
-    // The main process will handle focus.
-  });
+  // Maintain focus on the address bar when the initial page loads
+  if (focusBar) {
+    const remove = window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
+      setTimeout(() => urlBar.focus(), 0);
+      remove(); // only re-focus once on first load
+    });
+  } else {
+    window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
+      // The view is now interactable, but we can't directly add a mousedown listener.
+      // The main process will handle focus.
+    });
+  }
 
   addResizeHandle(cont, w, scale, windows, save, updateBounds);
   

@@ -416,7 +416,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.height = `calc(100% - ${barHeight * 2}px)`;
   viewContainer.style.zIndex = '0';
 
-  window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
+  const initialUrl = w.url === '.notes' ? 'notes://' : (w.url || 'https://www.google.com/search');
+  window.electronAPI.send('view:create', w.id, initialUrl);
 
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
@@ -462,15 +463,20 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   urlBar.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       let val = urlBar.value.trim();
-      if (!/^(https?:|file:)/i.test(val)) {
-        if (/^[\w-]+\.[\w-]+/.test(val)) {
-          val = 'https://' + val;
-        } else {
-          val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
+      if (val === '.notes') {
+        w.url = '.notes';
+        window.electronAPI.send('view:load-url', w.id, 'notes://');
+      } else {
+        if (!/^(https?:|file:)/i.test(val)) {
+          if (/^[\w-]+\.[\w-]+/.test(val)) {
+            val = 'https://' + val;
+          } else {
+            val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
+          }
         }
+        w.url = val;
+        window.electronAPI.send('view:load-url', w.id, val);
       }
-      w.url = val;
-      window.electronAPI.send('view:load-url', w.id, val);
     }
   });
 

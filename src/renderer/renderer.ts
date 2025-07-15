@@ -11,6 +11,18 @@ let offsetY = 0;
 let windows: WindowData[] = [];
 let muonActiveWindow: HTMLElement | null = null;
 
+type FocusMode = 'desktop' | 'window';
+let focusMode: FocusMode = 'desktop';
+
+const overlayMap = new Map<HTMLElement, HTMLElement>();
+
+function setFocusMode(mode: FocusMode) {
+  focusMode = mode;
+  overlayMap.forEach((overlay: HTMLElement) => {
+    overlay.style.pointerEvents = focusMode === 'desktop' ? 'auto' : 'none';
+  });
+}
+
 interface ZoomState {
   zoomed: boolean;
   origScale: number;
@@ -418,6 +430,25 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
 
+  const overlay = document.createElement('div');
+  overlay.className = 'muon-input-overlay';
+  overlay.style.position = 'absolute';
+  overlay.style.left = '0';
+  overlay.style.top = '0';
+  overlay.style.right = '0';
+  overlay.style.bottom = '0';
+  overlay.style.background = 'transparent';
+  overlay.style.zIndex = '1';
+  overlay.style.pointerEvents = focusMode === 'desktop' ? 'auto' : 'none';
+  overlay.addEventListener('mousedown', (e) => {
+    if (focusMode === 'desktop') {
+      e.stopPropagation();
+      setFocusMode('window');
+    }
+  });
+  viewContainer.appendChild(overlay);
+  overlayMap.set(cont, overlay);
+
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
     window.electronAPI.send('view:set-bounds', w.id, {
@@ -524,6 +555,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const setActiveWindow = () => {
     console.log('Setting active window:', cont);
     muonActiveWindow = cont;
+    setFocusMode('window');
     console.log('Active window is now:', muonActiveWindow);
   };
 
@@ -661,6 +693,8 @@ let dragStartY = 0;
 root.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
 
+  setFocusMode('desktop');
+
   // Prevent new window creation if clicking on address bar or resize handles
   const target = e.target as HTMLElement;
   if (
@@ -726,6 +760,7 @@ root.addEventListener('mousedown', e => {
 
 // Pan or zoom with wheel
 root.addEventListener('wheel', e => {
+  if (focusMode !== 'desktop') return;
   // Allow panning/zooming unless actively editing an input
   if ((e.target as HTMLElement).tagName === 'INPUT' &&
       (e.target as HTMLElement).matches(':focus')) {
@@ -762,6 +797,10 @@ root.addEventListener('wheel', e => {
 // Keyboard shortcuts - listen on document to ensure they work globally
 document.addEventListener('keydown', e => {
   console.log('Key event:', e.key, 'meta:', e.metaKey, 'ctrl:', e.ctrlKey, 'activeWindow:', muonActiveWindow);
+
+  if (focusMode !== 'desktop') {
+    return;
+  }
 
   if (searchOverlay) {
     if (e.key === 'Escape') { hideSearch(); return; }
@@ -827,4 +866,5 @@ function save () {
   offsetX = state.transform.x;
   offsetY = state.transform.y;
   rebuild();
+  setFocusMode('desktop');
 })();

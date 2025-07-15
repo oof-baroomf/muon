@@ -36,6 +36,14 @@ root.appendChild(desk);
 // Debounce timer for UI re-rendering
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
+window.electronAPI.receive('view:focused', (id: string) => {
+  const el = windowElements.get(id);
+  if (el) {
+    muonActiveWindow = el;
+    desk.appendChild(el);
+  }
+});
+
 function updateAllWindowsBounds() {
   for (const w of windows) {
     const cont = windowElements.get(w.id);

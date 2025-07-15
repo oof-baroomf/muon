@@ -68,6 +68,14 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   views.set(id, view);
   view.webContents.loadURL(url);
 
+  view.webContents.on('focus', () => {
+    if (mainWindow) {
+      (mainWindow.contentView as any).removeChildView(view);
+      (mainWindow.contentView as any).addChildView(view);
+      mainWindow.webContents.send('view:focused', id);
+    }
+  });
+
   const send = (channel: string, ...args: any[]) => {
     const wc = evt.sender;
     if (!wc.isDestroyed()) {

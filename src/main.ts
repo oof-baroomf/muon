@@ -104,6 +104,14 @@ ipcMain.on('view:set-bounds', (evt, id: string, bounds: Electron.Rectangle) => {
   }
 });
 
+ipcMain.on('view:focus', (_evt, id: string) => {
+  const view = views.get(id);
+  if (view && mainWindow) {
+    (mainWindow.contentView as any).removeChildView(view);
+    (mainWindow.contentView as any).addChildView(view);
+  }
+});
+
 ipcMain.on('view:back', (evt, id: string) => {
   const view = views.get(id);
   if (view && view.webContents.canGoBack()) {

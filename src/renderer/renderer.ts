@@ -309,6 +309,9 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
+    muonActiveWindow = cont;
+    desk.appendChild(cont);
+    window.electronAPI.send('view:focus', w.id);
     let startX = e.clientX;
     let startY = e.clientY;
     let startLeft = parseFloat(cont.style.left);
@@ -445,7 +448,13 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     btn.style.transition = 'color 0.15s, background 0.15s';
     btn.onmouseenter = () => { btn.style.color = '#fff'; btn.style.background = '#333'; };
     btn.onmouseleave = () => { btn.style.color = '#aaa'; btn.style.background = 'transparent'; };
-    btn.onclick = (e) => { e.stopPropagation(); handler(); };
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      muonActiveWindow = cont;
+      desk.appendChild(cont);
+      window.electronAPI.send('view:focus', w.id);
+      handler();
+    };
     return btn;
   }
   backBtn = makeNavBtn('←', 'Back', () => window.electronAPI.send('view:back', w.id));
@@ -522,9 +531,9 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   // Track this window as active when clicked anywhere
   const setActiveWindow = () => {
-    console.log('Setting active window:', cont);
     muonActiveWindow = cont;
-    console.log('Active window is now:', muonActiveWindow);
+    desk.appendChild(cont);
+    window.electronAPI.send('view:focus', w.id);
   };
 
   // Add click handlers to all clickable elements
@@ -533,11 +542,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Add handler to view when it's ready
-  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
-    // The view is now interactable, but we can't directly add a mousedown listener.
-    // The main process will handle focus.
-  });
 
   addResizeHandle(cont, w, scale, windows, save, updateBounds);
   

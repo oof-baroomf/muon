@@ -502,7 +502,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(viewContainer);
 
   // Autofocus address bar if requested
-  if (focusBar) {
+  let keepFocus = focusBar;
+  if (keepFocus) {
     setTimeout(() => urlBar.focus(), 0);
   }
 
@@ -533,10 +534,12 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Add handler to view when it's ready
+  // Refocus address bar once the view finishes loading when requested
   window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
-    // The view is now interactable, but we can't directly add a mousedown listener.
-    // The main process will handle focus.
+    if (keepFocus) {
+      setTimeout(() => urlBar.focus(), 0);
+      keepFocus = false;
+    }
   });
 
   addResizeHandle(cont, w, scale, windows, save, updateBounds);

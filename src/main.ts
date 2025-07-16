@@ -42,37 +42,8 @@ function createMainWindow () {
 const statePath = path.join(app.getPath('userData'), 'state.json');
 const notesPath = path.join(app.getPath('userData'), 'notes.md');
 
-const notesHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Notes</title>
-  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-  <style>html,body{height:100%;margin:0;}#editor{height:100%;}</style>
-</head>
-<body>
-  <div id="editor"></div>
-  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-  <script>
-  (async () => {
-    const editor = new toastui.Editor({
-      el: document.getElementById('editor'),
-      height: '100%',
-      initialEditType: 'wysiwyg',
-      previewStyle: 'vertical'
-    });
-    const content = await window.electronAPI.loadNotes();
-    editor.setMarkdown(content);
-    editor.on('change', () => {
-      window.electronAPI.saveNotes(editor.getMarkdown());
-    });
-    window.electronAPI.receive('notes:update', data => {
-      if (editor.getMarkdown() !== data) editor.setMarkdown(data);
-    });
-  })();
-  </script>
-</body>
-</html>`;
+const notesHtmlPath = path.join(__dirname, '..', 'notes', 'editor.html');
+const notesHtml = fs.readFileSync(notesHtmlPath, 'utf-8');
 
 ipcMain.handle('state:load', async () => {
   try {
@@ -120,7 +91,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
 
   if (url === 'notes://') {
     (view as any).isNotes = true;
-    view.webContents.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(notesHtml));
+    view.webContents.loadFile(notesHtmlPath);
   } else {
     view.webContents.loadURL(url);
   }
@@ -197,7 +168,7 @@ ipcMain.on('view:load-url', (evt, id: string, url: string) => {
   if (view) {
     if (url === 'notes://') {
       (view as any).isNotes = true;
-      view.webContents.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(notesHtml));
+      view.webContents.loadFile(notesHtmlPath);
     } else {
       (view as any).isNotes = false;
       view.webContents.loadURL(url);

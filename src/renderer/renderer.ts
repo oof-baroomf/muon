@@ -503,7 +503,24 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   // Autofocus address bar if requested
   if (focusBar) {
-    setTimeout(() => urlBar.focus(), 0);
+    const refocus = () => {
+      urlBar.focus();
+      setTimeout(() => urlBar.select(), 0);
+    };
+    setTimeout(refocus, 0);
+
+    const unsubNav = window.electronAPI.receive(`view:did-navigate:${w.id}`, refocus);
+    const unsubInPage = window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, refocus);
+    const unsubTitle = window.electronAPI.receive(`view:page-title-updated:${w.id}`, refocus);
+
+    const stopRefocus = () => {
+      unsubNav();
+      unsubInPage();
+      unsubTitle();
+    };
+
+    urlBar.addEventListener('input', stopRefocus, { once: true });
+    urlBar.addEventListener('blur', stopRefocus, { once: true });
   }
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)

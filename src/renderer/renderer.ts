@@ -8,7 +8,7 @@ function notesNumber(url: string): number | null {
 }
 
 function notesInternalUrl(num: number): string {
-  const url = new URL('../notes_window/notes.html', window.location.href);
+  const url = new URL('../notes_window/index.html', window.location.href);
   url.searchParams.set('note', String(num));
   return url.toString();
 }

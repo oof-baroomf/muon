@@ -40,39 +40,6 @@ function createMainWindow () {
 }
 
 const statePath = path.join(app.getPath('userData'), 'state.json');
-const notesPath = path.join(app.getPath('userData'), 'notes.md');
-
-const notesHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Notes</title>
-  <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
-  <style>html,body{height:100%;margin:0;}#editor{height:100%;}</style>
-</head>
-<body>
-  <div id="editor"></div>
-  <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
-  <script>
-  (async () => {
-    const editor = new toastui.Editor({
-      el: document.getElementById('editor'),
-      height: '100%',
-      initialEditType: 'wysiwyg',
-      previewStyle: 'vertical'
-    });
-    const content = await window.electronAPI.loadNotes();
-    editor.setMarkdown(content);
-    editor.on('change', () => {
-      window.electronAPI.saveNotes(editor.getMarkdown());
-    });
-    window.electronAPI.receive('notes:update', data => {
-      if (editor.getMarkdown() !== data) editor.setMarkdown(data);
-    });
-  })();
-  </script>
-</body>
-</html>`;
 
 ipcMain.handle('state:load', async () => {
   try {
@@ -84,23 +51,6 @@ ipcMain.handle('state:load', async () => {
 
 ipcMain.on('state:save', (_evt: IpcMainEvent, data: DesktopState) => {
   fs.writeFileSync(statePath, JSON.stringify(data, null, 2));
-});
-
-ipcMain.handle('notes:load', async () => {
-  try {
-    return fs.readFileSync(notesPath, 'utf-8');
-  } catch {
-    return '';
-  }
-});
-
-ipcMain.on('notes:save', (_evt: IpcMainEvent, data: string) => {
-  fs.writeFileSync(notesPath, data, 'utf-8');
-  for (const view of views.values()) {
-    if ((view as any).isNotes) {
-      view.webContents.send('notes:update', data);
-    }
-  }
 });
 
 ipcMain.on('view:create', (evt, id: string, url: string) => {
@@ -116,13 +66,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   }
   view.setBackgroundColor("#00000000");
   views.set(id, view);
-
-  if (url === 'notes://') {
-    (view as any).isNotes = true;
-    view.webContents.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(notesHtml));
-  } else {
-    view.webContents.loadURL(url);
-  }
+  view.webContents.loadURL(url);
 
   const send = (channel: string, ...args: any[]) => {
     const wc = evt.sender;
@@ -132,16 +76,13 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   }
 
   view.webContents.on('did-navigate', () => {
-    const urlToSend = (view as any).isNotes ? '.notes' : view.webContents.getURL();
-    send(`view:did-navigate:${id}`, urlToSend);
+    send(`view:did-navigate:${id}`, view.webContents.getURL());
   });
   view.webContents.on('did-navigate-in-page', () => {
-    const urlToSend = (view as any).isNotes ? '.notes' : view.webContents.getURL();
-    send(`view:did-navigate-in-page:${id}`, urlToSend);
+    send(`view:did-navigate-in-page:${id}`, view.webContents.getURL());
   });
   view.webContents.on('page-title-updated', () => {
-    const title = (view as any).isNotes ? 'Notes' : view.webContents.getTitle();
-    send(`view:page-title-updated:${id}`, title);
+    send(`view:page-title-updated:${id}`, view.webContents.getTitle());
   });
 });
 
@@ -194,13 +135,7 @@ ipcMain.on('view:stop', (evt, id: string) => {
 ipcMain.on('view:load-url', (evt, id: string, url: string) => {
   const view = views.get(id);
   if (view) {
-    if (url === 'notes://') {
-      (view as any).isNotes = true;
-      view.webContents.loadURL('data:text/html;charset=UTF-8,' + encodeURIComponent(notesHtml));
-    } else {
-      (view as any).isNotes = false;
-      view.webContents.loadURL(url);
-    }
+    view.webContents.loadURL(url);
   }
 });
 

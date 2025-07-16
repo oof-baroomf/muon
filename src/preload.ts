@@ -3,8 +3,6 @@ import { contextBridge, ipcRenderer } from 'electron';
 contextBridge.exposeInMainWorld('electronAPI', {
   loadState: (): Promise<any> => ipcRenderer.invoke('state:load'),
   saveState: (state: any) => ipcRenderer.send('state:save', state),
-  loadNotes: (): Promise<string> => ipcRenderer.invoke('notes:load'),
-  saveNotes: (data: string) => ipcRenderer.send('notes:save', data),
   send: (channel: string, ...args: any[]) => {
     ipcRenderer.send(channel, ...args);
   },

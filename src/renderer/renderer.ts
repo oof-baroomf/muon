@@ -416,8 +416,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
-  const initialUrl = w.url === '.notes' ? 'notes://' : (w.url || 'https://www.google.com/search');
-  window.electronAPI.send('view:create', w.id, initialUrl);
+  window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
 
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
@@ -463,20 +462,15 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   urlBar.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       let val = urlBar.value.trim();
-      if (val === '.notes') {
-        w.url = '.notes';
-        window.electronAPI.send('view:load-url', w.id, 'notes://');
-      } else {
-        if (!/^(https?:|file:)/i.test(val)) {
-          if (/^[\w-]+\.[\w-]+/.test(val)) {
-            val = 'https://' + val;
-          } else {
-            val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
-          }
+      if (!/^(https?:|file:)/i.test(val)) {
+        if (/^[\w-]+\.[\w-]+/.test(val)) {
+          val = 'https://' + val;
+        } else {
+          val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
         }
-        w.url = val;
-        window.electronAPI.send('view:load-url', w.id, val);
       }
+      w.url = val;
+      window.electronAPI.send('view:load-url', w.id, val);
     }
   });
 

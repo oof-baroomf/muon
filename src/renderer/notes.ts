@@ -3,10 +3,20 @@ const params = new URLSearchParams(location.search);
 const noteId = params.get('note') || '1';
 const storageKey = 'muon_note_' + noteId;
 
-async function init() {
-  const {createEditor, $getRoot, $createParagraphNode, $createTextNode} = await import('https://cdn.jsdelivr.net/npm/lexical@0.13.1/+esm');
-  const registerPlainText = (await import('https://cdn.jsdelivr.net/npm/@lexical/plain-text@0.13.1/+esm')).default;
-  const { $convertFromMarkdownString, $convertToMarkdownString, TRANSFORMERS } = await import('https://cdn.jsdelivr.net/npm/@lexical/markdown@0.13.1/+esm');
+import {
+  createEditor,
+  $getRoot,
+  $createParagraphNode,
+  $createTextNode
+} from 'lexical';
+import { registerPlainText } from '@lexical/plain-text';
+import {
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS
+} from '@lexical/markdown';
+
+function init() {
 
   const editor = createEditor();
   editor.setRootElement(editorEl);
@@ -15,7 +25,7 @@ async function init() {
   const initial = localStorage.getItem(storageKey);
   editor.update(() => {
     if (initial) {
-      $convertFromMarkdownString(initial, TRANSFORMERS, editor);
+      $convertFromMarkdownString(initial, TRANSFORMERS);
     } else {
       const root = $getRoot();
       root.clear();
@@ -34,7 +44,7 @@ async function init() {
     if (e.key === storageKey && e.newValue !== null) {
       editor.update(() => {
         $getRoot().clear();
-        $convertFromMarkdownString(e.newValue as string, TRANSFORMERS, editor);
+        $convertFromMarkdownString(e.newValue as string, TRANSFORMERS);
       });
     }
   });

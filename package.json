@@ -15,6 +15,9 @@
     "forge": "./forge.config.ts"
   },
   "dependencies": {
+    "@lexical/markdown": "^0.13.1",
+    "@lexical/plain-text": "^0.13.1",
+    "lexical": "^0.13.1"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",

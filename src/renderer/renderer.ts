@@ -2,6 +2,15 @@ import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 
+function notesNumber(url: string): number | null {
+  const m = url.match(/^\.notes(\d+)$/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+function notesInternalUrl(num: number): string {
+  return new URL(`notes.html?note=${num}`, window.location.href).toString();
+}
+
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0; // allow key focus
 
@@ -416,7 +425,9 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
-  window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
+  const notesNum = notesNumber(w.url);
+  const loadUrl = notesNum !== null ? notesInternalUrl(notesNum) : (w.url || 'https://www.google.com/search');
+  window.electronAPI.send('view:create', w.id, loadUrl);
 
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
@@ -462,6 +473,12 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   urlBar.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       let val = urlBar.value.trim();
+      const n = notesNumber(val);
+      if (n !== null) {
+        w.url = val;
+        window.electronAPI.send('view:load-url', w.id, notesInternalUrl(n));
+        return;
+      }
       if (!/^(https?:|file:)/i.test(val)) {
         if (/^[\w-]+\.[\w-]+/.test(val)) {
           val = 'https://' + val;
@@ -477,12 +494,22 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const updateTitle = (title: string) => { w.title = title; };
   
   window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
-    urlBar.value = url;
-    w.url = url;
+    const n = notesNumber(w.url);
+    if (n !== null && url.includes('notes.html')) {
+      urlBar.value = w.url;
+    } else {
+      urlBar.value = url;
+      w.url = url;
+    }
   });
   window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
-    urlBar.value = url;
-    w.url = url;
+    const n = notesNumber(w.url);
+    if (n !== null && url.includes('notes.html')) {
+      urlBar.value = w.url;
+    } else {
+      urlBar.value = url;
+      w.url = url;
+    }
   });
   window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
     updateTitle(title);

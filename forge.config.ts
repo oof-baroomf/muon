@@ -19,6 +19,12 @@ const config: ForgeConfig = {
             js: './src/renderer/renderer.ts',
             name: 'main_window',
             preload: { js: './src/preload.ts' }
+          },
+          {
+            html: './src/renderer/notes.html',
+            js: './src/renderer/notes.ts',
+            name: 'notes_window',
+            preload: { js: './src/preload.ts' }
           }
         ]
       }

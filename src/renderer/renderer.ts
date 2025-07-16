@@ -496,8 +496,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const updateTitle = (title: string) => { w.title = title; };
   
   window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
-    const n = notesNumber(w.url);
-    if (n !== null && url.includes('notes.html')) {
+    if (notesNumber(w.url) !== null) {
       urlBar.value = w.url;
     } else {
       urlBar.value = url;
@@ -505,8 +504,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     }
   });
   window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
-    const n = notesNumber(w.url);
-    if (n !== null && url.includes('notes.html')) {
+    if (notesNumber(w.url) !== null) {
       urlBar.value = w.url;
     } else {
       urlBar.value = url;

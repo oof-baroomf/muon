@@ -21,6 +21,8 @@ function init() {
   const editor = createEditor();
   editor.setRootElement(editorEl);
   registerPlainText(editor);
+  editor.focus();
+  editorEl.focus();
 
   const initial = localStorage.getItem(storageKey);
   editor.update(() => {

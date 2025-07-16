@@ -533,18 +533,28 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Maintain focus on the address bar when the initial page loads
+  // Keep the address bar focused until the user interacts with the view
+  let maintainFocus = focusBar;
+  const refocus = () => {
+    if (maintainFocus) setTimeout(() => urlBar.focus(), 0);
+  };
+  const disableFocus = () => { maintainFocus = false; };
+
   if (focusBar) {
-    const remove = window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
-      setTimeout(() => urlBar.focus(), 0);
-      remove(); // only re-focus once on first load
-    });
+    window.electronAPI.receive(`view:did-finish-load:${w.id}`, refocus);
+    window.electronAPI.receive(`view:page-title-updated:${w.id}`, refocus);
+    window.electronAPI.receive(`view:did-navigate:${w.id}`, refocus);
+    window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, refocus);
+    window.electronAPI.receive(`view:focus:${w.id}`, disableFocus);
   } else {
     window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
       // The view is now interactable, but we can't directly add a mousedown listener.
       // The main process will handle focus.
     });
   }
+
+  urlBar.addEventListener('blur', disableFocus);
+  viewContainer.addEventListener('mousedown', disableFocus);
 
   addResizeHandle(cont, w, scale, windows, save, updateBounds);
   

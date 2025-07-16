@@ -85,6 +85,10 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     send(`view:page-title-updated:${id}`, view.webContents.getTitle());
   });
 
+  view.webContents.on('focus', () => {
+    send(`view:focus:${id}`);
+  });
+
   view.webContents.on('did-finish-load', () => {
     send(`view:did-finish-load:${id}`);
   });

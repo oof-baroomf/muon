@@ -250,6 +250,7 @@ function zoomAndCenterWindow(cont: HTMLElement) {
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const cont = document.createElement('div');
   windowElements.set(w.id, cont);
+  let focusAfterLoad = focusBar;
   cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
   cont.style.left = w.x + 'px';
   cont.style.top = w.y + 'px';
@@ -501,10 +502,15 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  // Autofocus address bar if requested
-  if (focusBar) {
-    setTimeout(() => urlBar.focus(), 0);
-  }
+  // Focus address bar after the initial page load if requested
+  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
+    if (focusAfterLoad) {
+      urlBar.focus();
+      focusAfterLoad = false;
+    }
+    // The view is now interactable, but we can't directly add a mousedown listener.
+    // The main process will handle focus.
+  });
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {
@@ -533,11 +539,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   barContainer.addEventListener('mousedown', setActiveWindow);
   urlBar.addEventListener('mousedown', setActiveWindow);
   
-  // Add handler to view when it's ready
-  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
-    // The view is now interactable, but we can't directly add a mousedown listener.
-    // The main process will handle focus.
-  });
 
   addResizeHandle(cont, w, scale, windows, save, updateBounds);
   

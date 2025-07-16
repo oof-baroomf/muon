@@ -410,10 +410,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const viewContainer = document.createElement('div');
   viewContainer.className = 'muon-view-container';
   viewContainer.style.position = 'absolute';
-  viewContainer.style.left = '0';
+  viewContainer.style.left = '8px';
+  viewContainer.style.right = '8px';
   viewContainer.style.top = `${barHeight * 2}px`;
-  viewContainer.style.width = '100%';
-  viewContainer.style.height = `calc(100% - ${barHeight * 2}px)`;
+  viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
   window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');

@@ -503,25 +503,26 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(viewContainer);
 
   // Focus the address bar once the main process confirms the initial load is
-  // done. Instead of repeatedly calling focus, simulate a user click so the
-  // text becomes selected immediately.
-  const focusViaClick = () => {
+  // done. Perform a synthetic click first, then call focus normally.
+  const focusAfterFirstLoad = () => {
     if (!focusAfterLoad) return;
-    console.log('[renderer] focusing address bar via synthetic click', w.id);
+    console.log('[renderer] focusing address bar via click then focus', w.id);
     const rect = urlBar.getBoundingClientRect();
     ['mousedown', 'mouseup', 'click'].forEach(type => {
       urlBar.dispatchEvent(new MouseEvent(type, {
         bubbles: true,
         clientX: rect.left + 1,
-        clientY: rect.top + 1
+        clientY: rect.top + 1,
       }));
     });
-    urlBar.focus();
-    urlBar.select();
+    setTimeout(() => {
+      urlBar.focus();
+      urlBar.select();
+    }, 0);
     focusAfterLoad = false;
   };
-  window.electronAPI.receive(`view:initial-load:${w.id}`, focusViaClick);
-  setTimeout(focusViaClick, 5000);
+  window.electronAPI.receive(`view:did-finish-load:${w.id}`, focusAfterFirstLoad);
+  setTimeout(focusAfterFirstLoad, 5000);
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {

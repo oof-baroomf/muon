@@ -74,24 +74,17 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     }
   }
 
-  // Poll loading state because load events fire before the renderer subscribes
-  // on fast pages. Once loading stops, notify the renderer so it can focus the
-  // address bar. Fallback after a timeout in case events are missed.
-  console.log('[main] start polling for view load', id);
-  const pollInterval = setInterval(() => {
-    if (!view.webContents.isLoading()) {
-      console.log('[main] initial load complete for', id);
-      send(`view:initial-load:${id}`);
-      clearInterval(pollInterval);
-    }
-  }, 100);
-  setTimeout(() => {
-    if (pollInterval) {
-      console.log('[main] polling timeout for', id);
-      clearInterval(pollInterval);
-      send(`view:initial-load:${id}`);
-    }
-  }, 5000);
+  // Notify the renderer after the first load finishes or fails so it can focus
+  // the address bar. Attach listeners before calling loadURL to avoid missing
+  // the events on fast pages.
+  view.webContents.once('did-finish-load', () => {
+    console.log('[main] did-finish-load', id);
+    send(`view:did-finish-load:${id}`);
+  });
+  view.webContents.once('did-fail-load', () => {
+    console.log('[main] did-fail-load', id);
+    send(`view:did-finish-load:${id}`);
+  });
 
   view.webContents.on('did-navigate', () => {
     send(`view:did-navigate:${id}`, view.webContents.getURL());

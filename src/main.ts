@@ -66,7 +66,6 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   }
   view.setBackgroundColor("#00000000");
   views.set(id, view);
-  view.webContents.loadURL(url);
 
   const send = (channel: string, ...args: any[]) => {
     const wc = evt.sender;
@@ -74,6 +73,13 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
       wc.send(channel, ...args);
     }
   }
+
+  // Notify renderer when the initial page load completes or fails so it can
+  // react (e.g. focus the address bar). Attach listeners before calling
+  // loadURL to avoid missing early events when loading local pages.
+  const notifyLoad = () => send(`view:did-finish-load:${id}`);
+  view.webContents.on('did-finish-load', notifyLoad);
+  view.webContents.on('did-fail-load', notifyLoad);
 
   view.webContents.on('did-navigate', () => {
     send(`view:did-navigate:${id}`, view.webContents.getURL());
@@ -84,12 +90,8 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   view.webContents.on('page-title-updated', () => {
     send(`view:page-title-updated:${id}`, view.webContents.getTitle());
   });
-  // Notify renderer when the initial page load completes or fails so it can
-  // react (e.g. focus the address bar). This covers cases where network access
-  // is blocked and the page fails to load entirely.
-  const notifyLoad = () => send(`view:did-finish-load:${id}`);
-  view.webContents.on('did-finish-load', notifyLoad);
-  view.webContents.on('did-fail-load', notifyLoad);
+
+  view.webContents.loadURL(url);
 });
 
 ipcMain.on('view:destroy', (evt, id: string) => {

@@ -502,22 +502,23 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  // Focus address bar after the initial page load. Try a few times in case
-  // other elements steal focus, and also fall back to a timer if the event
-  // doesn't fire.
-  const attemptFocus = () => {
+  // Focus address bar after the initial page load. Use a short animation-frame
+  // loop so the web contents cannot immediately steal focus again.
+  const scheduleFocus = () => {
     if (!focusAfterLoad) return;
     let tries = 0;
-    const id = setInterval(() => {
+    const focusLoop = () => {
       urlBar.focus();
-      if (document.activeElement === urlBar || ++tries >= 10) {
-        clearInterval(id);
+      if (document.activeElement !== urlBar && ++tries < 60) {
+        requestAnimationFrame(focusLoop);
+      } else {
         focusAfterLoad = false;
       }
-    }, 100);
+    };
+    requestAnimationFrame(focusLoop);
   };
-  window.electronAPI.receive(`view:did-finish-load:${w.id}`, attemptFocus);
-  setTimeout(attemptFocus, 3000);
+  window.electronAPI.receive(`view:did-finish-load:${w.id}`, scheduleFocus);
+  setTimeout(scheduleFocus, 3000);
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {

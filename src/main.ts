@@ -78,11 +78,9 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   // the address bar. Attach listeners before calling loadURL to avoid missing
   // the events on fast pages.
   view.webContents.once('did-finish-load', () => {
-    console.log('[main] did-finish-load', id);
     send(`view:did-finish-load:${id}`);
   });
   view.webContents.once('did-fail-load', () => {
-    console.log('[main] did-fail-load', id);
     send(`view:did-finish-load:${id}`);
   });
 

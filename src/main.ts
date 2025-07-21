@@ -84,9 +84,12 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   view.webContents.on('page-title-updated', () => {
     send(`view:page-title-updated:${id}`, view.webContents.getTitle());
   });
-  view.webContents.on('did-finish-load', () => {
-    send(`view:did-finish-load:${id}`);
-  });
+  // Notify renderer when the initial page load completes or fails so it can
+  // react (e.g. focus the address bar). This covers cases where network access
+  // is blocked and the page fails to load entirely.
+  const notifyLoad = () => send(`view:did-finish-load:${id}`);
+  view.webContents.on('did-finish-load', notifyLoad);
+  view.webContents.on('did-fail-load', notifyLoad);
 });
 
 ipcMain.on('view:destroy', (evt, id: string) => {

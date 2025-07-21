@@ -502,15 +502,16 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  // Focus address bar after the initial page load if requested
-  window.electronAPI.receive(`view:did-finish-load:${w.id}`, () => {
+  // Focus address bar after the initial page load (or failure) if requested.
+  // Include a fallback timer in case the page never completes loading.
+  const focusIfNeeded = () => {
     if (focusAfterLoad) {
       urlBar.focus();
       focusAfterLoad = false;
     }
-    // The view is now interactable, but we can't directly add a mousedown listener.
-    // The main process will handle focus.
-  });
+  };
+  window.electronAPI.receive(`view:did-finish-load:${w.id}`, focusIfNeeded);
+  setTimeout(focusIfNeeded, 5000);
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {

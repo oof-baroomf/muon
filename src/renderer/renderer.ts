@@ -4,6 +4,7 @@ import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
+import { sanitizeNotePath, setupNoteEditor } from './notes';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -17,30 +18,6 @@ let windows: WindowData[] = [];
 let muonActiveWindow: HTMLElement | null = null;
 
 const windowElements = new Map<string, HTMLElement>();
-
-function sanitizeNotePath(input: string): string {
-  let p = input.replace(/[^a-zA-Z0-9\-_./]/g, '');
-  p = p.replace(/^\.+/, '').replace(/^\/+/, '');
-  if (!p.endsWith('.md')) p += '.md';
-  return p;
-}
-
-async function setupNoteEditor(container: HTMLElement, notePath: string) {
-  container.innerHTML = '';
-  const editor = document.createElement('div');
-  editor.className = 'muon-note-editor';
-  editor.contentEditable = 'true';
-  editor.style.outline = 'none';
-  editor.style.height = '100%';
-  editor.style.overflow = 'auto';
-  editor.style.padding = '8px';
-  const text = await window.electronAPI.readNote(notePath);
-  editor.innerHTML = text;
-  editor.addEventListener('input', () => {
-    window.electronAPI.writeNote(notePath, editor.innerHTML);
-  });
-  container.appendChild(editor);
-}
 
 const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
 

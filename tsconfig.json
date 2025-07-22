@@ -5,7 +5,6 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
       "*": ["node_modules/*"]

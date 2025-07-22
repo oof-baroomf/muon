@@ -146,7 +146,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     windows = windows.filter(win => win.id !== w.id);
     windowElements.delete(w.id);
     window.electronAPI.send('view:destroy', w.id);
-    if (disposeNote) { disposeNote(); disposeNote = null; }
     cont.remove();
     save();
   };
@@ -200,9 +199,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
-  let disposeNote: (() => void) | null = null;
   if (w.notePath) {
-    disposeNote = setupNoteEditor(viewContainer, w.notePath);
+    setupNoteEditor(viewContainer, w.notePath);
   } else {
     window.electronAPI.send('view:create', w.id, w.url || '');
   }
@@ -256,8 +254,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
         w.notePath = note;
         w.url = '';
         window.electronAPI.send('view:destroy', w.id);
-        if (disposeNote) disposeNote();
-        disposeNote = setupNoteEditor(viewContainer, note);
+        setupNoteEditor(viewContainer, note);
         save();
         return;
       }
@@ -270,7 +267,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       }
       if (w.notePath) {
         w.notePath = undefined;
-        if (disposeNote) { disposeNote(); disposeNote = null; }
         viewContainer.innerHTML = '';
         window.electronAPI.send('view:create', w.id, val);
       } else {

@@ -502,14 +502,13 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  // Focus the address bar once the main process confirms the initial load is
-  // done. Call focus() immediately, then synthesize a click shortly after so
-  // the text becomes selected.
+  // Focus the address bar after the first load by simulating user clicks
+  // before and after calling focus(). This attempts to mimic real interaction
+  // so the text becomes selected reliably.
   const focusAfterFirstLoad = () => {
     if (!focusAfterLoad) return;
-    urlBar.focus();
     const rect = urlBar.getBoundingClientRect();
-    setTimeout(() => {
+    const simulateClick = () => {
       ['mousedown', 'mouseup', 'click'].forEach(type => {
         urlBar.dispatchEvent(new MouseEvent(type, {
           bubbles: true,
@@ -517,7 +516,12 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
           clientY: rect.top + 1,
         }));
       });
-    }, 100);
+    };
+
+    console.log('[renderer] focusing address bar for', w.id);
+    simulateClick();
+    urlBar.focus();
+    setTimeout(simulateClick, 100);
     focusAfterLoad = false;
   };
   window.electronAPI.receive(`view:did-finish-load:${w.id}`, focusAfterFirstLoad);

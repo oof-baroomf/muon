@@ -16,7 +16,7 @@ const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 import { WindowData } from './windowManager';
-import { getConfig } from './appConfig';
+import { getConfig } from './settings/appConfig';
 
 export function updateAllWindowsBounds(
   windows: WindowData[],

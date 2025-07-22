@@ -1,6 +1,7 @@
  // These are injected by @electron-forge/plugin-webpack
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
@@ -25,6 +26,7 @@ interface DesktopState {
 
 let mainWindow: BrowserWindow | null = null;
 let appConfig: AppConfig = loadConfig();
+let settingsWindow: BrowserWindow | null = null;
 
 function createMenu() {
   const isMac = process.platform === 'darwin';
@@ -35,7 +37,7 @@ function createMenu() {
         submenu: [
           { role: 'about' },
           { type: 'separator' },
-          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: () => { mainWindow?.webContents.send('settings:open'); } },
+          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: () => openSettingsWindow() },
           { type: 'separator' },
           { role: 'quit' }
         ]
@@ -44,7 +46,7 @@ function createMenu() {
     {
       label: 'File',
       submenu: [
-        ...(isMac ? [] : [{ label: 'Settings...', accelerator: 'Ctrl+,', click: () => { mainWindow?.webContents.send('settings:open'); } }, { type: 'separator' }]),
+        ...(isMac ? [] : [{ label: 'Settings...', accelerator: 'Ctrl+,', click: () => openSettingsWindow() }, { type: 'separator' }]),
         { role: isMac ? 'close' : 'quit' }
       ]
     },
@@ -70,6 +72,24 @@ function createMainWindow () {
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
+function openSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+  settingsWindow = new BrowserWindow({
+    width: 320,
+    height: 200,
+    resizable: false,
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      sandbox: true
+    }
+  });
+  settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
+  settingsWindow.on('closed', () => { settingsWindow = null; });
+}
+
 const statePath = path.join(app.getPath('userData'), 'state.json');
 
 ipcMain.handle('state:load', async () => {
@@ -92,6 +112,7 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
   appConfig = cfg;
   saveConfig(appConfig);
   mainWindow?.webContents.send('config:updated', appConfig);
+  settingsWindow?.webContents.send('config:updated', appConfig);
 });
 
 ipcMain.on('view:create', (evt, id: string, url: string) => {

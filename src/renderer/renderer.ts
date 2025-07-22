@@ -503,9 +503,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(viewContainer);
 
   // Focus the address bar once the main process confirms the initial load is
-  // done. Delay slightly before synthesizing a click so the element is ready.
+  // done. Call focus() immediately, then synthesize a click shortly after so
+  // the text becomes selected.
   const focusAfterFirstLoad = () => {
     if (!focusAfterLoad) return;
+    urlBar.focus();
     const rect = urlBar.getBoundingClientRect();
     setTimeout(() => {
       ['mousedown', 'mouseup', 'click'].forEach(type => {

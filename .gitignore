@@ -2,3 +2,5 @@ node_modules/
 .webpack/
 dist/
 .DS_Store
+
+package-lock.json

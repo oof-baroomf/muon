@@ -15,6 +15,7 @@ interface WindowState {
   w: number;
   h: number;
   url: string;
+  notePath?: string;
 }
 
 interface DesktopState {
@@ -51,6 +52,25 @@ ipcMain.handle('state:load', async () => {
 
 ipcMain.on('state:save', (_evt: IpcMainEvent, data: DesktopState) => {
   fs.writeFileSync(statePath, JSON.stringify(data, null, 2));
+});
+
+const notesDir = path.join(app.getPath('userData'), 'notes');
+
+ipcMain.handle('note:read', async (_evt, notePath: string) => {
+  const full = path.join(notesDir, notePath);
+  try {
+    return fs.readFileSync(full, 'utf-8');
+  } catch {
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, '');
+    return '';
+  }
+});
+
+ipcMain.on('note:write', (_evt, notePath: string, content: string) => {
+  const full = path.join(notesDir, notePath);
+  fs.mkdirSync(path.dirname(full), { recursive: true });
+  fs.writeFileSync(full, content);
 });
 
 ipcMain.on('view:create', (evt, id: string, url: string) => {

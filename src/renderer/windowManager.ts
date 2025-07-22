@@ -6,6 +6,7 @@ export interface WindowData {
   w: number;
   h: number;
   url: string;
+  notePath?: string;
   title?: string;
 }
 

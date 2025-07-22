@@ -699,22 +699,27 @@ root.addEventListener('mousedown', e => {
 
     const gw = parseFloat(ghost.style.width);
     const gh = parseFloat(ghost.style.height);
-    if (gw > 32 && gh > 32) {
-      // Always create window with default URL, focus address bar for entry
-      const wdata: WindowData = {
-        id: crypto.randomUUID(),
-        x: parseFloat(ghost.style.left),
-        y: parseFloat(ghost.style.top),
-        w: gw,
-        h: gh,
-        url: '' // 'https://www.google.com/search'
-      };
-      windows.push(wdata);
-      const el = createWindowElement(wdata, true); // focus address bar
-      muonActiveWindow = el; // Set newly created window as active
-      console.log('Set newly created window as active:', el);
-      save();
-    }
+      if (gw > 32 && gh > 32) {
+        // Compute world coordinates for new window based on drag rectangle and current transform
+        const rawLeft = Math.min(dragStartX, ev.clientX);
+        const rawTop = Math.min(dragStartY, ev.clientY);
+        const rootRect = root.getBoundingClientRect();
+        const worldX = (rawLeft - rootRect.left - offsetX) / scale;
+        const worldY = (rawTop - rootRect.top - offsetY) / scale;
+        const wdata: WindowData = {
+          id: crypto.randomUUID(),
+          x: worldX,
+          y: worldY,
+          w: gw,
+          h: gh,
+          url: '' // 'https://www.google.com/search'
+        };
+        windows.push(wdata);
+        const el = createWindowElement(wdata, true); // focus address bar
+        muonActiveWindow = el; // Set newly created window as active
+        console.log('Set newly created window as active:', el);
+        save();
+      }
     ghost.remove();
     isDragging = false;
   };

@@ -4,6 +4,8 @@ import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
+import { loadConfig, applyGridStyle } from './appConfig';
+import { initSettingsOverlay } from './settingsOverlay';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -417,10 +419,13 @@ function save() {
 }
 
 (async () => {
+  await loadConfig();
+  applyGridStyle(root);
   const state: DesktopState = await loadState();
   windows = state.windows;
   transform.scale = state.transform.scale;
   transform.offsetX = state.transform.x;
   transform.offsetY = state.transform.y;
   rebuild();
+  initSettingsOverlay({ root, applyTransform: apply });
 })();

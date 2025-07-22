@@ -3,8 +3,9 @@ declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
 import path from 'path';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
 import fs from 'fs';
+import { loadConfig, saveConfig, AppConfig } from './config';
 
 const views = new Map<string, WebContentsView>();
 
@@ -23,6 +24,36 @@ interface DesktopState {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let appConfig: AppConfig = loadConfig();
+
+function createMenu() {
+  const isMac = process.platform === 'darwin';
+  const template = [
+    ...(isMac ? [
+      {
+        label: app.name,
+        submenu: [
+          { role: 'about' },
+          { type: 'separator' },
+          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: () => { mainWindow?.webContents.send('settings:open'); } },
+          { type: 'separator' },
+          { role: 'quit' }
+        ]
+      } as MenuItemConstructorOptions
+    ] : []),
+    {
+      label: 'File',
+      submenu: [
+        ...(isMac ? [] : [{ label: 'Settings...', accelerator: 'Ctrl+,', click: () => { mainWindow?.webContents.send('settings:open'); } }, { type: 'separator' }]),
+        { role: isMac ? 'close' : 'quit' }
+      ]
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' }
+  ] as MenuItemConstructorOptions[];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
 
 function createMainWindow () {
   mainWindow = new BrowserWindow({
@@ -51,6 +82,16 @@ ipcMain.handle('state:load', async () => {
 
 ipcMain.on('state:save', (_evt: IpcMainEvent, data: DesktopState) => {
   fs.writeFileSync(statePath, JSON.stringify(data, null, 2));
+});
+
+ipcMain.handle('config:load', () => {
+  return appConfig;
+});
+
+ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
+  appConfig = cfg;
+  saveConfig(appConfig);
+  mainWindow?.webContents.send('config:updated', appConfig);
 });
 
 ipcMain.on('view:create', (evt, id: string, url: string) => {
@@ -146,7 +187,10 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   }
 });
 
-app.whenReady().then(createMainWindow);
+app.whenReady().then(() => {
+  createMainWindow();
+  createMenu();
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();

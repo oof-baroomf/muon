@@ -4,9 +4,9 @@
   "description": "Infinite canvas web browser",
   "main": ".webpack/main.js",
   "scripts": {
-    "dev": "electron-forge start",
-    "build": "electron-forge make",
-    "lint": "eslint . --ext .ts,.tsx"
+    "dev": "pnpm exec electron-forge start",
+    "build": "pnpm exec electron-forge make",
+    "lint": "pnpm exec eslint . --ext .ts,.tsx"
   },
   "keywords": [],
   "author": "",
@@ -14,8 +14,7 @@
   "config": {
     "forge": "./forge.config.ts"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@electron-forge/cli": "^7.4.0",
     "@electron-forge/maker-squirrel": "^7.4.0",

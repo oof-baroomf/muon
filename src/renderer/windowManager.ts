@@ -1,3 +1,4 @@
+import { collides } from './collision';
 // Types for window data and transform
 export interface WindowData {
   id: string;
@@ -48,8 +49,27 @@ export function addResizeHandle(
       const doResize = (ev: MouseEvent) => {
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
+        const prev = {
+          x: parseFloat(cont.style.left),
+          y: parseFloat(cont.style.top),
+          w: parseFloat(cont.style.width),
+          h: parseFloat(cont.style.height)
+        };
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
-        updateBounds();
+        const rect = {
+          x: parseFloat(cont.style.left),
+          y: parseFloat(cont.style.top),
+          w: parseFloat(cont.style.width),
+          h: parseFloat(cont.style.height)
+        };
+        if (collides(rect, w.id)) {
+          cont.style.left = prev.x + 'px';
+          cont.style.top = prev.y + 'px';
+          cont.style.width = prev.w + 'px';
+          cont.style.height = prev.h + 'px';
+        } else {
+          updateBounds();
+        }
       };
 
       const stopResize = () => {
@@ -216,9 +236,19 @@ export function addAddressBarDrag(
     const doDrag = (e: MouseEvent) => {
       const dx = (e.clientX - startX) / scale;
       const dy = (e.clientY - startY) / scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
-      updateBounds();
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      const rect = {
+        x: newLeft,
+        y: newTop,
+        w: parseFloat(cont.style.width),
+        h: parseFloat(cont.style.height)
+      };
+      if (!collides(rect, w.id)) {
+        cont.style.left = newLeft + 'px';
+        cont.style.top = newTop + 'px';
+        updateBounds();
+      }
     };
 
     const stopDrag = (e: MouseEvent) => {

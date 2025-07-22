@@ -29,6 +29,7 @@ function fuzzyMatch(text: string, query: string) {
 
 export function showSearch() {
   if (overlay) return;
+  window.electronAPI.send('views:hide');
   overlay = document.createElement('div');
   overlay.className = 'absolute inset-0 bg-black/60 flex items-start justify-center pt-24';
   overlay.style.zIndex = '50';
@@ -70,6 +71,7 @@ export function hideSearch() {
   listEl = null;
   results = [];
   index = -1;
+  window.electronAPI.send('views:show');
 }
 
 export function isSearchVisible() {

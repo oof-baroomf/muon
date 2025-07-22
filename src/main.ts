@@ -7,6 +7,7 @@ import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView } from 'elec
 import fs from 'fs';
 
 const views = new Map<string, WebContentsView>();
+const viewBounds = new Map<string, Electron.Rectangle>();
 
 interface WindowState {
   id: string;
@@ -101,6 +102,7 @@ ipcMain.on('view:set-bounds', (evt, id: string, bounds: Electron.Rectangle) => {
   const view = views.get(id);
   if (view) {
     view.setBounds(bounds);
+    viewBounds.set(id, bounds);
   }
 });
 
@@ -143,6 +145,19 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   const view = views.get(id);
   if (view) {
     view.webContents.setZoomFactor(factor);
+  }
+});
+
+ipcMain.on('views:hide', () => {
+  for (const view of views.values()) {
+    view.setBounds({ x: 0, y: 0, width: 0, height: 0 });
+  }
+});
+
+ipcMain.on('views:show', () => {
+  for (const [id, view] of views.entries()) {
+    const b = viewBounds.get(id);
+    if (b) view.setBounds(b);
   }
 });
 

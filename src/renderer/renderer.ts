@@ -3,6 +3,7 @@ import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager'
 import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
+import { collides } from './collision';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -105,9 +106,19 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     const doDrag = (ev: MouseEvent) => {
       const dx = (ev.clientX - startX) / transform.scale;
       const dy = (ev.clientY - startY) / transform.scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
-      updateBounds();
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      const rect = {
+        x: newLeft,
+        y: newTop,
+        w: parseFloat(cont.style.width),
+        h: parseFloat(cont.style.height)
+      };
+      if (!collides(rect, w.id)) {
+        cont.style.left = newLeft + 'px';
+        cont.style.top = newTop + 'px';
+        updateBounds();
+      }
     };
 
     const stopDrag = (ev: MouseEvent) => {

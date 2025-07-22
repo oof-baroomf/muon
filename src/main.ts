@@ -146,6 +146,18 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   }
 });
 
+ipcMain.on('overlay:show', () => {
+  for (const view of views.values()) {
+    view.setVisible(false);
+  }
+});
+
+ipcMain.on('overlay:hide', () => {
+  for (const view of views.values()) {
+    view.setVisible(true);
+  }
+});
+
 app.whenReady().then(createMainWindow);
 
 app.on('window-all-closed', () => {

@@ -416,7 +416,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
-  window.electronAPI.send('view:create', w.id, w.url || 'https://www.google.com/search');
+  window.electronAPI.send('view:create', w.id, w.url || '');
 
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
@@ -501,10 +501,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  // Autofocus address bar if requested
-  if (focusBar) {
-    setTimeout(() => urlBar.focus(), 0);
-  }
 
   // double click to center this window (ignore if dblclick was on url bar or resize handles)
   cont.addEventListener('dblclick', e => {
@@ -546,6 +542,9 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   }
 
   desk.appendChild(cont);
+
+  urlBar.focus();
+      
   return cont;
 }
 
@@ -708,7 +707,7 @@ root.addEventListener('mousedown', e => {
         y: parseFloat(ghost.style.top),
         w: gw,
         h: gh,
-        url: 'https://www.google.com/search'
+        url: '' // 'https://www.google.com/search'
       };
       windows.push(wdata);
       const el = createWindowElement(wdata, true); // focus address bar

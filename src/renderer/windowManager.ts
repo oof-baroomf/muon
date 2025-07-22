@@ -15,6 +15,28 @@ export interface Transform {
   y: number;
 }
 
+function getRect(el: HTMLElement) {
+  const left = parseFloat(el.style.left);
+  const top = parseFloat(el.style.top);
+  const width = parseFloat(el.style.width);
+  const height = parseFloat(el.style.height);
+  return { left, top, right: left + width, bottom: top + height, width, height };
+}
+
+function hasCollision(rect: {left:number;top:number;right:number;bottom:number}, el: HTMLElement) {
+  const parent = el.parentElement;
+  if (!parent) return false;
+  const others = parent.querySelectorAll('.muon-window');
+  for (const other of Array.from(others)) {
+    if (other === el) continue;
+    const r = getRect(other as HTMLElement);
+    if (rect.left < r.right && rect.right > r.left && rect.top < r.bottom && rect.bottom > r.top) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Add resize handle to all windows
 export function addResizeHandle(
   cont: HTMLElement,
@@ -45,10 +67,27 @@ export function addResizeHandle(
       const startLeft = parseFloat(cont.style.left);
       const startTop = parseFloat(cont.style.top);
 
+      let lastLeft = startLeft;
+      let lastTop = startTop;
+      let lastWidth = startWidth;
+      let lastHeight = startHeight;
+
       const doResize = (ev: MouseEvent) => {
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
+        const rect = getRect(cont);
+        if (hasCollision(rect, cont)) {
+          cont.style.left = lastLeft + 'px';
+          cont.style.top = lastTop + 'px';
+          cont.style.width = lastWidth + 'px';
+          cont.style.height = lastHeight + 'px';
+        } else {
+          lastLeft = rect.left;
+          lastTop = rect.top;
+          lastWidth = rect.width;
+          lastHeight = rect.height;
+        }
         updateBounds();
       };
 
@@ -212,13 +251,22 @@ export function addAddressBarDrag(
     startY = e.clientY;
     startLeft = parseFloat(cont.style.left);
     startTop = parseFloat(cont.style.top);
+    let lastLeft = startLeft;
+    let lastTop = startTop;
 
     const doDrag = (e: MouseEvent) => {
       const dx = (e.clientX - startX) / scale;
       const dy = (e.clientY - startY) / scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
-      updateBounds();
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      const rect = { left: newLeft, top: newTop, right: newLeft + parseFloat(cont.style.width), bottom: newTop + parseFloat(cont.style.height) };
+      if (!hasCollision(rect, cont)) {
+        lastLeft = newLeft;
+        lastTop = newTop;
+        cont.style.left = newLeft + 'px';
+        cont.style.top = newTop + 'px';
+        updateBounds();
+      }
     };
 
     const stopDrag = (e: MouseEvent) => {
@@ -229,8 +277,8 @@ export function addAddressBarDrag(
       if (Math.abs(e.clientX - startX) > 2 || Math.abs(e.clientY - startY) > 2) {
         const win = windows.find(win => win.id === w.id);
         if (win) {
-          win.x = parseFloat(cont.style.left);
-          win.y = parseFloat(cont.style.top);
+          win.x = lastLeft;
+          win.y = lastTop;
           save();
         }
       }

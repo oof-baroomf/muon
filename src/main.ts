@@ -146,6 +146,12 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   }
 });
 
+ipcMain.on('views:set-visible', (_evt, visible: boolean) => {
+  for (const view of views.values()) {
+    view.setVisible(visible);
+  }
+});
+
 app.whenReady().then(createMainWindow);
 
 app.on('window-all-closed', () => {

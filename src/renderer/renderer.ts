@@ -5,6 +5,28 @@ import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTr
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 
+function getRect(el: HTMLElement) {
+  const left = parseFloat(el.style.left);
+  const top = parseFloat(el.style.top);
+  const width = parseFloat(el.style.width);
+  const height = parseFloat(el.style.height);
+  return { left, top, right: left + width, bottom: top + height, width, height };
+}
+
+function hasCollision(rect: {left:number;top:number;right:number;bottom:number}, el: HTMLElement) {
+  const parent = el.parentElement;
+  if (!parent) return false;
+  const others = parent.querySelectorAll('.muon-window');
+  for (const other of Array.from(others)) {
+    if (other === el) continue;
+    const r = getRect(other as HTMLElement);
+    if (rect.left < r.right && rect.right > r.left && rect.top < r.bottom && rect.bottom > r.top) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
 
@@ -101,13 +123,22 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     let startY = e.clientY;
     let startLeft = parseFloat(cont.style.left);
     let startTop = parseFloat(cont.style.top);
+    let lastLeft = startLeft;
+    let lastTop = startTop;
 
     const doDrag = (ev: MouseEvent) => {
       const dx = (ev.clientX - startX) / transform.scale;
       const dy = (ev.clientY - startY) / transform.scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
-      updateBounds();
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      const rect = { left: newLeft, top: newTop, right: newLeft + parseFloat(cont.style.width), bottom: newTop + parseFloat(cont.style.height) };
+      if (!hasCollision(rect, cont)) {
+        lastLeft = newLeft;
+        lastTop = newTop;
+        cont.style.left = newLeft + 'px';
+        cont.style.top = newTop + 'px';
+        updateBounds();
+      }
     };
 
     const stopDrag = (ev: MouseEvent) => {
@@ -117,8 +148,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       if (Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) {
         const win = windows.find(win => win.id === w.id);
         if (win) {
-          win.x = parseFloat(cont.style.left);
-          win.y = parseFloat(cont.style.top);
+          win.x = lastLeft;
+          win.y = lastTop;
           save();
         }
       }
@@ -377,10 +408,13 @@ root.addEventListener('mousedown', e => {
         h: gh,
         url: ''
       };
-      windows.push(wdata);
-      const el = createWindowElement(wdata, true);
-      muonActiveWindow = el;
-      save();
+      const rect = { left: wdata.x, top: wdata.y, right: wdata.x + wdata.w, bottom: wdata.y + wdata.h };
+      if (!hasCollision(rect, desk as any)) {
+        windows.push(wdata);
+        const el = createWindowElement(wdata, true);
+        muonActiveWindow = el;
+        save();
+      }
     }
     ghost.remove();
     isDragging = false;

@@ -26,9 +26,11 @@ export function saveConfig(c: AppConfig) {
 export function applyGridStyle(root: HTMLElement) {
   const color = '#222';
   if (config.gridStyle === 'dots') {
-    root.style.backgroundImage = `radial-gradient(${color} 1px, transparent 1px)`;
+    root.style.backgroundImage = `radial-gradient(circle, ${color} 1px, transparent 1px)`;
   } else if (config.gridStyle === 'cross') {
-    root.style.backgroundImage = `linear-gradient(${color} 0 2px, transparent 2px), linear-gradient(90deg, ${color} 0 2px, transparent 2px)`;
+    root.style.backgroundImage =
+      `linear-gradient(transparent calc(50% - 1px), ${color} calc(50% - 1px), ${color} calc(50% + 1px), transparent calc(50% + 1px)),` +
+      `linear-gradient(90deg, transparent calc(50% - 1px), ${color} calc(50% - 1px), ${color} calc(50% + 1px), transparent calc(50% + 1px))`;
   } else {
     root.style.backgroundImage = `linear-gradient(${color} 1px, transparent 1px), linear-gradient(90deg, ${color} 1px, transparent 1px)`;
   }

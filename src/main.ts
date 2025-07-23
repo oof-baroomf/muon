@@ -1,10 +1,12 @@
  // These are injected by @electron-forge/plugin-webpack
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
 import fs from 'fs';
+import { loadConfig, saveConfig, AppConfig } from './config';
 
 const views = new Map<string, WebContentsView>();
 
@@ -24,6 +26,37 @@ interface DesktopState {
 }
 
 let mainWindow: BrowserWindow | null = null;
+let appConfig: AppConfig = loadConfig();
+let settingsWindow: BrowserWindow | null = null;
+
+function createMenu() {
+  const isMac = process.platform === 'darwin';
+  const template = [
+    ...(isMac ? [
+      {
+        label: app.name,
+        submenu: [
+          { role: 'about' },
+          { type: 'separator' },
+          { label: 'Settings...', accelerator: 'CmdOrCtrl+,', click: () => openSettingsWindow() },
+          { type: 'separator' },
+          { role: 'quit' }
+        ]
+      } as MenuItemConstructorOptions
+    ] : []),
+    {
+      label: 'File',
+      submenu: [
+        ...(isMac ? [] : [{ label: 'Settings...', accelerator: 'Ctrl+,', click: () => openSettingsWindow() }, { type: 'separator' }]),
+        { role: isMac ? 'close' : 'quit' }
+      ]
+    },
+    { role: 'editMenu' },
+    { role: 'viewMenu' },
+    { role: 'windowMenu' }
+  ] as MenuItemConstructorOptions[];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
 
 function createMainWindow () {
   mainWindow = new BrowserWindow({
@@ -40,6 +73,24 @@ function createMainWindow () {
   mainWindow.on('closed', () => { mainWindow = null; });
 }
 
+function openSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+  settingsWindow = new BrowserWindow({
+    width: 400,
+    height: 260,
+    resizable: true,
+    webPreferences: {
+      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      sandbox: true
+    }
+  });
+  settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
+  settingsWindow.on('closed', () => { settingsWindow = null; });
+}
+
 const statePath = path.join(app.getPath('userData'), 'state.json');
 
 ipcMain.handle('state:load', async () => {
@@ -54,6 +105,15 @@ ipcMain.on('state:save', (_evt: IpcMainEvent, data: DesktopState) => {
   fs.writeFileSync(statePath, JSON.stringify(data, null, 2));
 });
 
+ipcMain.handle('config:load', () => {
+  return appConfig;
+});
+
+ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
+  appConfig = cfg;
+  saveConfig(appConfig);
+  mainWindow?.webContents.send('config:updated', appConfig);
+  settingsWindow?.webContents.send('config:updated', appConfig);
 const notesDir = path.join(app.getPath('userData'), 'notes');
 
 ipcMain.handle('note:read', async (_evt, notePath: string) => {
@@ -178,8 +238,11 @@ ipcMain.on('overlay:hide', () => {
   }
 });
 
-app.whenReady().then(createMainWindow);
-
+app.whenReady().then(() => {
+  createMainWindow();
+  createMenu();
+});
+  
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

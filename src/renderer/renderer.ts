@@ -4,6 +4,8 @@ import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
+import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
+import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -443,10 +445,17 @@ function save() {
 }
 
 (async () => {
+  await loadConfig();
+  applyGridStyle(root);
   const state: DesktopState = await loadState();
   windows = state.windows;
   transform.scale = state.transform.scale;
   transform.offsetX = state.transform.x;
   transform.offsetY = state.transform.y;
   rebuild();
+  window.electronAPI.receive('config:updated', (cfg: AppConfig) => {
+    setConfig(cfg);
+    applyGridStyle(root);
+    apply();
+  });
 })();

@@ -5,6 +5,8 @@ declare global {
     electronAPI: {
       loadState(): Promise<any>;
       saveState(state: any): void;
+      loadConfig(): Promise<any>;
+      saveConfig(cfg: any): void;
       send(channel: string, ...args: any[]): void;
       receive(channel: string, func: (...args: any[]) => void): () => void;
       readNote(path: string): Promise<string>;

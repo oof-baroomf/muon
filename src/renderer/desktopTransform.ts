@@ -16,6 +16,7 @@ const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 import { WindowData } from './windowManager';
+import { getConfig } from './settings/appConfig';
 
 export function updateAllWindowsBounds(
   windows: WindowData[],
@@ -115,7 +116,8 @@ export function applyTransform(
   state: TransformState
 ) {
   desk.style.transform = `translate(${state.offsetX}px,${state.offsetY}px) scale(${state.scale})`;
-  const gridSize = 32 * state.scale;
+  const base = getConfig().gridSize;
+  const gridSize = base * state.scale;
   root.style.backgroundSize = `${gridSize}px ${gridSize}px`;
   root.style.backgroundPosition = `${state.offsetX}px ${state.offsetY}px`;
   updateAllWindowsBounds(windows, windowElements);

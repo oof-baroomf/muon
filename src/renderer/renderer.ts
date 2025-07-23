@@ -7,7 +7,7 @@ import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
-import { collides, Rect } from './collision';
+import { Rect, clampDrag, clampMove } from './collision';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -111,19 +111,18 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     const doDrag = (ev: MouseEvent) => {
       const dx = (ev.clientX - startX) / transform.scale;
       const dy = (ev.clientY - startY) / transform.scale;
-      const newLeft = startLeft + dx;
-      const newTop = startTop + dy;
-      const newRect: Rect = {
-        x: newLeft,
-        y: newTop,
-        w: parseFloat(cont.style.width),
-        h: parseFloat(cont.style.height)
-      };
-      if (collides(newRect, windows, w.id)) return;
-      cont.style.left = newLeft + 'px';
-      cont.style.top = newTop + 'px';
-      lastLeft = newLeft;
-      lastTop = newTop;
+      const width = parseFloat(cont.style.width);
+      const height = parseFloat(cont.style.height);
+      const rect = clampMove(
+        { x: startLeft + dx, y: startTop + dy, w: width, h: height },
+        { x: lastLeft, y: lastTop, w: width, h: height },
+        windows,
+        w.id
+      );
+      cont.style.left = rect.x + 'px';
+      cont.style.top = rect.y + 'px';
+      lastLeft = rect.x;
+      lastTop = rect.y;
       updateBounds();
     };
 
@@ -392,15 +391,16 @@ root.addEventListener('mousedown', e => {
   desk.appendChild(ghost);
 
   const updateGhost = (ev: MouseEvent) => {
-    const gx = Math.min(dragStartX, ev.clientX);
-    const gy = Math.min(dragStartY, ev.clientY);
-    const gw = Math.abs(ev.clientX - dragStartX);
-    const gh = Math.abs(ev.clientY - dragStartY);
     const deskRect = root.getBoundingClientRect();
-    ghost.style.left = ((gx - deskRect.left - transform.offsetX) / transform.scale) + 'px';
-    ghost.style.top = ((gy - deskRect.top - transform.offsetY) / transform.scale) + 'px';
-    ghost.style.width = gw / transform.scale + 'px';
-    ghost.style.height = gh / transform.scale + 'px';
+    const sx = (dragStartX - deskRect.left - transform.offsetX) / transform.scale;
+    const sy = (dragStartY - deskRect.top - transform.offsetY) / transform.scale;
+    const cx = (ev.clientX - deskRect.left - transform.offsetX) / transform.scale;
+    const cy = (ev.clientY - deskRect.top - transform.offsetY) / transform.scale;
+    const rect = clampDrag(sx, sy, cx, cy, windows);
+    ghost.style.left = rect.x + 'px';
+    ghost.style.top = rect.y + 'px';
+    ghost.style.width = rect.w + 'px';
+    ghost.style.height = rect.h + 'px';
   };
 
   const move = (ev: MouseEvent) => updateGhost(ev);
@@ -419,12 +419,10 @@ root.addEventListener('mousedown', e => {
         h: gh,
         url: ''
       };
-      if (!collides(wdata as Rect, windows)) {
-        windows.push(wdata);
-        const el = createWindowElement(wdata, true);
-        muonActiveWindow = el;
-        save();
-      }
+      windows.push(wdata);
+      const el = createWindowElement(wdata, true);
+      muonActiveWindow = el;
+      save();
     }
     ghost.remove();
     isDragging = false;

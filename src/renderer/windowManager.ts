@@ -16,7 +16,7 @@ export interface Transform {
   y: number;
 }
 
-import { collides, Rect } from './collision';
+import { Rect, clampResize, clampMove } from './collision';
 
 // Add resize handle to all windows
 export function addResizeHandle(
@@ -53,20 +53,18 @@ export function addResizeHandle(
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
-        const newRect: Rect = {
+        const rect = {
           x: parseFloat(cont.style.left),
           y: parseFloat(cont.style.top),
           w: parseFloat(cont.style.width),
           h: parseFloat(cont.style.height)
-        };
-        if (collides(newRect, windows, w.id)) {
-          cont.style.left = lastRect.x + 'px';
-          cont.style.top = lastRect.y + 'px';
-          cont.style.width = lastRect.w + 'px';
-          cont.style.height = lastRect.h + 'px';
-          return;
-        }
-        lastRect = newRect;
+        } as Rect;
+        const clamped = clampResize(rect, lastRect, windows, w.id);
+        cont.style.left = clamped.x + 'px';
+        cont.style.top = clamped.y + 'px';
+        cont.style.width = clamped.w + 'px';
+        cont.style.height = clamped.h + 'px';
+        lastRect = clamped;
         updateBounds();
       };
 
@@ -237,19 +235,18 @@ export function addAddressBarDrag(
     const doDrag = (e: MouseEvent) => {
       const dx = (e.clientX - startX) / scale;
       const dy = (e.clientY - startY) / scale;
-      const newLeft = startLeft + dx;
-      const newTop = startTop + dy;
-      const newRect: Rect = {
-        x: newLeft,
-        y: newTop,
-        w: parseFloat(cont.style.width),
-        h: parseFloat(cont.style.height)
-      };
-      if (collides(newRect, windows, w.id)) return;
-      cont.style.left = newLeft + 'px';
-      cont.style.top = newTop + 'px';
-      lastLeft = newLeft;
-      lastTop = newTop;
+      const width = parseFloat(cont.style.width);
+      const height = parseFloat(cont.style.height);
+      const rect = clampMove(
+        { x: startLeft + dx, y: startTop + dy, w: width, h: height },
+        { x: lastLeft, y: lastTop, w: width, h: height },
+        windows,
+        w.id
+      );
+      cont.style.left = rect.x + 'px';
+      cont.style.top = rect.y + 'px';
+      lastLeft = rect.x;
+      lastTop = rect.y;
       updateBounds();
     };
 

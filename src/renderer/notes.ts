@@ -22,7 +22,16 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   container.appendChild(editor);
 }
 
-export function rerenderVisibleNotes(): void {
+
+export function rescaleNoteEditors(scale: number): void {
+  const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
+  editors.forEach(editor => {
+    editor.style.transformOrigin = 'top left';
+    editor.style.transform = `scale(${1 / scale})`;
+  });
+}
+
+export function rerenderVisibleNotes(scale: number): void {
   const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
   editors.forEach(editor => {
     if (editor.offsetParent) {
@@ -32,4 +41,5 @@ export function rerenderVisibleNotes(): void {
       editor.style.display = originalDisplay;
     }
   });
+  rescaleNoteEditors(scale);
 }

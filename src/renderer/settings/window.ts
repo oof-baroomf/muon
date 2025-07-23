@@ -1,3 +1,4 @@
+import '../styles.css';
 import { loadConfig, saveConfig } from './appConfig';
 
 (async () => {

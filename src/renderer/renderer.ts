@@ -7,6 +7,7 @@ import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
+import { collides, Rect } from './collision';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -104,12 +105,25 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     let startY = e.clientY;
     let startLeft = parseFloat(cont.style.left);
     let startTop = parseFloat(cont.style.top);
+    let lastLeft = startLeft;
+    let lastTop = startTop;
 
     const doDrag = (ev: MouseEvent) => {
       const dx = (ev.clientX - startX) / transform.scale;
       const dy = (ev.clientY - startY) / transform.scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
+      const newLeft = startLeft + dx;
+      const newTop = startTop + dy;
+      const newRect: Rect = {
+        x: newLeft,
+        y: newTop,
+        w: parseFloat(cont.style.width),
+        h: parseFloat(cont.style.height)
+      };
+      if (collides(newRect, windows, w.id)) return;
+      cont.style.left = newLeft + 'px';
+      cont.style.top = newTop + 'px';
+      lastLeft = newLeft;
+      lastTop = newTop;
       updateBounds();
     };
 
@@ -405,10 +419,12 @@ root.addEventListener('mousedown', e => {
         h: gh,
         url: ''
       };
-      windows.push(wdata);
-      const el = createWindowElement(wdata, true);
-      muonActiveWindow = el;
-      save();
+      if (!collides(wdata as Rect, windows)) {
+        windows.push(wdata);
+        const el = createWindowElement(wdata, true);
+        muonActiveWindow = el;
+        save();
+      }
     }
     ghost.remove();
     isDragging = false;

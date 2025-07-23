@@ -1,7 +1,7 @@
 import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
-import { TransformState, applyTransform, zoomAndCenterWindow } from './desktopTransform';
+import { TransformState, applyTransform, zoomAndCenterWindow, panActiveZoom } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
@@ -311,8 +311,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     const bounds = cont.getBoundingClientRect();
     const cx = bounds.left + bounds.width / 2 - root.clientWidth / 2;
     const cy = bounds.top + bounds.height / 2 - root.clientHeight / 2;
-    transform.offsetX -= cx / transform.scale;
-    transform.offsetY -= cy / transform.scale;
+    const dx = -cx / transform.scale;
+    const dy = -cy / transform.scale;
+    transform.offsetX += dx;
+    transform.offsetY += dy;
+    panActiveZoom(dx, dy);
     apply();
   });
 
@@ -430,8 +433,11 @@ root.addEventListener('wheel', e => {
     transform.offsetX = mx - wx * transform.scale;
     transform.offsetY = my - wy * transform.scale;
   } else {
-    transform.offsetX -= e.deltaX / transform.scale;
-    transform.offsetY -= e.deltaY / transform.scale;
+    const dx = -e.deltaX / transform.scale;
+    const dy = -e.deltaY / transform.scale;
+    transform.offsetX += dx;
+    transform.offsetY += dy;
+    panActiveZoom(dx, dy);
   }
   apply();
 }, { passive: false });

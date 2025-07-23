@@ -15,6 +15,17 @@ interface ZoomState {
 }
 
 const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
+let activeZoomElement: HTMLElement | null = null;
+
+export function panActiveZoom(dx: number, dy: number) {
+  if (!activeZoomElement) return;
+  const zs = zoomStateMap.get(activeZoomElement);
+  if (!zs || !zs.zoomed) return;
+  zs.origOffsetX += dx;
+  zs.origOffsetY += dy;
+  if (zs.zoomOffsetX !== undefined) zs.zoomOffsetX += dx;
+  if (zs.zoomOffsetY !== undefined) zs.zoomOffsetY += dy;
+}
 
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
@@ -149,6 +160,7 @@ export function zoomAndCenterWindow(
       Math.abs(state.offsetY - (zs.zoomOffsetY ?? state.offsetY)) > 0.5;
     if (moved) {
       zs.zoomed = false;
+      activeZoomElement = null;
       zs.origScale = state.scale;
       zs.origOffsetX = state.offsetX;
       zs.origOffsetY = state.offsetY;
@@ -183,6 +195,7 @@ export function zoomAndCenterWindow(
     }
     requestAnimationFrame(animateRestore);
     zs.zoomed = false;
+    activeZoomElement = null;
     return;
   }
 
@@ -239,4 +252,5 @@ export function zoomAndCenterWindow(
   }
   requestAnimationFrame(animateZoom);
   zs.zoomed = true;
+  activeZoomElement = cont;
 }

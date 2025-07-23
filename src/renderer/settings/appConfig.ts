@@ -9,7 +9,7 @@ export interface AppConfig {
   };
 }
 
-const isMac = process.platform === 'darwin';
+const isMac = /Mac/.test(navigator.platform);
 const modKey = isMac ? 'Cmd' : 'Ctrl';
 const defaultShortcuts = {
   toggleSearch: `${modKey}+K`,

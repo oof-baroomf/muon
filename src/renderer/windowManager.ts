@@ -16,6 +16,8 @@ export interface Transform {
   y: number;
 }
 
+import { Rect, clampResize, clampMove } from './collision';
+
 // Add resize handle to all windows
 export function addResizeHandle(
   cont: HTMLElement,
@@ -45,11 +47,24 @@ export function addResizeHandle(
       const startHeight = parseFloat(cont.style.height);
       const startLeft = parseFloat(cont.style.left);
       const startTop = parseFloat(cont.style.top);
+      let lastRect: Rect = { x: startLeft, y: startTop, w: startWidth, h: startHeight };
 
       const doResize = (ev: MouseEvent) => {
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
+        const rect = {
+          x: parseFloat(cont.style.left),
+          y: parseFloat(cont.style.top),
+          w: parseFloat(cont.style.width),
+          h: parseFloat(cont.style.height)
+        } as Rect;
+        const clamped = clampResize(rect, lastRect, windows, w.id);
+        cont.style.left = clamped.x + 'px';
+        cont.style.top = clamped.y + 'px';
+        cont.style.width = clamped.w + 'px';
+        cont.style.height = clamped.h + 'px';
+        lastRect = clamped;
         updateBounds();
       };
 
@@ -214,11 +229,24 @@ export function addAddressBarDrag(
     startLeft = parseFloat(cont.style.left);
     startTop = parseFloat(cont.style.top);
 
+    let lastLeft = startLeft;
+    let lastTop = startTop;
+
     const doDrag = (e: MouseEvent) => {
       const dx = (e.clientX - startX) / scale;
       const dy = (e.clientY - startY) / scale;
-      cont.style.left = (startLeft + dx) + 'px';
-      cont.style.top = (startTop + dy) + 'px';
+      const width = parseFloat(cont.style.width);
+      const height = parseFloat(cont.style.height);
+      const rect = clampMove(
+        { x: startLeft + dx, y: startTop + dy, w: width, h: height },
+        { x: lastLeft, y: lastTop, w: width, h: height },
+        windows,
+        w.id
+      );
+      cont.style.left = rect.x + 'px';
+      cont.style.top = rect.y + 'px';
+      lastLeft = rect.x;
+      lastTop = rect.y;
       updateBounds();
     };
 

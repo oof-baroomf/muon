@@ -9,7 +9,8 @@ export interface AppConfig {
   };
 }
 
-const isMac = /Mac/.test(navigator.platform);
+const platform = typeof navigator !== 'undefined' ? navigator.platform : '';
+const isMac = /Mac/.test(platform);
 const modKey = isMac ? 'Cmd' : 'Ctrl';
 const defaultShortcuts = {
   toggleSearch: `${modKey}+K`,

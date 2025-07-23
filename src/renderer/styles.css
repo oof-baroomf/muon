@@ -64,6 +64,16 @@ button,
     image-rendering: pixelated;
 }
 .muon-remove {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 2px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
     color: #aaa;
     transition: color 0.15s;
     border-radius: 4px;
@@ -75,6 +85,7 @@ button,
     image-rendering: pixelated;
     backface-visibility: hidden;
     transform: translateZ(0);
+    z-index: 4;
 }
 .muon-remove:hover {
     color: #fff;
@@ -120,9 +131,9 @@ button,
 }
 
 .muon-nav-btn {
-    font-size: 14px;
-    width: 18px;
-    height: 18px;
+    font-size: 12px;
+    width: 16px;
+    height: 16px;
     display: flex;
     align-items: center;
     justify-content: center;

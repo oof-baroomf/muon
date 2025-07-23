@@ -134,14 +134,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const removeBtn = document.createElement('button');
   removeBtn.textContent = '×';
   removeBtn.title = 'Remove window';
-  removeBtn.className = 'muon-remove bg-transparent border-none leading-none cursor-pointer';
-  removeBtn.style.fontSize = `18px`;
-  removeBtn.style.width = `${barHeight - 4}px`;
-  removeBtn.style.height = `${barHeight - 4}px`;
-  removeBtn.style.display = 'flex';
-  removeBtn.style.alignItems = 'center';
-  removeBtn.style.justifyContent = 'center';
-  removeBtn.style.marginRight = '2px';
+  removeBtn.className = 'muon-remove';
   removeBtn.style.zIndex = '4';
   removeBtn.onclick = (e) => {
     e.stopPropagation();
@@ -221,18 +214,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     const btn = document.createElement('button');
     btn.textContent = label;
     btn.title = title;
-    btn.className = 'muon-nav-btn bg-transparent border-none leading-none cursor-pointer';
-    btn.style.fontSize = '14px';
-    btn.style.width = `${barHeight - 6}px`;
-    btn.style.height = `${barHeight - 6}px`;
-    btn.style.display = 'flex';
-    btn.style.alignItems = 'center';
-    btn.style.justifyContent = 'center';
-    btn.style.borderRadius = '4px';
-    btn.style.color = '#aaa';
-    btn.style.transition = 'color 0.15s, background 0.15s';
-    btn.onmouseenter = () => { btn.style.color = '#fff'; btn.style.background = '#333'; };
-    btn.onmouseleave = () => { btn.style.color = '#aaa'; btn.style.background = 'transparent'; };
+    btn.className = 'muon-nav-btn';
     btn.onclick = (e) => { e.stopPropagation(); handler(); };
     return btn;
   }

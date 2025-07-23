@@ -9,6 +9,9 @@ interface ZoomState {
   origScale: number;
   origOffsetX: number;
   origOffsetY: number;
+  zoomScale?: number;
+  zoomOffsetX?: number;
+  zoomOffsetY?: number;
 }
 
 const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
@@ -140,6 +143,19 @@ export function zoomAndCenterWindow(
   }
 
   if (zs.zoomed) {
+    const moved =
+      Math.abs(state.scale - (zs.zoomScale ?? state.scale)) > 0.001 ||
+      Math.abs(state.offsetX - (zs.zoomOffsetX ?? state.offsetX)) > 0.5 ||
+      Math.abs(state.offsetY - (zs.zoomOffsetY ?? state.offsetY)) > 0.5;
+    if (moved) {
+      zs.zoomed = false;
+      zs.origScale = state.scale;
+      zs.origOffsetX = state.offsetX;
+      zs.origOffsetY = state.offsetY;
+    }
+  }
+
+  if (zs.zoomed) {
     const targetScale = zs.origScale;
     const targetOffsetX = zs.origOffsetX;
     const targetOffsetY = zs.origOffsetY;
@@ -194,6 +210,10 @@ export function zoomAndCenterWindow(
 
   const targetOffsetX = viewportCenterX - winCenterX * targetScale;
   const targetOffsetY = viewportCenterY - winCenterY * targetScale;
+
+  zs.zoomScale = targetScale;
+  zs.zoomOffsetX = targetOffsetX;
+  zs.zoomOffsetY = targetOffsetY;
 
   const startScale = state.scale;
   const startOffsetX = state.offsetX;

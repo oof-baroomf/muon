@@ -6,6 +6,7 @@ import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './se
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
+import { sanitizeNotePath, setupNoteEditor } from './notes';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -169,7 +170,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   const urlBar = document.createElement('input');
   urlBar.type = 'text';
-  urlBar.value = w.url;
+  urlBar.value = w.notePath ? '.' + w.notePath.replace(/\.md$/, '') : w.url;
   urlBar.addEventListener('focus', () => { setTimeout(() => urlBar.select(), 0); });
   urlBar.addEventListener('click', (e) => {
     if (document.activeElement !== urlBar) {
@@ -200,7 +201,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   viewContainer.style.bottom = '8px';
   viewContainer.style.zIndex = '0';
 
-  window.electronAPI.send('view:create', w.id, w.url || '');
+  if (w.notePath) {
+    setupNoteEditor(viewContainer, w.notePath);
+  } else {
+    window.electronAPI.send('view:create', w.id, w.url || '');
+  }
 
   const updateBounds = () => {
     const rect = viewContainer.getBoundingClientRect();
@@ -245,6 +250,16 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   urlBar.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
       let val = urlBar.value.trim();
+      if (val.startsWith('.')) {
+        const note = sanitizeNotePath(val.slice(1));
+        urlBar.value = '.' + note.replace(/\.md$/, '');
+        w.notePath = note;
+        w.url = '';
+        window.electronAPI.send('view:destroy', w.id);
+        setupNoteEditor(viewContainer, note);
+        save();
+        return;
+      }
       if (!/^(https?:|file:)/i.test(val)) {
         if (/^[\w-]+\.[\w-]+/.test(val)) {
           val = 'https://' + val;
@@ -252,28 +267,39 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
           val = 'https://www.google.com/search?q=' + encodeURIComponent(val);
         }
       }
+      if (w.notePath) {
+        w.notePath = undefined;
+        viewContainer.innerHTML = '';
+        window.electronAPI.send('view:create', w.id, val);
+      } else {
+        window.electronAPI.send('view:load-url', w.id, val);
+      }
       w.url = val;
-      window.electronAPI.send('view:load-url', w.id, val);
+      save();
     }
   });
 
   const updateTitle = (title: string) => { w.title = title; };
 
-  window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
-    urlBar.value = url;
-    w.url = url;
-  });
-  window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
-    urlBar.value = url;
-    w.url = url;
-  });
-  window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
-    updateTitle(title);
-  });
+  if (!w.notePath) {
+    window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
+      urlBar.value = url;
+      w.url = url;
+    });
+    window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
+      urlBar.value = url;
+      w.url = url;
+    });
+    window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
+      updateTitle(title);
+    });
+  }
 
   const adjustZoom = () => {
-    const newZoom = transform.scale * (cont.offsetWidth / 800);
-    window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
+    if (!w.notePath) {
+      const newZoom = transform.scale * (cont.offsetWidth / 800);
+      window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
+    }
   };
 
   new ResizeObserver(updateBounds).observe(cont);

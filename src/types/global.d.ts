@@ -9,6 +9,8 @@ declare global {
       saveConfig(cfg: any): void;
       send(channel: string, ...args: any[]): void;
       receive(channel: string, func: (...args: any[]) => void): () => void;
+      readNote(path: string): Promise<string>;
+      writeNote(path: string, content: string): void;
     };
   }
 

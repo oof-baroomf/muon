@@ -17,6 +17,7 @@ interface WindowState {
   w: number;
   h: number;
   url: string;
+  notePath?: string;
 }
 
 interface DesktopState {
@@ -113,6 +114,23 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
   saveConfig(appConfig);
   mainWindow?.webContents.send('config:updated', appConfig);
   settingsWindow?.webContents.send('config:updated', appConfig);
+const notesDir = path.join(app.getPath('userData'), 'notes');
+
+ipcMain.handle('note:read', async (_evt, notePath: string) => {
+  const full = path.join(notesDir, notePath);
+  try {
+    return fs.readFileSync(full, 'utf-8');
+  } catch {
+    fs.mkdirSync(path.dirname(full), { recursive: true });
+    fs.writeFileSync(full, '');
+    return '';
+  }
+});
+
+ipcMain.on('note:write', (_evt, notePath: string, content: string) => {
+  const full = path.join(notesDir, notePath);
+  fs.mkdirSync(path.dirname(full), { recursive: true });
+  fs.writeFileSync(full, content);
 });
 
 ipcMain.on('view:create', (evt, id: string, url: string) => {
@@ -208,11 +226,23 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   }
 });
 
+ipcMain.on('overlay:show', () => {
+  for (const view of views.values()) {
+    view.setVisible(false);
+  }
+});
+
+ipcMain.on('overlay:hide', () => {
+  for (const view of views.values()) {
+    view.setVisible(true);
+  }
+});
+
 app.whenReady().then(() => {
   createMainWindow();
   createMenu();
 });
-
+  
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

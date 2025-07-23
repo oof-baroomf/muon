@@ -14,5 +14,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => {
       ipcRenderer.removeListener(channel, subscription);
     };
-  }
+  },
+  readNote: (path: string): Promise<string> => ipcRenderer.invoke('note:read', path),
+  writeNote: (path: string, content: string) => ipcRenderer.send('note:write', path, content)
 });

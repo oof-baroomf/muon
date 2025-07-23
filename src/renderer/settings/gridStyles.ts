@@ -15,7 +15,8 @@ export function applyGridStyle(
       `<rect x='${(config.gridSize - stroke) / 2}' y='${(config.gridSize - len) / 2}' width='${stroke}' height='${len}' fill='${color}'/>` +
       `<rect x='${(config.gridSize - len) / 2}' y='${(config.gridSize - stroke) / 2}' width='${len}' height='${stroke}' fill='${color}'/>` +
       `</svg>`;
-    root.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+    const uri = 'data:image/svg+xml;base64,' + btoa(svg);
+    root.style.backgroundImage = `url("${uri}")`;
     root.style.backgroundSize = `${config.gridSize}px ${config.gridSize}px`;
     root.style.backgroundPosition = 'center';
   } else {

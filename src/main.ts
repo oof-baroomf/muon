@@ -78,9 +78,9 @@ function openSettingsWindow() {
     return;
   }
   settingsWindow = new BrowserWindow({
-    width: 360,
-    height: 240,
-    resizable: false,
+    width: 400,
+    height: 260,
+    resizable: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       sandbox: true

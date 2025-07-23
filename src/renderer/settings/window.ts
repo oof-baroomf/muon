@@ -5,10 +5,12 @@ import { loadConfig, saveConfig } from './appConfig';
   const root = document.getElementById('root') as HTMLElement;
   const cfg = await loadConfig();
 
-  const box = document.createElement('div');
-  box.className = 'bg-zinc-800 border border-zinc-600 rounded-lg p-4 w-64 space-y-4';
+  root.classList.add('space-y-4');
 
-  const gridSizeRow = document.createElement('div');
+  const firstRow = document.createElement('div');
+  firstRow.className = 'flex gap-4';
+
+  const sizeCol = document.createElement('div');
   const gridSizeLabel = document.createElement('label');
   gridSizeLabel.textContent = 'Grid Size';
   gridSizeLabel.className = 'block text-sm';
@@ -19,7 +21,7 @@ import { loadConfig, saveConfig } from './appConfig';
   sizeInput.min = '4';
   sizeInput.max = '256';
   sizeInput.value = String(cfg.gridSize);
-  sizeInput.className = 'w-full bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
+  sizeInput.className = 'w-20 bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
   const sizeUnit = document.createElement('span');
   sizeUnit.textContent = 'px';
   sizeWrap.appendChild(sizeInput);
@@ -28,15 +30,15 @@ import { loadConfig, saveConfig } from './appConfig';
     cfg.gridSize = parseInt(sizeInput.value) || cfg.gridSize;
     saveConfig(cfg);
   });
-  gridSizeRow.appendChild(gridSizeLabel);
-  gridSizeRow.appendChild(sizeWrap);
+  sizeCol.appendChild(gridSizeLabel);
+  sizeCol.appendChild(sizeWrap);
 
-  const styleRow = document.createElement('div');
+  const styleCol = document.createElement('div');
   const styleLabel = document.createElement('label');
   styleLabel.textContent = 'Grid Style';
   styleLabel.className = 'block text-sm';
   const styleSelect = document.createElement('select');
-  styleSelect.className = 'mt-1 w-full bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
+  styleSelect.className = 'mt-1 bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
   for (const opt of ['lines', 'cross', 'dots']) {
     const o = document.createElement('option');
     o.value = opt;
@@ -48,8 +50,8 @@ import { loadConfig, saveConfig } from './appConfig';
     cfg.gridStyle = styleSelect.value as any;
     saveConfig(cfg);
   });
-  styleRow.appendChild(styleLabel);
-  styleRow.appendChild(styleSelect);
+  styleCol.appendChild(styleLabel);
+  styleCol.appendChild(styleSelect);
 
   const opacityRow = document.createElement('div');
   const opacityLabel = document.createElement('label');
@@ -69,8 +71,9 @@ import { loadConfig, saveConfig } from './appConfig';
   opacityRow.appendChild(opacityLabel);
   opacityRow.appendChild(opacityInput);
 
-  box.appendChild(gridSizeRow);
-  box.appendChild(styleRow);
-  box.appendChild(opacityRow);
-  root.appendChild(box);
+  firstRow.appendChild(sizeCol);
+  firstRow.appendChild(styleCol);
+
+  root.appendChild(firstRow);
+  root.appendChild(opacityRow);
 })();

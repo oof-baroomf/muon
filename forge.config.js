@@ -19,6 +19,12 @@ module.exports = {
             js: './src/renderer/renderer.ts',
             name: 'main_window',
             preload: { js: './src/preload.ts' }
+          },
+          {
+            html: './src/renderer/settings/index.html',
+            js: './src/renderer/settings/window.ts',
+            name: 'settings_window',
+            preload: { js: './src/preload.ts' }
           }
         ]
       }

@@ -4,14 +4,14 @@ export interface AppConfig {
   gridOpacity: number;
 }
 
-let config: AppConfig = { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.4 };
+let config: AppConfig = { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.15 };
 
 export async function loadConfig(): Promise<AppConfig> {
   const c = await window.electronAPI.loadConfig();
   config = {
     gridSize: typeof c.gridSize === 'number' ? c.gridSize : 32,
     gridStyle: c.gridStyle || 'lines',
-    gridOpacity: typeof c.gridOpacity === 'number' ? c.gridOpacity : 0.4
+    gridOpacity: typeof c.gridOpacity === 'number' ? c.gridOpacity : 0.15
   };
   return config;
 }

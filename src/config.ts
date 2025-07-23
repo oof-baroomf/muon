@@ -29,10 +29,10 @@ export function loadConfig(): AppConfig {
     return {
       gridSize: typeof cfg.grid_size === 'number' ? cfg.grid_size : 32,
       gridStyle: (cfg.grid_style as any) || 'lines',
-      gridOpacity: typeof cfg.grid_opacity === 'number' ? cfg.grid_opacity : 0.4
+      gridOpacity: typeof cfg.grid_opacity === 'number' ? cfg.grid_opacity : 0.15
     };
   } catch {
-    return { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.4 };
+    return { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.15 };
   }
 }
 

@@ -4,6 +4,10 @@ import { loadConfig, saveConfig } from './appConfig';
   const root = document.getElementById('root') as HTMLElement;
   const cfg = await loadConfig();
 
+  const box = document.createElement('div');
+  box.className = 'bg-zinc-800 border border-zinc-600 rounded-lg p-4 w-60 space-y-4';
+
+  const gridSizeRow = document.createElement('div');
   const gridSizeLabel = document.createElement('label');
   gridSizeLabel.textContent = 'Grid Size';
   gridSizeLabel.className = 'block text-sm';
@@ -17,7 +21,10 @@ import { loadConfig, saveConfig } from './appConfig';
     cfg.gridSize = parseInt(sizeInput.value) || cfg.gridSize;
     saveConfig(cfg);
   });
+  gridSizeRow.appendChild(gridSizeLabel);
+  gridSizeRow.appendChild(sizeInput);
 
+  const styleRow = document.createElement('div');
   const styleLabel = document.createElement('label');
   styleLabel.textContent = 'Grid Style';
   styleLabel.className = 'block text-sm';
@@ -34,9 +41,10 @@ import { loadConfig, saveConfig } from './appConfig';
     cfg.gridStyle = styleSelect.value as any;
     saveConfig(cfg);
   });
+  styleRow.appendChild(styleLabel);
+  styleRow.appendChild(styleSelect);
 
-  root.appendChild(gridSizeLabel);
-  root.appendChild(sizeInput);
-  root.appendChild(styleLabel);
-  root.appendChild(styleSelect);
+  box.appendChild(gridSizeRow);
+  box.appendChild(styleRow);
+  root.appendChild(box);
 })();

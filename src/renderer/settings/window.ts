@@ -1,5 +1,6 @@
 import '../styles.css';
 import { loadConfig, saveConfig } from './appConfig';
+import { createShortcutInput } from './shortcutInput';
 
 (async () => {
   const root = document.getElementById('root') as HTMLElement;
@@ -76,4 +77,33 @@ import { loadConfig, saveConfig } from './appConfig';
 
   root.appendChild(firstRow);
   root.appendChild(opacityRow);
+
+  const scTitle = document.createElement('div');
+  scTitle.textContent = 'Keyboard Shortcuts';
+  scTitle.className = 'pt-2 text-sm font-semibold';
+  const scContainer = document.createElement('div');
+  scContainer.className = 'space-y-2';
+
+  const defs: [keyof typeof cfg.shortcuts, string][] = [
+    ['toggleSearch', 'Toggle Search'],
+    ['saveState', 'Save Layout'],
+    ['centerWindow', 'Center Window']
+  ];
+  for (const [key, labelText] of defs) {
+    const row = document.createElement('div');
+    row.className = 'flex items-center gap-2';
+    const label = document.createElement('label');
+    label.textContent = labelText;
+    label.className = 'w-40 text-sm';
+    const input = createShortcutInput(cfg.shortcuts[key], val => {
+      cfg.shortcuts[key] = val;
+      saveConfig(cfg);
+    });
+    row.appendChild(label);
+    row.appendChild(input);
+    scContainer.appendChild(row);
+  }
+
+  root.appendChild(scTitle);
+  root.appendChild(scContainer);
 })();

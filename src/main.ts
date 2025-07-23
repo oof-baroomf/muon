@@ -114,6 +114,8 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
   saveConfig(appConfig);
   mainWindow?.webContents.send('config:updated', appConfig);
   settingsWindow?.webContents.send('config:updated', appConfig);
+});
+
 const notesDir = path.join(app.getPath('userData'), 'notes');
 
 ipcMain.handle('note:read', async (_evt, notePath: string) => {

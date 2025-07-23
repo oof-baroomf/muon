@@ -21,3 +21,12 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   });
   container.appendChild(editor);
 }
+
+export function updateNoteEditorZoom(scale: number) {
+  const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
+  editors.forEach(editor => {
+    editor.style.transformOrigin = 'top left';
+    editor.style.transform = `scale(${1 / scale})`;
+    editor.style.zoom = String(scale);
+  });
+}

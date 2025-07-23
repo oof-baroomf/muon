@@ -17,6 +17,7 @@ let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';
+import { updateNoteEditorZoom } from './notes';
 
 export function updateAllWindowsBounds(
   windows: WindowData[],
@@ -122,6 +123,7 @@ export function applyTransform(
   root.style.backgroundPosition = `${state.offsetX}px ${state.offsetY}px`;
   updateAllWindowsBounds(windows, windowElements);
   updateAllWindowsZoom(windows, windowElements, state.scale);
+  updateNoteEditorZoom(state.scale);
   root.style.backgroundRepeat = 'repeat';
   root.offsetHeight;
   debouncedUIRerender(root, desk, state.scale);

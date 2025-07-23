@@ -17,7 +17,7 @@ let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';
-import { updateNoteEditorZoom } from './notes';
+import { rerenderVisibleNotes } from './notes';
 
 export function updateAllWindowsBounds(
   windows: WindowData[],
@@ -106,6 +106,7 @@ function forceUIRerender(root: HTMLElement, desk: HTMLElement, scale: number) {
   desk.style.zoom = (1.0001).toString();
   desk.offsetHeight;
   desk.style.zoom = originalZoom || '';
+  rerenderVisibleNotes();
   console.log('UI rerender completed');
 }
 
@@ -123,10 +124,10 @@ export function applyTransform(
   root.style.backgroundPosition = `${state.offsetX}px ${state.offsetY}px`;
   updateAllWindowsBounds(windows, windowElements);
   updateAllWindowsZoom(windows, windowElements, state.scale);
-  updateNoteEditorZoom(state.scale);
   root.style.backgroundRepeat = 'repeat';
   root.offsetHeight;
   debouncedUIRerender(root, desk, state.scale);
+  rerenderVisibleNotes();
 }
 
 export function zoomAndCenterWindow(

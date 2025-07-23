@@ -22,11 +22,14 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   container.appendChild(editor);
 }
 
-export function updateNoteEditorZoom(scale: number) {
+export function rerenderVisibleNotes(): void {
   const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
   editors.forEach(editor => {
-    editor.style.transformOrigin = 'top left';
-    editor.style.transform = `scale(${1 / scale})`;
-    editor.style.zoom = String(scale);
+    if (editor.offsetParent) {
+      const originalDisplay = editor.style.display;
+      editor.style.display = 'none';
+      editor.offsetHeight;
+      editor.style.display = originalDisplay;
+    }
   });
 }

@@ -1,6 +1,6 @@
 export interface AppConfig {
   gridSize: number;
-  gridStyle: 'lines' | 'cross' | 'dots';
+  gridStyle: 'lines' | 'dots';
   gridOpacity: number;
   shortcuts: {
     toggleSearch: string;
@@ -29,7 +29,7 @@ export async function loadConfig(): Promise<AppConfig> {
   const c = await window.electronAPI.loadConfig();
   config = {
     gridSize: typeof c.gridSize === 'number' ? c.gridSize : 32,
-    gridStyle: c.gridStyle || 'lines',
+    gridStyle: c.gridStyle === 'dots' ? 'dots' : 'lines',
     gridOpacity: typeof c.gridOpacity === 'number' ? c.gridOpacity : 0.15,
     shortcuts: {
       toggleSearch: c.shortcuts?.toggleSearch || defaultShortcuts.toggleSearch,

@@ -40,7 +40,7 @@ import { createShortcutInput } from './shortcutInput';
   styleLabel.className = 'block text-sm';
   const styleSelect = document.createElement('select');
   styleSelect.className = 'mt-1 bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
-  for (const opt of ['lines', 'cross', 'dots']) {
+  for (const opt of ['lines', 'dots']) {
     const o = document.createElement('option');
     o.value = opt;
     o.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
@@ -48,7 +48,7 @@ import { createShortcutInput } from './shortcutInput';
     styleSelect.appendChild(o);
   }
   styleSelect.addEventListener('change', () => {
-    cfg.gridStyle = styleSelect.value as any;
+    cfg.gridStyle = styleSelect.value as 'lines' | 'dots';
     saveConfig(cfg);
   });
   styleCol.appendChild(styleLabel);

@@ -4,7 +4,7 @@ import { app } from 'electron';
 
 export interface AppConfig {
   gridSize: number;
-  gridStyle: 'lines' | 'cross' | 'dots';
+  gridStyle: 'lines' | 'dots';
   gridOpacity: number;
   shortcuts: {
     toggleSearch: string;
@@ -41,7 +41,7 @@ export function loadConfig(): AppConfig {
     }
     return {
       gridSize: typeof cfg.grid_size === 'number' ? cfg.grid_size : 32,
-      gridStyle: (cfg.grid_style as any) || 'lines',
+      gridStyle: cfg.grid_style === 'dots' ? 'dots' : 'lines',
       gridOpacity: typeof cfg.grid_opacity === 'number' ? cfg.grid_opacity : 0.15,
       shortcuts: {
         toggleSearch: typeof cfg.shortcut_toggle_search === 'string'

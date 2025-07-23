@@ -25,6 +25,7 @@ export function createShortcutInput(initial: string, onChange: (v: string) => vo
       const combo = parts.join('+');
       btn.textContent = combo;
       document.removeEventListener('keydown', handler, true);
+      document.removeEventListener('mousedown', cancel, true);
       recording = false;
       onChange(combo);
     };

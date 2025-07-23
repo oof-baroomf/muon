@@ -13,10 +13,12 @@ export interface AppConfig {
   };
 }
 
+const isMac = process.platform === 'darwin';
+const modKey = isMac ? 'Cmd' : 'Ctrl';
 const defaultShortcuts = {
-  toggleSearch: 'Ctrl+K',
-  saveState: 'Ctrl+S',
-  centerWindow: 'Ctrl+D'
+  toggleSearch: `${modKey}+K`,
+  saveState: `${modKey}+S`,
+  centerWindow: `${modKey}+D`
 };
 
 const configPath = path.join(app.getPath('userData'), 'config.toml');

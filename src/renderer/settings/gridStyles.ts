@@ -4,7 +4,7 @@ export function applyGridStyle(
   root: HTMLElement,
   config: AppConfig = getConfig()
 ) {
-  const color = '#222';
+  const color = `rgba(34,34,34,${config.gridOpacity})`;
   if (config.gridStyle === 'dots') {
     root.style.backgroundImage = `radial-gradient(circle, ${color} 1px, transparent 1px)`;
     root.style.backgroundSize = `${config.gridSize}px ${config.gridSize}px`;

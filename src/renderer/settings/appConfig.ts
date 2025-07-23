@@ -1,15 +1,17 @@
 export interface AppConfig {
   gridSize: number;
   gridStyle: 'lines' | 'cross' | 'dots';
+  gridOpacity: number;
 }
 
-let config: AppConfig = { gridSize: 32, gridStyle: 'lines' };
+let config: AppConfig = { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.4 };
 
 export async function loadConfig(): Promise<AppConfig> {
   const c = await window.electronAPI.loadConfig();
   config = {
     gridSize: typeof c.gridSize === 'number' ? c.gridSize : 32,
-    gridStyle: c.gridStyle || 'lines'
+    gridStyle: c.gridStyle || 'lines',
+    gridOpacity: typeof c.gridOpacity === 'number' ? c.gridOpacity : 0.4
   };
   return config;
 }

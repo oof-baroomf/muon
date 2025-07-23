@@ -5,6 +5,7 @@ import { app } from 'electron';
 export interface AppConfig {
   gridSize: number;
   gridStyle: 'lines' | 'cross' | 'dots';
+  gridOpacity: number;
 }
 
 const configPath = path.join(app.getPath('userData'), 'config.toml');
@@ -27,14 +28,18 @@ export function loadConfig(): AppConfig {
     }
     return {
       gridSize: typeof cfg.grid_size === 'number' ? cfg.grid_size : 32,
-      gridStyle: (cfg.grid_style as any) || 'lines'
+      gridStyle: (cfg.grid_style as any) || 'lines',
+      gridOpacity: typeof cfg.grid_opacity === 'number' ? cfg.grid_opacity : 0.4
     };
   } catch {
-    return { gridSize: 32, gridStyle: 'lines' };
+    return { gridSize: 32, gridStyle: 'lines', gridOpacity: 0.4 };
   }
 }
 
 export function saveConfig(config: AppConfig) {
-  const text = `grid_size = ${config.gridSize}\ngrid_style = "${config.gridStyle}"\n`;
+  const text =
+    `grid_size = ${config.gridSize}\n` +
+    `grid_style = "${config.gridStyle}"\n` +
+    `grid_opacity = ${config.gridOpacity}\n`;
   fs.writeFileSync(configPath, text);
 }

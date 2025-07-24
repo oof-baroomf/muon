@@ -7,23 +7,9 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
 import fs from 'fs';
 import { loadConfig, saveConfig, AppConfig } from './config';
+import type { DesktopState } from './renderer/state';
 
 const views = new Map<string, WebContentsView>();
-
-interface WindowState {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  url: string;
-  notePath?: string;
-}
-
-interface DesktopState {
-  windows: WindowState[];
-  transform: { scale: number; x: number; y: number };
-}
 
 let mainWindow: BrowserWindow | null = null;
 let appConfig: AppConfig = loadConfig();
@@ -150,7 +136,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   views.set(id, view);
   view.webContents.loadURL(url);
 
-  const send = (channel: string, ...args: any[]) => {
+  const send = (channel: string, ...args: unknown[]) => {
     const wc = evt.sender;
     if (!wc.isDestroyed()) {
       wc.send(channel, ...args);

@@ -18,6 +18,13 @@ export interface Transform {
 
 import { Rect, clampResize, clampMove } from './collision';
 
+interface ResizeState {
+  startWidth: number;
+  startHeight: number;
+  startLeft: number;
+  startTop: number;
+}
+
 // Add resize handle to all windows
 export function addResizeHandle(
   cont: HTMLElement,
@@ -31,7 +38,7 @@ export function addResizeHandle(
     edge: string,
     cursor: string,
     style: Partial<CSSStyleDeclaration>,
-    resizeFn: (dx: number, dy: number, state: any) => void
+    resizeFn: (dx: number, dy: number, state: ResizeState) => void
   ) {
     const handle = document.createElement('div');
     handle.className = 'muon-resize-handle muon-resize-' + edge;

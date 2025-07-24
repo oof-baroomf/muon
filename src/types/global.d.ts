@@ -3,12 +3,12 @@ export {};
 declare global {
   interface Window {
     electronAPI: {
-      loadState(): Promise<any>;
-      saveState(state: any): void;
-      loadConfig(): Promise<any>;
-      saveConfig(cfg: any): void;
-      send(channel: string, ...args: any[]): void;
-      receive(channel: string, func: (...args: any[]) => void): () => void;
+      loadState(): Promise<import('../renderer/state').DesktopState>;
+      saveState(state: import('../renderer/state').DesktopState): void;
+      loadConfig(): Promise<import('../config').AppConfig>;
+      saveConfig(cfg: import('../config').AppConfig): void;
+      send<T extends unknown[]>(channel: string, ...args: T): void;
+      receive<T extends unknown[]>(channel: string, func: (...args: T) => void): () => void;
       readNote(path: string): Promise<string>;
       writeNote(path: string, content: string): void;
     };

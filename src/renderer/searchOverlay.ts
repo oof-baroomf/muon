@@ -1,5 +1,5 @@
 import { WindowData } from './windowManager';
-import { zoomAndCenterWindow, TransformState } from './desktopTransform';
+import { zoomAndCenterWindow, centerWindow, isElementZoomed, TransformState } from './desktopTransform';
 
 interface Deps {
   root: HTMLElement;
@@ -109,5 +109,9 @@ function selectResult(i: number) {
   if (!res) return;
   deps.setActiveWindow(res.element);
   hideSearch();
-  zoomAndCenterWindow(res.element, deps.root, deps.transform, deps.applyTransform);
+  if (isElementZoomed(res.element)) {
+    centerWindow(res.element, deps.root, deps.transform, deps.applyTransform);
+  } else {
+    zoomAndCenterWindow(res.element, deps.root, deps.transform, deps.applyTransform);
+  }
 }

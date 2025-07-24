@@ -26,11 +26,11 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
 export function rerenderVisibleNotes(): void {
   const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
   editors.forEach(editor => {
-    if (editor.offsetParent) {
-      const originalDisplay = editor.style.display;
-      editor.style.display = 'none';
-      editor.offsetHeight;
-      editor.style.display = originalDisplay;
-    }
+      if (editor.offsetParent) {
+        const originalDisplay = editor.style.display;
+        editor.style.display = 'none';
+        void editor.offsetHeight;
+        editor.style.display = originalDisplay;
+      }
   });
 }

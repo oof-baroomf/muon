@@ -15,6 +15,15 @@ interface ZoomState {
 }
 
 const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
+let activeZoomElement: HTMLElement | null = null;
+
+export function panActiveZoom(dx: number, dy: number) {
+  if (!activeZoomElement) return;
+  const zs = zoomStateMap.get(activeZoomElement);
+  if (!zs || !zs.zoomed) return;
+  zs.origOffsetX += dx;
+  zs.origOffsetY += dy;
+}
 
 let uiRerenderTimeout: NodeJS.Timeout | null = null;
 
@@ -146,52 +155,78 @@ export function zoomAndCenterWindow(
   }
 
   if (zs.zoomed) {
-    const moved =
-      Math.abs(state.scale - (zs.zoomScale ?? state.scale)) > 0.001 ||
-      Math.abs(state.offsetX - (zs.zoomOffsetX ?? state.offsetX)) > 0.5 ||
-      Math.abs(state.offsetY - (zs.zoomOffsetY ?? state.offsetY)) > 0.5;
-    if (moved) {
-      zs.zoomed = false;
-      zs.origScale = state.scale;
-      zs.origOffsetX = state.offsetX;
-      zs.origOffsetY = state.offsetY;
-    }
-  }
+    const scaleDiff = Math.abs(state.scale - (zs.zoomScale ?? state.scale));
+    const dx = state.offsetX - (zs.zoomOffsetX ?? state.offsetX);
+    const dy = state.offsetY - (zs.zoomOffsetY ?? state.offsetY);
+    const moved = Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5;
 
-  if (zs.zoomed) {
-    const targetScale = zs.origScale;
-    const targetOffsetX = zs.origOffsetX;
-    const targetOffsetY = zs.origOffsetY;
-    const startScale = state.scale;
-    const startOffsetX = state.offsetX;
-    const startOffsetY = state.offsetY;
-    const duration = 300;
-    const startTime = performance.now();
+    if (scaleDiff < 0.001 && !moved) {
+      const targetScale = zs.origScale;
+      const targetOffsetX = zs.origOffsetX;
+      const targetOffsetY = zs.origOffsetY;
+      const startScale = state.scale;
+      const startOffsetX = state.offsetX;
+      const startOffsetY = state.offsetY;
+      const duration = 300;
+      const startTime = performance.now();
 
-    function animateRestore(now: number) {
-      const t = Math.min(1, (now - startTime) / duration);
-      const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      state.scale = startScale + (targetScale - startScale) * ease;
-      state.offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
-      state.offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
-      apply();
-      if (t < 1) {
-        requestAnimationFrame(animateRestore);
-      } else {
-        state.scale = targetScale;
-        state.offsetX = targetOffsetX;
-        state.offsetY = targetOffsetY;
+      function animateRestore(now: number) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        state.scale = startScale + (targetScale - startScale) * ease;
+        state.offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
+        state.offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
         apply();
+        if (t < 1) {
+          requestAnimationFrame(animateRestore);
+        } else {
+          state.scale = targetScale;
+          state.offsetX = targetOffsetX;
+          state.offsetY = targetOffsetY;
+          apply();
+        }
       }
+      requestAnimationFrame(animateRestore);
+      zs.zoomed = false;
+      activeZoomElement = null;
+      return;
     }
-    requestAnimationFrame(animateRestore);
+
+    if (scaleDiff < 0.001 && moved && zs.zoomOffsetX !== undefined && zs.zoomOffsetY !== undefined) {
+      const startOffsetX = state.offsetX;
+      const startOffsetY = state.offsetY;
+      const targetOffsetX = zs.zoomOffsetX;
+      const targetOffsetY = zs.zoomOffsetY;
+      const duration = 300;
+      const startTime = performance.now();
+
+      function animateRecenter(now: number) {
+        const t = Math.min(1, (now - startTime) / duration);
+        const ease = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+        state.offsetX = startOffsetX + (targetOffsetX - startOffsetX) * ease;
+        state.offsetY = startOffsetY + (targetOffsetY - startOffsetY) * ease;
+        apply();
+        if (t < 1) {
+          requestAnimationFrame(animateRecenter);
+        } else {
+          state.offsetX = targetOffsetX;
+          state.offsetY = targetOffsetY;
+          apply();
+        }
+      }
+      requestAnimationFrame(animateRecenter);
+      return;
+    }
+
+    // scale changed while zoomed; reset zoom state
     zs.zoomed = false;
-    return;
+    activeZoomElement = null;
+    zs.origScale = state.scale;
+    zs.origOffsetX = state.offsetX;
+    zs.origOffsetY = state.offsetY;
   }
 
   zs.origScale = state.scale;
-  zs.origOffsetX = state.offsetX;
-  zs.origOffsetY = state.offsetY;
 
   const margin = 32;
   const winW = cont.offsetWidth;
@@ -213,6 +248,9 @@ export function zoomAndCenterWindow(
 
   const targetOffsetX = viewportCenterX - winCenterX * targetScale;
   const targetOffsetY = viewportCenterY - winCenterY * targetScale;
+
+  zs.origOffsetX = state.offsetX;
+  zs.origOffsetY = state.offsetY;
 
   zs.zoomScale = targetScale;
   zs.zoomOffsetX = targetOffsetX;
@@ -242,4 +280,45 @@ export function zoomAndCenterWindow(
   }
   requestAnimationFrame(animateZoom);
   zs.zoomed = true;
+  activeZoomElement = cont;
 }
+
+export function centerWindow(cont: HTMLElement, root: HTMLElement, state: TransformState, apply: () => void) {
+  const bounds = cont.getBoundingClientRect();
+  const cx = bounds.left + bounds.width / 2 - root.clientWidth / 2;
+  const cy = bounds.top + bounds.height / 2 - root.clientHeight / 2;
+  const dx = -cx / state.scale;
+  const dy = -cy / state.scale;
+  state.offsetX += dx;
+  state.offsetY += dy;
+  panActiveZoom(dx, dy);
+  apply();
+}
+
+export function initPanZoom(root: HTMLElement, state: TransformState, apply: () => void) {
+  root.addEventListener('wheel', e => {
+    if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLElement).matches(':focus')) {
+      return;
+    }
+    e.preventDefault();
+    if (e.metaKey || e.ctrlKey) {
+      const zoomIntensity = 0.001;
+      const delta = -e.deltaY * zoomIntensity;
+      const mx = e.clientX - root.getBoundingClientRect().left;
+      const my = e.clientY - root.getBoundingClientRect().top;
+      const wx = (mx - state.offsetX) / state.scale;
+      const wy = (my - state.offsetY) / state.scale;
+      state.scale = Math.min(Math.max(0.25, state.scale * (1 + delta)), 4);
+      state.offsetX = mx - wx * state.scale;
+      state.offsetY = my - wy * state.scale;
+    } else {
+      const dx = -e.deltaX / state.scale;
+      const dy = -e.deltaY / state.scale;
+      state.offsetX += dx;
+      state.offsetY += dy;
+      panActiveZoom(dx, dy);
+    }
+    apply();
+  }, { passive: false });
+}
+

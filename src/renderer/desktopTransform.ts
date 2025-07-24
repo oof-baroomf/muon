@@ -254,3 +254,43 @@ export function zoomAndCenterWindow(
   zs.zoomed = true;
   activeZoomElement = cont;
 }
+
+export function centerWindow(cont: HTMLElement, root: HTMLElement, state: TransformState, apply: () => void) {
+  const bounds = cont.getBoundingClientRect();
+  const cx = bounds.left + bounds.width / 2 - root.clientWidth / 2;
+  const cy = bounds.top + bounds.height / 2 - root.clientHeight / 2;
+  const dx = -cx / state.scale;
+  const dy = -cy / state.scale;
+  state.offsetX += dx;
+  state.offsetY += dy;
+  panActiveZoom(dx, dy);
+  apply();
+}
+
+export function initPanZoom(root: HTMLElement, state: TransformState, apply: () => void) {
+  root.addEventListener('wheel', e => {
+    if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLElement).matches(':focus')) {
+      return;
+    }
+    e.preventDefault();
+    if (e.metaKey || e.ctrlKey) {
+      const zoomIntensity = 0.001;
+      const delta = -e.deltaY * zoomIntensity;
+      const mx = e.clientX - root.getBoundingClientRect().left;
+      const my = e.clientY - root.getBoundingClientRect().top;
+      const wx = (mx - state.offsetX) / state.scale;
+      const wy = (my - state.offsetY) / state.scale;
+      state.scale = Math.min(Math.max(0.25, state.scale * (1 + delta)), 4);
+      state.offsetX = mx - wx * state.scale;
+      state.offsetY = my - wy * state.scale;
+    } else {
+      const dx = -e.deltaX / state.scale;
+      const dy = -e.deltaY / state.scale;
+      state.offsetX += dx;
+      state.offsetY += dy;
+      panActiveZoom(dx, dy);
+    }
+    apply();
+  }, { passive: false });
+}
+

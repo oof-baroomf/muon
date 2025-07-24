@@ -1,7 +1,7 @@
 import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
-import { TransformState, applyTransform, zoomAndCenterWindow, panActiveZoom } from './desktopTransform';
+import { TransformState, applyTransform, zoomAndCenterWindow, centerWindow, initPanZoom } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
@@ -27,6 +27,8 @@ const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
 function apply() {
   applyTransform(desk, root, windows, windowElements, transform);
 }
+
+initPanZoom(root, transform, apply);
 
 initSearchOverlay({
   root,
@@ -308,15 +310,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     if ((e.target as HTMLElement).closest('.muon-urlbar') ||
         (e.target as HTMLElement).closest('.muon-resize-handle')) return;
     e.stopPropagation();
-    const bounds = cont.getBoundingClientRect();
-    const cx = bounds.left + bounds.width / 2 - root.clientWidth / 2;
-    const cy = bounds.top + bounds.height / 2 - root.clientHeight / 2;
-    const dx = -cx / transform.scale;
-    const dy = -cy / transform.scale;
-    transform.offsetX += dx;
-    transform.offsetY += dy;
-    panActiveZoom(dx, dy);
-    apply();
+    centerWindow(cont, root, transform, apply);
   });
 
   const setActiveWindow = () => {
@@ -416,31 +410,6 @@ root.addEventListener('mousedown', e => {
   document.addEventListener('mousemove', move);
   document.addEventListener('mouseup', up);
 });
-
-root.addEventListener('wheel', e => {
-  if ((e.target as HTMLElement).tagName === 'INPUT' && (e.target as HTMLElement).matches(':focus')) {
-    return;
-  }
-  e.preventDefault();
-  if (e.metaKey || e.ctrlKey) {
-    const zoomIntensity = 0.001;
-    const delta = -e.deltaY * zoomIntensity;
-    const mx = e.clientX - root.getBoundingClientRect().left;
-    const my = e.clientY - root.getBoundingClientRect().top;
-    const wx = (mx - transform.offsetX) / transform.scale;
-    const wy = (my - transform.offsetY) / transform.scale;
-    transform.scale = Math.min(Math.max(0.25, transform.scale * (1 + delta)), 4);
-    transform.offsetX = mx - wx * transform.scale;
-    transform.offsetY = my - wy * transform.scale;
-  } else {
-    const dx = -e.deltaX / transform.scale;
-    const dy = -e.deltaY / transform.scale;
-    transform.offsetX += dx;
-    transform.offsetY += dy;
-    panActiveZoom(dx, dy);
-  }
-  apply();
-}, { passive: false });
 
 function save() {
   saveState(windows, { scale: transform.scale, x: transform.offsetX, y: transform.offsetY });

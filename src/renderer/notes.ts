@@ -14,25 +14,30 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   wrapper.className = 'muon-note-editor';
   wrapper.style.display = 'flex';
   wrapper.style.height = '100%';
+  wrapper.style.width = '100%';
+  wrapper.style.gap = '8px';
 
   const textarea = document.createElement('textarea');
   textarea.className = 'muon-note-text';
-  textarea.style.flex = '1 1 50%';
+  textarea.style.flex = '1';
   textarea.style.background = '#1e1e1e';
   textarea.style.color = '#e5e5e5';
-  textarea.style.border = 'none';
+  textarea.style.border = '1px solid #444';
   textarea.style.outline = 'none';
   textarea.style.padding = '8px';
   textarea.style.resize = 'none';
   textarea.style.height = '100%';
+  textarea.style.boxSizing = 'border-box';
 
   const preview = document.createElement('div');
   preview.className = 'muon-note-preview';
-  preview.style.flex = '1 1 50%';
+  preview.style.flex = '1';
   preview.style.overflow = 'auto';
   preview.style.padding = '8px';
   preview.style.background = '#1e1e1e';
   preview.style.color = '#e5e5e5';
+  preview.style.border = '1px solid #444';
+  preview.style.boxSizing = 'border-box';
 
   const text = await window.electronAPI.readNote(notePath);
   textarea.value = text;

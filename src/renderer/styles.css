@@ -241,22 +241,27 @@ button,
 .muon-note-editor {
     display: flex;
     height: 100%;
+    width: 100%;
+    gap: 8px;
 }
 
 .muon-note-text {
-    flex: 1 1 50%;
+    flex: 1;
     background: #1e1e1e;
     color: #e5e5e5;
-    border: none;
+    border: 1px solid #444;
     outline: none;
     padding: 8px;
     resize: none;
+    box-sizing: border-box;
 }
 
 .muon-note-preview {
-    flex: 1 1 50%;
+    flex: 1;
     overflow: auto;
     padding: 8px;
     background: #1e1e1e;
+    border: 1px solid #444;
+    box-sizing: border-box;
     color: #e5e5e5;
 }

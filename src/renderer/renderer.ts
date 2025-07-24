@@ -8,6 +8,7 @@ import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
 import { Rect, clampDrag, clampMove } from './collision';
+import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -62,8 +63,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
   cont.style.left = w.x + 'px';
   cont.style.top = w.y + 'px';
-  cont.style.width = w.w + 'px';
-  cont.style.height = w.h + 'px';
+  cont.style.width = Math.max(w.w, MIN_WINDOW_WIDTH) + 'px';
+  cont.style.height = Math.max(w.h, MIN_WINDOW_HEIGHT) + 'px';
   cont.style.transform = '';
   cont.style.transformOrigin = 'top left';
   cont.dataset.id = w.id;
@@ -407,11 +408,14 @@ root.addEventListener('mousedown', e => {
         id: crypto.randomUUID(),
         x: parseFloat(ghost.style.left),
         y: parseFloat(ghost.style.top),
-        w: gw,
-        h: gh,
+        w: Math.max(gw, MIN_WINDOW_WIDTH),
+        h: Math.max(gh, MIN_WINDOW_HEIGHT),
         url: '',
         title: 'Blank'
       };
+      const rect = clampMove(wdata, wdata, windows);
+      wdata.x = rect.x;
+      wdata.y = rect.y;
       windows.push(wdata);
       const el = createWindowElement(wdata, true);
       muonActiveWindow = el;
@@ -433,7 +437,16 @@ function save() {
   await loadConfig();
   applyGridStyle(root);
   const state: DesktopState = await loadState();
-  windows = state.windows;
+  windows = [];
+  for (const w of state.windows) {
+    const expanded = {
+      ...w,
+      w: Math.max(w.w, MIN_WINDOW_WIDTH),
+      h: Math.max(w.h, MIN_WINDOW_HEIGHT)
+    };
+    const adjusted = clampMove(expanded, expanded, windows);
+    windows.push({ ...expanded, x: adjusted.x, y: adjusted.y });
+  }
   transform.scale = state.transform.scale;
   transform.offsetX = state.transform.x;
   transform.offsetY = state.transform.y;

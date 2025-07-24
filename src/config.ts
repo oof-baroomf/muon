@@ -24,14 +24,26 @@ const defaultShortcuts = {
 
 const configPath = path.join(app.getPath('userData'), 'config.yaml');
 
+const defaultConfig: AppConfig = {
+  gridSize: 32,
+  gridStyle: 'lines',
+  gridOpacity: 0.15,
+  shortcuts: { ...defaultShortcuts }
+};
+
 export function loadConfig(): AppConfig {
+  if (!fs.existsSync(configPath)) {
+    fs.mkdirSync(path.dirname(configPath), { recursive: true });
+    fs.writeFileSync(configPath, YAML.stringify(defaultConfig));
+    return { ...defaultConfig };
+  }
   try {
     const text = fs.readFileSync(configPath, 'utf-8');
     const cfg = YAML.parse(text) as Partial<AppConfig> | null || {};
     return {
-      gridSize: typeof cfg.gridSize === 'number' ? cfg.gridSize : 32,
-      gridStyle: cfg.gridStyle === 'dots' ? 'dots' : 'lines',
-      gridOpacity: typeof cfg.gridOpacity === 'number' ? cfg.gridOpacity : 0.15,
+      gridSize: typeof cfg.gridSize === 'number' ? cfg.gridSize : defaultConfig.gridSize,
+      gridStyle: cfg.gridStyle === 'dots' ? 'dots' : defaultConfig.gridStyle,
+      gridOpacity: typeof cfg.gridOpacity === 'number' ? cfg.gridOpacity : defaultConfig.gridOpacity,
       shortcuts: {
         toggleSearch: cfg.shortcuts?.toggleSearch ?? defaultShortcuts.toggleSearch,
         saveState: cfg.shortcuts?.saveState ?? defaultShortcuts.saveState,
@@ -39,12 +51,7 @@ export function loadConfig(): AppConfig {
       }
     };
   } catch {
-    return {
-      gridSize: 32,
-      gridStyle: 'lines',
-      gridOpacity: 0.15,
-      shortcuts: { ...defaultShortcuts }
-    };
+    return { ...defaultConfig };
   }
 }
 
@@ -55,5 +62,6 @@ export function saveConfig(config: AppConfig) {
     gridOpacity: config.gridOpacity,
     shortcuts: { ...config.shortcuts }
   };
+  fs.mkdirSync(path.dirname(configPath), { recursive: true });
   fs.writeFileSync(configPath, YAML.stringify(data));
 }

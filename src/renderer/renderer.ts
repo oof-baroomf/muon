@@ -51,6 +51,12 @@ initKeyboardShortcuts({
 });
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
+  if (w.notePath) {
+    const name = w.notePath.split('/').pop()!.replace(/\.md$/, '');
+    w.title = w.title || name;
+  } else if (!w.url) {
+    w.title = w.title || 'Blank';
+  }
   const cont = document.createElement('div');
   windowElements.set(w.id, cont);
   cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
@@ -257,6 +263,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
         urlBar.value = '.' + note.replace(/\.md$/, '');
         w.notePath = note;
         w.url = '';
+        w.title = note.split('/').pop()!.replace(/\.md$/, '');
         window.electronAPI.send('view:destroy', w.id);
         setupNoteEditor(viewContainer, note);
         save();
@@ -277,6 +284,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
         window.electronAPI.send('view:load-url', w.id, val);
       }
       w.url = val;
+      w.title = val ? '' : 'Blank';
       save();
     }
   });
@@ -401,7 +409,8 @@ root.addEventListener('mousedown', e => {
         y: parseFloat(ghost.style.top),
         w: gw,
         h: gh,
-        url: ''
+        url: '',
+        title: 'Blank'
       };
       windows.push(wdata);
       const el = createWindowElement(wdata, true);

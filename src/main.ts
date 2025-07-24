@@ -104,8 +104,16 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
 
 const notesDir = path.join(app.getPath('userData'), 'notes');
 
+function resolveNotePath(notePath: string): string {
+  const full = path.resolve(notesDir, notePath);
+  if (!full.startsWith(notesDir + path.sep) && full !== notesDir) {
+    throw new Error('Invalid note path');
+  }
+  return full;
+}
+
 ipcMain.handle('note:read', async (_evt, notePath: string) => {
-  const full = path.join(notesDir, notePath);
+  const full = resolveNotePath(notePath);
   try {
     return fs.readFileSync(full, 'utf-8');
   } catch {
@@ -116,7 +124,7 @@ ipcMain.handle('note:read', async (_evt, notePath: string) => {
 });
 
 ipcMain.on('note:write', (_evt, notePath: string, content: string) => {
-  const full = path.join(notesDir, notePath);
+  const full = resolveNotePath(notePath);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, content);
 });

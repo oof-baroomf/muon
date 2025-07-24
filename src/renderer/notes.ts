@@ -1,5 +1,4 @@
 import { marked } from 'marked';
-import DOMPurify from 'dompurify';
 
 export function sanitizeNotePath(input: string): string {
   let p = input.replace(/[^a-zA-Z0-9\-_./]/g, '');
@@ -20,7 +19,7 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   editor.style.display = 'none';
 
   const updatePreview = () => {
-    preview.innerHTML = DOMPurify.sanitize(marked.parse(editor.value) as string);
+    preview.innerHTML = marked.parse(editor.value) as string;
   };
 
   const text = await window.electronAPI.readNote(notePath);

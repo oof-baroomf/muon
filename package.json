@@ -15,7 +15,6 @@
     "forge": "./forge.config.js"
   },
   "dependencies": {
-    "dompurify": "^3.2.6",
     "marked": "^16.1.1",
     "yaml": "^2.8.0"
   },
@@ -25,7 +24,6 @@
     "@electron-forge/maker-zip": "^7.4.0",
     "@electron-forge/plugin-webpack": "^7.4.0",
     "@eslint/js": "^9.31.0",
-    "@types/dompurify": "^3.2.0",
     "@types/node": "^20.12.8",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",

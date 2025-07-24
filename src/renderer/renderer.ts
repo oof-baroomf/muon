@@ -186,6 +186,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       e.preventDefault();
     }
   });
+  urlBar.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    zoomAndCenterWindow(cont, root, transform, apply);
+  });
   urlBar.className = 'muon-urlbar px-2 py-1 text-xs outline-none';
   urlBar.style.flex = '1 1 0%';
   urlBar.style.height = `${barHeight - 4}px`;

@@ -36,12 +36,16 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
 
   const text = await window.electronAPI.readNote(notePath);
   textarea.value = text;
-  preview.innerHTML = DOMPurify.sanitize(marked.parse(text));
+  preview.innerHTML = DOMPurify.sanitize(
+    marked.parse(text, { async: false }) as string
+  );
 
   textarea.addEventListener('input', () => {
     const md = textarea.value;
     window.electronAPI.writeNote(notePath, md);
-    preview.innerHTML = DOMPurify.sanitize(marked.parse(md));
+    preview.innerHTML = DOMPurify.sanitize(
+      marked.parse(md, { async: false }) as string
+    );
   });
 
   wrapper.appendChild(textarea);

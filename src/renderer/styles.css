@@ -26,7 +26,6 @@ button,
     font-family:
         "MuonMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
         monospace;
-    font-size: 11px;
     color: #e5e5e5;
     background-color: #18181b;
     /* Force pixel-perfect rendering */

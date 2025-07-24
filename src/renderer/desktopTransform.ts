@@ -17,6 +17,11 @@ interface ZoomState {
 const zoomStateMap = new WeakMap<HTMLElement, ZoomState>();
 let activeZoomElement: HTMLElement | null = null;
 
+export function isElementZoomed(el: HTMLElement): boolean {
+  const zs = zoomStateMap.get(el);
+  return !!zs?.zoomed && activeZoomElement === el;
+}
+
 export function panActiveZoom(dx: number, dy: number) {
   if (!activeZoomElement) return;
   const zs = zoomStateMap.get(activeZoomElement);

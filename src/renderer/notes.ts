@@ -20,10 +20,7 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   editor.style.display = 'none';
 
   const updatePreview = () => {
-    preview.innerHTML = DOMPurify.sanitize(
-      marked.parse(editor.value) as string,
-      { USE_PROFILES: { html: true } }
-    );
+    preview.innerHTML = DOMPurify.sanitize(marked.parse(editor.value) as string);
   };
 
   const text = await window.electronAPI.readNote(notePath);

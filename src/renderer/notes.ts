@@ -5,32 +5,59 @@ export function sanitizeNotePath(input: string): string {
   return p;
 }
 
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
+
 export async function setupNoteEditor(container: HTMLElement, notePath: string) {
   container.innerHTML = '';
-  const editor = document.createElement('div');
-  editor.className = 'muon-note-editor';
-  editor.contentEditable = 'true';
-  editor.style.outline = 'none';
-  editor.style.height = '100%';
-  editor.style.overflow = 'auto';
-  editor.style.padding = '8px';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'muon-note-editor';
+  wrapper.style.display = 'flex';
+  wrapper.style.height = '100%';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'muon-note-text';
+  textarea.style.flex = '1 1 50%';
+  textarea.style.background = '#1e1e1e';
+  textarea.style.color = '#e5e5e5';
+  textarea.style.border = 'none';
+  textarea.style.outline = 'none';
+  textarea.style.padding = '8px';
+  textarea.style.resize = 'none';
+  textarea.style.height = '100%';
+
+  const preview = document.createElement('div');
+  preview.className = 'muon-note-preview';
+  preview.style.flex = '1 1 50%';
+  preview.style.overflow = 'auto';
+  preview.style.padding = '8px';
+  preview.style.background = '#1e1e1e';
+  preview.style.color = '#e5e5e5';
+
   const text = await window.electronAPI.readNote(notePath);
-  editor.innerHTML = text;
-  editor.addEventListener('input', () => {
-    window.electronAPI.writeNote(notePath, editor.innerHTML);
+  textarea.value = text;
+  preview.innerHTML = DOMPurify.sanitize(marked.parse(text));
+
+  textarea.addEventListener('input', () => {
+    const md = textarea.value;
+    window.electronAPI.writeNote(notePath, md);
+    preview.innerHTML = DOMPurify.sanitize(marked.parse(md));
   });
-  container.appendChild(editor);
+
+  wrapper.appendChild(textarea);
+  wrapper.appendChild(preview);
+  container.appendChild(wrapper);
 }
 
 
 export function rerenderVisibleNotes(): void {
-  const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
-  editors.forEach(editor => {
-    if (editor.offsetParent) {
-      const originalDisplay = editor.style.display;
-      editor.style.display = 'none';
-      editor.offsetHeight;
-      editor.style.display = originalDisplay;
+  const previews = document.querySelectorAll('.muon-note-preview') as NodeListOf<HTMLElement>;
+  previews.forEach(preview => {
+    if (preview.offsetParent) {
+      const originalDisplay = preview.style.display;
+      preview.style.display = 'none';
+      preview.offsetHeight;
+      preview.style.display = originalDisplay;
     }
   });
 }

@@ -106,7 +106,7 @@ function forceUIRerender(root: HTMLElement, desk: HTMLElement, scale: number) {
   desk.style.zoom = (1.0001).toString();
   desk.offsetHeight;
   desk.style.zoom = originalZoom || '';
-  rerenderVisibleNotes(scale);
+  rerenderVisibleNotes();
   console.log('UI rerender completed');
 }
 
@@ -127,7 +127,7 @@ export function applyTransform(
   root.style.backgroundRepeat = 'repeat';
   root.offsetHeight;
   debouncedUIRerender(root, desk, state.scale);
-  rerenderVisibleNotes(state.scale);
+  rerenderVisibleNotes();
 }
 
 export function zoomAndCenterWindow(

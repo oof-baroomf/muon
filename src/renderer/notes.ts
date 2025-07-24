@@ -23,15 +23,7 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
 }
 
 
-export function rescaleNoteEditors(scale: number): void {
-  const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
-  editors.forEach(editor => {
-    editor.style.transformOrigin = 'top left';
-    editor.style.transform = `scale(${1 / scale})`;
-  });
-}
-
-export function rerenderVisibleNotes(scale: number): void {
+export function rerenderVisibleNotes(): void {
   const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
   editors.forEach(editor => {
     if (editor.offsetParent) {
@@ -41,5 +33,4 @@ export function rerenderVisibleNotes(scale: number): void {
       editor.style.display = originalDisplay;
     }
   });
-  rescaleNoteEditors(scale);
 }

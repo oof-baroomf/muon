@@ -15,6 +15,8 @@
     "forge": "./forge.config.js"
   },
   "dependencies": {
+    "dompurify": "^3.2.6",
+    "marked": "^16.1.1",
     "yaml": "^2.8.0"
   },
   "devDependencies": {

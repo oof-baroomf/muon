@@ -26,6 +26,7 @@ button,
     font-family:
         "MuonMono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
         monospace;
+    font-size: 11px;
     color: #e5e5e5;
     background-color: #18181b;
     /* Force pixel-perfect rendering */
@@ -239,29 +240,38 @@ button,
 }
 
 .muon-note-editor {
-    display: flex;
+    position: relative;
     height: 100%;
     width: 100%;
-    gap: 8px;
-}
-
-.muon-note-text {
-    flex: 1;
-    background: #1e1e1e;
-    color: #e5e5e5;
-    border: 1px solid #444;
-    outline: none;
-    padding: 8px;
-    resize: none;
-    box-sizing: border-box;
 }
 
 .muon-note-preview {
-    flex: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     overflow: auto;
     padding: 8px;
     background: #1e1e1e;
     border: 1px solid #444;
     box-sizing: border-box;
     color: #e5e5e5;
+    pointer-events: none;
+}
+
+.muon-note-text {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    color: transparent;
+    caret-color: #e5e5e5;
+    border: 1px solid #444;
+    outline: none;
+    padding: 8px;
+    resize: none;
+    box-sizing: border-box;
 }

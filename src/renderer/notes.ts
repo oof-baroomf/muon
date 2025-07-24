@@ -12,16 +12,20 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   container.innerHTML = '';
   const wrapper = document.createElement('div');
   wrapper.className = 'muon-note-editor';
-  wrapper.style.display = 'flex';
+  wrapper.style.position = 'relative';
   wrapper.style.height = '100%';
   wrapper.style.width = '100%';
-  wrapper.style.gap = '8px';
 
   const textarea = document.createElement('textarea');
   textarea.className = 'muon-note-text';
-  textarea.style.flex = '1';
-  textarea.style.background = '#1e1e1e';
-  textarea.style.color = '#e5e5e5';
+  textarea.style.position = 'absolute';
+  textarea.style.top = '0';
+  textarea.style.left = '0';
+  textarea.style.right = '0';
+  textarea.style.bottom = '0';
+  textarea.style.background = 'transparent';
+  textarea.style.color = 'transparent';
+  textarea.style.caretColor = '#e5e5e5';
   textarea.style.border = '1px solid #444';
   textarea.style.outline = 'none';
   textarea.style.padding = '8px';
@@ -31,13 +35,18 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
 
   const preview = document.createElement('div');
   preview.className = 'muon-note-preview';
-  preview.style.flex = '1';
+  preview.style.position = 'absolute';
+  preview.style.top = '0';
+  preview.style.left = '0';
+  preview.style.right = '0';
+  preview.style.bottom = '0';
   preview.style.overflow = 'auto';
   preview.style.padding = '8px';
   preview.style.background = '#1e1e1e';
   preview.style.color = '#e5e5e5';
   preview.style.border = '1px solid #444';
   preview.style.boxSizing = 'border-box';
+  preview.style.pointerEvents = 'none';
 
   const text = await window.electronAPI.readNote(notePath);
   textarea.value = text;
@@ -53,8 +62,8 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
     );
   });
 
-  wrapper.appendChild(textarea);
   wrapper.appendChild(preview);
+  wrapper.appendChild(textarea);
   container.appendChild(wrapper);
 }
 

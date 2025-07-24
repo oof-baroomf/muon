@@ -117,6 +117,10 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
 });
 
 const notesDir = path.join(app.getPath('userData'), 'notes');
+if (!fs.existsSync(notesDir)) {
+  fs.mkdirSync(notesDir, { recursive: true });
+  fs.writeFileSync(path.join(notesDir, 'welcome.md'), '# Welcome to Muon\n');
+}
 
 ipcMain.handle('note:read', async (_evt, notePath: string) => {
   const full = path.join(notesDir, notePath);

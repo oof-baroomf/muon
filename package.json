@@ -12,7 +12,7 @@
   "author": "",
   "license": "MIT",
   "config": {
-    "forge": "./forge.config.js"
+    "forge": "./forge.config.ts"
   },
   "dependencies": {},
   "devDependencies": {

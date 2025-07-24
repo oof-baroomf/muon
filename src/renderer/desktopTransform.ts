@@ -222,8 +222,8 @@ export function zoomAndCenterWindow(
   const targetOffsetX = viewportCenterX - winCenterX * targetScale;
   const targetOffsetY = viewportCenterY - winCenterY * targetScale;
 
-  zs.origOffsetX = targetOffsetX;
-  zs.origOffsetY = targetOffsetY;
+  zs.origOffsetX = state.offsetX;
+  zs.origOffsetY = state.offsetY;
 
   zs.zoomScale = targetScale;
   zs.zoomOffsetX = targetOffsetX;

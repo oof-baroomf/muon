@@ -30,7 +30,7 @@ export function panActiveZoom(dx: number, dy: number) {
   zs.origOffsetY += dy;
 }
 
-let uiRerenderTimeout: NodeJS.Timeout | null = null;
+let uiRerenderTimeout: ReturnType<typeof setTimeout> | null = null;
 
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';
@@ -90,17 +90,17 @@ function forceUIRerender(root: HTMLElement, desk: HTMLElement, scale: number) {
     const htmlElement = element as HTMLElement;
     const originalDisplay = htmlElement.style.display;
     htmlElement.style.display = 'none';
-    htmlElement.offsetHeight;
+    void htmlElement.offsetHeight;
     htmlElement.style.display = originalDisplay;
 
     const originalOpacity = htmlElement.style.opacity;
     htmlElement.style.opacity = '0.999';
-    htmlElement.offsetHeight;
+    void htmlElement.offsetHeight;
     htmlElement.style.opacity = originalOpacity || '';
 
     const originalTransform = htmlElement.style.transform;
     htmlElement.style.transform = 'translateZ(0.1px)';
-    htmlElement.offsetHeight;
+    void htmlElement.offsetHeight;
     htmlElement.style.transform = originalTransform || '';
 
     if (
@@ -113,7 +113,7 @@ function forceUIRerender(root: HTMLElement, desk: HTMLElement, scale: number) {
       if (fontSize) {
         const originalFontSize = htmlElement.style.fontSize;
         htmlElement.style.fontSize = fontSize + 0.001 + 'px';
-        htmlElement.offsetHeight;
+        void htmlElement.offsetHeight;
         htmlElement.style.fontSize = originalFontSize || '';
       }
     }
@@ -121,7 +121,7 @@ function forceUIRerender(root: HTMLElement, desk: HTMLElement, scale: number) {
 
   const originalZoom = desk.style.zoom;
   desk.style.zoom = (1.0001).toString();
-  desk.offsetHeight;
+  void desk.offsetHeight;
   desk.style.zoom = originalZoom || '';
   rerenderVisibleNotes();
   console.log('UI rerender completed');
@@ -142,7 +142,7 @@ export function applyTransform(
   updateAllWindowsBounds(windows, windowElements);
   updateAllWindowsZoom(windows, windowElements, state.scale);
   root.style.backgroundRepeat = 'repeat';
-  root.offsetHeight;
+  void root.offsetHeight;
   debouncedUIRerender(root, desk, state.scale);
   rerenderVisibleNotes();
 }

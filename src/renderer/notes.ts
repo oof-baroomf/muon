@@ -29,7 +29,7 @@ export function rerenderVisibleNotes(): void {
     if (editor.offsetParent) {
       const originalDisplay = editor.style.display;
       editor.style.display = 'none';
-      editor.offsetHeight;
+      void editor.offsetHeight;
       editor.style.display = originalDisplay;
     }
   });

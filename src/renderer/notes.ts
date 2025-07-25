@@ -1,7 +1,16 @@
 import {createEditor} from 'lexical';
 import {registerHistory, createEmptyHistoryState} from '@lexical/history';
-import {registerRichText} from '@lexical/rich-text';
-import {registerMarkdownShortcuts, $convertFromMarkdownString, $convertToMarkdownString} from '@lexical/markdown';
+import {registerRichText, HeadingNode, QuoteNode} from '@lexical/rich-text';
+import {registerList} from '@lexical/list';
+import {ListNode, ListItemNode} from '@lexical/list';
+import {CodeNode} from '@lexical/code';
+import {LinkNode} from '@lexical/link';
+import {
+  registerMarkdownShortcuts,
+  $convertFromMarkdownString,
+  $convertToMarkdownString,
+  TRANSFORMERS
+} from '@lexical/markdown';
 import {mergeRegister} from '@lexical/utils';
 
 export function sanitizeNotePath(input: string): string {
@@ -25,7 +34,15 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
     namespace: 'muon-note',
     onError: (e: Error) => {
       throw e;
-    }
+    },
+    nodes: [
+      HeadingNode,
+      QuoteNode,
+      ListNode,
+      ListItemNode,
+      CodeNode,
+      LinkNode
+    ]
   });
 
   editor.setRootElement(root);
@@ -33,17 +50,18 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   mergeRegister(
     registerRichText(editor),
     registerHistory(editor, createEmptyHistoryState(), 1000),
-    registerMarkdownShortcuts(editor)
+    registerList(editor),
+    registerMarkdownShortcuts(editor, TRANSFORMERS)
   );
 
   const markdown = await window.electronAPI.readNote(notePath);
   editor.update(() => {
-    $convertFromMarkdownString(markdown);
+    $convertFromMarkdownString(markdown, TRANSFORMERS);
   });
 
   editor.registerUpdateListener(({editorState}) => {
     editorState.read(() => {
-      const md = $convertToMarkdownString();
+      const md = $convertToMarkdownString(TRANSFORMERS);
       window.electronAPI.writeNote(notePath, md);
     });
   });

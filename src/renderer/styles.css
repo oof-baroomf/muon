@@ -251,8 +251,3 @@ button,
     padding: 8px;
 }
 
-.muon-note-preview {
-    padding: 8px;
-    overflow: auto;
-    height: 100%;
-}

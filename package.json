@@ -15,6 +15,11 @@
     "forge": "./forge.config.js"
   },
   "dependencies": {
+    "@lexical/history": "^0.33.1",
+    "@lexical/markdown": "^0.33.1",
+    "@lexical/rich-text": "^0.33.1",
+    "@lexical/utils": "^0.33.1",
+    "lexical": "^0.33.1",
     "yaml": "^2.8.0"
   },
   "devDependencies": {

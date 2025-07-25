@@ -1,8 +1,7 @@
-import type { ForgeConfig } from '@electron-forge/shared-types';
-import { WebpackPlugin } from '@electron-forge/plugin-webpack';
-import path from 'path';
+const { WebpackPlugin } = require('@electron-forge/plugin-webpack');
+const path = require('path');
 
-const config: ForgeConfig = {
+const config = {
   packagerConfig: { asar: true },
   makers: [
     { name: '@electron-forge/maker-squirrel', config: {} },
@@ -31,4 +30,4 @@ const config: ForgeConfig = {
     })
   ]
 };
-export default config;
+module.exports = config;

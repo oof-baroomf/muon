@@ -31,10 +31,44 @@ export function clampMove(rect: Rect, prev: Rect, windows: WindowData[], ignoreI
   for (const w of windows) {
     if (w.id === ignoreId) continue;
     if (rectsOverlap({ x, y, w: rect.w, h: rect.h }, w)) {
-      if (prev.x + prev.w <= w.x) x = Math.min(x, w.x - rect.w);
-      else if (prev.x >= w.x + w.w) x = Math.max(x, w.x + w.w);
-      if (prev.y + prev.h <= w.y) y = Math.min(y, w.y - rect.h);
-      else if (prev.y >= w.y + w.h) y = Math.max(y, w.y + w.h);
+      const insideX = prev.x >= w.x && prev.x + prev.w <= w.x + w.w;
+      const insideY = prev.y >= w.y && prev.y + prev.h <= w.y + w.h;
+
+      let newX = x;
+      let newY = y;
+
+      if (prev.x + prev.w <= w.x) newX = Math.min(newX, w.x - rect.w);
+      else if (prev.x >= w.x + w.w) newX = Math.max(newX, w.x + w.w);
+      else if (insideX) {
+        const leftDist = prev.x - w.x;
+        const rightDist = w.x + w.w - (prev.x + prev.w);
+        newX = leftDist < rightDist ? w.x - rect.w : w.x + w.w;
+      }
+
+      if (prev.y + prev.h <= w.y) newY = Math.min(newY, w.y - rect.h);
+      else if (prev.y >= w.y + w.h) newY = Math.max(newY, w.y + w.h);
+      else if (insideY) {
+        const topDist = prev.y - w.y;
+        const bottomDist = w.y + w.h - (prev.y + prev.h);
+        newY = topDist < bottomDist ? w.y - rect.h : w.y + w.h;
+      }
+
+      // If the rectangle started completely inside, move in the direction of
+      // the nearest edge overall to avoid diagonal jumps.
+      if (insideX && insideY) {
+        const dLeft = Math.abs(prev.x - w.x);
+        const dRight = Math.abs(prev.x + prev.w - (w.x + w.w));
+        const dTop = Math.abs(prev.y - w.y);
+        const dBottom = Math.abs(prev.y + prev.h - (w.y + w.h));
+        const min = Math.min(dLeft, dRight, dTop, dBottom);
+        if (min === dLeft) { newX = w.x - rect.w; newY = prev.y; }
+        else if (min === dRight) { newX = w.x + w.w; newY = prev.y; }
+        else if (min === dTop) { newY = w.y - rect.h; newX = prev.x; }
+        else { newY = w.y + w.h; newX = prev.x; }
+      }
+
+      x = newX;
+      y = newY;
     }
   }
   return { ...rect, x, y };
@@ -67,10 +101,34 @@ export function clampResize(rect: Rect, prev: Rect, windows: WindowData[], ignor
 
 // Clamp a creation drag rectangle so it never crosses other windows
 export function clampDrag(sx: number, sy: number, cx: number, cy: number, windows: WindowData[]): Rect {
-  let x1 = Math.min(sx, cx);
-  let x2 = Math.max(sx, cx);
-  let y1 = Math.min(sy, cy);
-  let y2 = Math.max(sy, cy);
+  // Move the drag start point outside existing windows so new windows never
+  // spawn inside another
+  let startX = sx;
+  let startY = sy;
+  let moved = true;
+  while (moved) {
+    moved = false;
+    for (const w of windows) {
+      if (startX > w.x && startX < w.x + w.w && startY > w.y && startY < w.y + w.h) {
+        const left = startX - w.x;
+        const right = w.x + w.w - startX;
+        const top = startY - w.y;
+        const bottom = w.y + w.h - startY;
+        const min = Math.min(left, right, top, bottom);
+        if (min === left) startX = w.x - 1;
+        else if (min === right) startX = w.x + w.w + 1;
+        else if (min === top) startY = w.y - 1;
+        else startY = w.y + w.h + 1;
+        moved = true;
+        break;
+      }
+    }
+  }
+
+  let x1 = Math.min(startX, cx);
+  let x2 = Math.max(startX, cx);
+  let y1 = Math.min(startY, cy);
+  let y2 = Math.max(startY, cy);
 
   for (const w of windows) {
     if (rangesOverlap(y1, y2, w.y, w.y + w.h)) {

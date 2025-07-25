@@ -32,7 +32,7 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
 
   mergeRegister(
     registerRichText(editor),
-    registerHistory(editor, createEmptyHistoryState()),
+    registerHistory(editor, createEmptyHistoryState(), 1000),
     registerMarkdownShortcuts(editor)
   );
 

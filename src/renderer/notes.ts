@@ -30,6 +30,8 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   root.style.padding = '8px';
   root.style.fontSize = '13px';
 
+  container.appendChild(root);
+
   const editor = createEditor({
     namespace: 'muon-note',
     onError: (e: Error) => {
@@ -46,6 +48,7 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   });
 
   editor.setRootElement(root);
+  editor.setEditable(true);
 
   mergeRegister(
     registerRichText(editor),

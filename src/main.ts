@@ -5,6 +5,7 @@ declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
+import type { Rectangle } from 'electron';
 import fs from 'fs';
 import { loadConfig, saveConfig, AppConfig } from './config';
 import type { DesktopState } from './renderer/state';
@@ -177,7 +178,7 @@ ipcMain.on('view:destroy', (evt, id: string) => {
   }
 });
 
-ipcMain.on('view:set-bounds', (evt, id: string, bounds: Electron.Rectangle) => {
+ipcMain.on('view:set-bounds', (evt, id: string, bounds: Rectangle) => {
   const view = views.get(id);
   if (view) {
     view.setBounds(bounds);

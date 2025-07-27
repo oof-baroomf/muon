@@ -6,7 +6,7 @@ import globals from 'globals';
 export default [
   {
     ...js.configs.recommended,
-    ignores: ['node_modules/**', '.webpack/**'],
+    ignores: ['**/node_modules/**', '**/.webpack/**', '**/dist/**'],
     languageOptions: {
       globals: {
         ...globals.node,
@@ -26,7 +26,10 @@ export default [
       '@typescript-eslint': tsPlugin
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules
+      ...tsPlugin.configs.recommended.rules,
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off',
+      '@typescript-eslint/no-explicit-any': 'off'
     }
   }
 ];

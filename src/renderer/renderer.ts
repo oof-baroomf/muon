@@ -1,13 +1,13 @@
 import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
-import { TransformState, applyTransform, zoomAndCenterWindow, initPanZoom } from './desktopTransform';
+import { TransformState, applyTransform, zoomAndCenterWindow, centerWindow, initPanZoom } from './desktopTransform';
 import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
-import { Rect, clampDrag, clampMove } from './collision';
+import { clampDrag, clampMove } from './collision';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -353,7 +353,6 @@ function rebuild () {
   apply();
 }
 
-let isDragging = false;
 let dragStartX = 0;
 let dragStartY = 0;
 
@@ -365,7 +364,6 @@ root.addEventListener('mousedown', e => {
   }
   dragStartX = e.clientX;
   dragStartY = e.clientY;
-  isDragging = true;
   const ghost = document.createElement('div');
   ghost.id = 'ghost';
   ghost.className = 'absolute border border-gray-500 bg-gray-500/10';
@@ -407,7 +405,6 @@ root.addEventListener('mousedown', e => {
       save();
     }
     ghost.remove();
-    isDragging = false;
   };
 
   document.addEventListener('mousemove', move);

@@ -17,7 +17,7 @@ interface Deps {
 
 function matchesShortcut(e: KeyboardEvent, shortcut: string): boolean {
   const tokens = shortcut.toLowerCase().split('+');
-  const key = tokens.pop();
+  const keyToken = tokens.pop() ?? '';
   const req = { ctrl: false, meta: false, alt: false, shift: false };
   for (const t of tokens) {
     if (t === 'ctrl' || t === 'control') req.ctrl = true;
@@ -25,7 +25,17 @@ function matchesShortcut(e: KeyboardEvent, shortcut: string): boolean {
     else if (t === 'alt') req.alt = true;
     else if (t === 'shift') req.shift = true;
   }
-  return key === e.key.toLowerCase() &&
+
+  const key = keyToken.toLowerCase();
+  const code = e.code.toLowerCase();
+  const keyMatch = key === e.key.toLowerCase() ||
+    key === code ||
+    (key === '=' && code === 'equal') ||
+    (key === '+' && code === 'equal' && e.shiftKey) ||
+    (key === '-' && code === 'minus') ||
+    (key === '_' && code === 'minus' && e.shiftKey);
+
+  return keyMatch &&
     (!req.ctrl || e.ctrlKey) &&
     (!req.meta || e.metaKey) &&
     (!req.alt || e.altKey) &&

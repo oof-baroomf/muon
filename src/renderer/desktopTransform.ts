@@ -30,9 +30,7 @@ export function panActiveZoom(dx: number, dy: number) {
   zs.origOffsetY += dy;
 }
 
-import type { Timeout } from 'node:timers';
-
-let uiRerenderTimeout: Timeout | null = null;
+let uiRerenderTimeout: ReturnType<typeof setTimeout> | null = null;
 
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';

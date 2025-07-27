@@ -25,7 +25,7 @@ export function panActiveZoom(dx: number, dy: number) {
   zs.origOffsetY += dy;
 }
 
-let uiRerenderTimeout: NodeJS.Timeout | null = null;
+let uiRerenderTimeout: ReturnType<typeof setTimeout> | null = null;
 
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';

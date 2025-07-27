@@ -7,7 +7,7 @@ import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
-import { Rect, clampDrag, clampMove } from './collision';
+import { Rect, clampDrag, clampMove, collides } from './collision';
 import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
 
 const root = document.getElementById('root') as HTMLElement;
@@ -423,13 +423,12 @@ root.addEventListener('mousedown', e => {
         url: '',
         title: 'Blank'
       };
-      const rect = clampMove(wdata, startRect, windows);
-      wdata.x = rect.x;
-      wdata.y = rect.y;
-      windows.push(wdata);
-      const el = createWindowElement(wdata, true);
-      muonActiveWindow = el;
-      save();
+      if (!collides(wdata, windows)) {
+        windows.push(wdata);
+        const el = createWindowElement(wdata, true);
+        muonActiveWindow = el;
+        save();
+      }
     }
     ghost.remove();
     isDragging = false;

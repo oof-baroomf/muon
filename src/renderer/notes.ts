@@ -16,9 +16,9 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   editor.style.padding = '8px';
   const text = await window.electronAPI.readNote(notePath);
   editor.innerHTML = text;
-  editor.addEventListener('input', () => {
-    window.electronAPI.writeNote(notePath, editor.innerHTML);
-  });
+    editor.addEventListener('input', () => {
+      window.electronAPI.writeNote(notePath, editor.innerHTML);
+    });
   container.appendChild(editor);
 }
 
@@ -28,9 +28,9 @@ export function rerenderVisibleNotes(): void {
   editors.forEach(editor => {
     if (editor.offsetParent) {
       const originalDisplay = editor.style.display;
-      editor.style.display = 'none';
-      editor.offsetHeight;
-      editor.style.display = originalDisplay;
+        editor.style.display = 'none';
+        void editor.offsetHeight;
+        editor.style.display = originalDisplay;
     }
   });
 }

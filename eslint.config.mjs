@@ -6,7 +6,7 @@ import globals from 'globals';
 export default [
   {
     ...js.configs.recommended,
-    ignores: ['node_modules/**', '.webpack/**'],
+    ignores: ['node_modules/**', '.webpack/**', 'src/renderer/vendor/**'],
     languageOptions: {
       globals: {
         ...globals.node,

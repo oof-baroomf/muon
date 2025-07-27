@@ -1,4 +1,5 @@
 import './styles.css';
+import './vendor/toastui-editor.min.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow, centerWindow, initPanZoom } from './desktopTransform';

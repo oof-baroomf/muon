@@ -143,7 +143,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     }
   });
   if (mainWindow) {
-    mainWindow.contentView.addChildView(view);
+    (mainWindow.contentView as any).addChildView(view);
   }
   view.setBackgroundColor("#00000000");
   views.set(id, view);
@@ -171,9 +171,9 @@ ipcMain.on('view:destroy', (evt, id: string) => {
   const view = views.get(id);
   if (view) {
     if (mainWindow) {
-      mainWindow.contentView.removeChildView(view);
+      (mainWindow.contentView as any).removeChildView(view);
     }
-    view.webContents.destroy();
+    (view.webContents as any).destroy();
     views.delete(id);
   }
 });

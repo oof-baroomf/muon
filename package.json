@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm exec electron-forge start",
     "build": "pnpm exec electron-forge make",
-    "lint": "pnpm exec eslint . --ext .ts,.tsx"
+    "lint": "pnpm exec eslint \"src/**/*.{ts,tsx}\""
   },
   "keywords": [],
   "author": "",

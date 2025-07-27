@@ -8,6 +8,7 @@ import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
 import { clampDrag, clampMove } from './collision';
+import { initGestureNavigation } from './gestureNavigation';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -42,7 +43,9 @@ function createAdjacentWindow(base: HTMLElement | null, url = '') {
   const el = createWindowElement(wdata, false);
   muonActiveWindow = el;
   if (base) {
-    transform.offsetX -= width + 10;
+    const baseLeft = parseFloat(base.style.left);
+    const delta = left - baseLeft;
+    transform.offsetX -= delta;
     apply();
   }
   save();
@@ -73,6 +76,11 @@ initKeyboardShortcuts({
   applyTransform: apply,
   root,
   newWindow: createAdjacentWindow
+});
+
+initGestureNavigation({
+  root,
+  getActiveWindow: () => muonActiveWindow
 });
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
@@ -120,7 +128,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   navControls.style.gap = '2px';
   navControls.style.marginLeft = '4px';
 
-  let backBtn: HTMLButtonElement, fwdBtn: HTMLButtonElement, reloadBtn: HTMLButtonElement, stopBtn: HTMLButtonElement;
+  let backBtn: HTMLButtonElement, fwdBtn: HTMLButtonElement, reloadBtn: HTMLButtonElement, hardReloadBtn: HTMLButtonElement, stopBtn: HTMLButtonElement;
 
   const dragArea = document.createElement('div');
   dragArea.className = 'muon-drag-area';
@@ -273,10 +281,12 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   backBtn = makeNavBtn('←', 'Back', () => window.electronAPI.send('view:back', w.id));
   fwdBtn = makeNavBtn('→', 'Forward', () => window.electronAPI.send('view:forward', w.id));
   reloadBtn = makeNavBtn('⟳', 'Reload', () => window.electronAPI.send('view:reload', w.id));
+  hardReloadBtn = makeNavBtn('⟲', 'Hard Reload', () => window.electronAPI.send('view:reload-hard', w.id));
   stopBtn = makeNavBtn('⨉', 'Stop', () => window.electronAPI.send('view:stop', w.id));
 
   topBar.insertBefore(stopBtn, topBar.firstChild);
   topBar.insertBefore(reloadBtn, topBar.firstChild);
+  topBar.insertBefore(hardReloadBtn, topBar.firstChild);
   topBar.insertBefore(fwdBtn, topBar.firstChild);
   topBar.insertBefore(backBtn, topBar.firstChild);
 
@@ -464,6 +474,20 @@ function save() {
     setConfig(cfg);
     applyGridStyle(root);
     apply();
+  });
+  window.electronAPI.receive('shortcut:reload', () => {
+    const active = muonActiveWindow;
+    if (active) window.electronAPI.send('view:reload', active.dataset.id!);
+  });
+  window.electronAPI.receive('shortcut:hard-reload', () => {
+    const active = muonActiveWindow;
+    if (active) window.electronAPI.send('view:reload-hard', active.dataset.id!);
+  });
+  window.electronAPI.receive('shortcut:new-window', () => {
+    createAdjacentWindow(muonActiveWindow);
+  });
+  window.electronAPI.receive('shortcut:open-settings', () => {
+    window.electronAPI.send('settings:open');
   });
   window.electronAPI.receive('view:new-window', (srcId: string, url: string) => {
     const base = windowElements.get(srcId) || null;

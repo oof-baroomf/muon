@@ -116,6 +116,36 @@ export function initKeyboardShortcuts(d: Deps) {
       return;
     }
 
+    if (matchesShortcut(e, cfg.shortcuts.hardReloadWindow)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) {
+        const id = active.dataset.id!;
+        window.electronAPI.send('view:reload-hard', id);
+      }
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.openSettings)) {
+      e.preventDefault();
+      window.electronAPI.send('settings:open');
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.goBack)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) window.electronAPI.send('view:back', active.dataset.id!);
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.goForward)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) window.electronAPI.send('view:forward', active.dataset.id!);
+      return;
+    }
+
     if (matchesShortcut(e, cfg.shortcuts.newWindow)) {
       e.preventDefault();
       d.newWindow(d.getActiveWindow());

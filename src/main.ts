@@ -57,6 +57,29 @@ function createMainWindow () {
   // works in both dev (http://localhost:300x) and prod (file://…)
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
   mainWindow.on('closed', () => { mainWindow = null; });
+
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return;
+    const key = input.key.toLowerCase();
+    if ((input.control || input.meta) && key === 'r') {
+      event.preventDefault();
+      mainWindow?.webContents.send(input.shift ? 'shortcut:hard-reload' : 'shortcut:reload');
+    }
+    if ((input.control || input.meta) && key === 't') {
+      event.preventDefault();
+      mainWindow?.webContents.send('shortcut:new-window');
+    }
+    if ((input.control || input.meta) && key === ',') {
+      event.preventDefault();
+      mainWindow?.webContents.send('shortcut:open-settings');
+    }
+  });
+
+  mainWindow.on('swipe', (_e, direction) => {
+    if (direction === 'left' || direction === 'right') {
+      mainWindow?.webContents.send('swipe', direction);
+    }
+  });
 }
 
 function openSettingsWindow() {
@@ -100,6 +123,10 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
   saveConfig(appConfig);
   mainWindow?.webContents.send('config:updated', appConfig);
   settingsWindow?.webContents.send('config:updated', appConfig);
+});
+
+ipcMain.on('settings:open', () => {
+  openSettingsWindow();
 });
 
 const notesDir = path.join(app.getPath('userData'), 'notes');
@@ -207,6 +234,13 @@ ipcMain.on('view:reload', (evt, id: string) => {
   const view = views.get(id);
   if (view) {
     view.webContents.reload();
+  }
+});
+
+ipcMain.on('view:reload-hard', (_evt, id: string) => {
+  const view = views.get(id);
+  if (view) {
+    view.webContents.reloadIgnoringCache();
   }
 });
 

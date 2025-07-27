@@ -7,7 +7,11 @@ export interface AppConfig {
     saveState: string;
     centerWindow: string;
     reloadWindow: string;
+    hardReloadWindow: string;
     newWindow: string;
+    openSettings: string;
+    goBack: string;
+    goForward: string;
     zoomInSite: string;
     zoomOutSite: string;
     zoomInUI: string;
@@ -23,7 +27,11 @@ const defaultShortcuts = {
   saveState: `${modKey}+S`,
   centerWindow: `${modKey}+D`,
   reloadWindow: `${modKey}+R`,
+  hardReloadWindow: `${modKey}+Shift+R`,
   newWindow: `${modKey}+T`,
+  openSettings: `${modKey}+,`,
+  goBack: `${modKey}+[`,
+  goForward: `${modKey}+]`,
   zoomInSite: `${modKey}+=`,
   zoomOutSite: `${modKey}+-`,
   zoomInUI: `Alt+=`,
@@ -48,7 +56,11 @@ export async function loadConfig(): Promise<AppConfig> {
       saveState: c.shortcuts?.saveState || defaultShortcuts.saveState,
       centerWindow: c.shortcuts?.centerWindow || defaultShortcuts.centerWindow,
       reloadWindow: c.shortcuts?.reloadWindow || defaultShortcuts.reloadWindow,
+      hardReloadWindow: c.shortcuts?.hardReloadWindow || defaultShortcuts.hardReloadWindow,
       newWindow: c.shortcuts?.newWindow || defaultShortcuts.newWindow,
+      openSettings: c.shortcuts?.openSettings || defaultShortcuts.openSettings,
+      goBack: c.shortcuts?.goBack || defaultShortcuts.goBack,
+      goForward: c.shortcuts?.goForward || defaultShortcuts.goForward,
       zoomInSite: c.shortcuts?.zoomInSite || defaultShortcuts.zoomInSite,
       zoomOutSite: c.shortcuts?.zoomOutSite || defaultShortcuts.zoomOutSite,
       zoomInUI: c.shortcuts?.zoomInUI || defaultShortcuts.zoomInUI,

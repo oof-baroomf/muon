@@ -4,7 +4,7 @@ declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
-import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions, nativeTheme } from 'electron';
 import fs from 'fs';
 import { loadConfig, saveConfig, AppConfig } from './config';
 import type { DesktopState } from './renderer/state';
@@ -48,9 +48,11 @@ function createMainWindow () {
   mainWindow = new BrowserWindow({
     width: 1400,
     height: 900,
+    darkTheme: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       sandbox: true,
+      preferredColorScheme: 'system'
     }
   });
 
@@ -68,9 +70,11 @@ function openSettingsWindow() {
     width: 400,
     height: 260,
     resizable: true,
+    darkTheme: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      sandbox: true
+      sandbox: true,
+      preferredColorScheme: 'system'
     }
   });
   settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
@@ -138,7 +142,8 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     webPreferences: {
       sandbox: true,
       contextIsolation: true,
-      partition: `persist:muon`
+      partition: `persist:muon`,
+      preferredColorScheme: 'system'
     }
   });
   if (mainWindow) {
@@ -239,6 +244,7 @@ ipcMain.on('overlay:hide', () => {
 });
 
 app.whenReady().then(() => {
+  nativeTheme.themeSource = 'system';
   createMainWindow();
   createMenu();
 });

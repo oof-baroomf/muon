@@ -5,6 +5,7 @@ declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
+import type { Rectangle } from 'electron';
 import fs from 'fs';
 import { loadConfig, saveConfig, AppConfig } from './config';
 import type { DesktopState } from './renderer/state';
@@ -142,7 +143,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
     }
   });
   if (mainWindow) {
-    (mainWindow.contentView as any).addChildView(view);
+    mainWindow.contentView.addChildView(view);
   }
   view.setBackgroundColor("#00000000");
   views.set(id, view);
@@ -170,14 +171,14 @@ ipcMain.on('view:destroy', (evt, id: string) => {
   const view = views.get(id);
   if (view) {
     if (mainWindow) {
-      (mainWindow.contentView as any).removeChildView(view);
+      mainWindow.contentView.removeChildView(view);
     }
-    (view.webContents as any).destroy();
+    view.webContents.destroy();
     views.delete(id);
   }
 });
 
-ipcMain.on('view:set-bounds', (evt, id: string, bounds: Electron.Rectangle) => {
+ipcMain.on('view:set-bounds', (evt, id: string, bounds: Rectangle) => {
   const view = views.get(id);
   if (view) {
     view.setBounds(bounds);

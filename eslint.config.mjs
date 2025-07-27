@@ -26,7 +26,9 @@ export default [
       '@typescript-eslint': tsPlugin
     },
     rules: {
-      ...tsPlugin.configs.recommended.rules
+      ...tsPlugin.configs.recommended.rules,
+      'no-undef': 'off',
+      '@typescript-eslint/no-unused-expressions': 'off'
     }
   }
 ];

@@ -372,7 +372,11 @@ let dragStartY = 0;
 root.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const target = e.target as HTMLElement;
-  if (target.closest('.muon-urlbar') || target.closest('.muon-resize-handle')) {
+  if (
+    target.closest('.muon-window') ||
+    target.closest('.muon-urlbar') ||
+    target.closest('.muon-resize-handle')
+  ) {
     return;
   }
   dragStartX = e.clientX;
@@ -404,16 +408,22 @@ root.addEventListener('mousedown', e => {
     const gw = parseFloat(ghost.style.width);
     const gh = parseFloat(ghost.style.height);
     if (gw > 32 && gh > 32) {
-      const wdata: WindowData = {
-        id: crypto.randomUUID(),
+      const startRect: Rect = {
         x: parseFloat(ghost.style.left),
         y: parseFloat(ghost.style.top),
+        w: gw,
+        h: gh
+      };
+      const wdata: WindowData = {
+        id: crypto.randomUUID(),
+        x: startRect.x,
+        y: startRect.y,
         w: Math.max(gw, MIN_WINDOW_WIDTH),
         h: Math.max(gh, MIN_WINDOW_HEIGHT),
         url: '',
         title: 'Blank'
       };
-      const rect = clampMove(wdata, wdata, windows);
+      const rect = clampMove(wdata, startRect, windows);
       wdata.x = rect.x;
       wdata.y = rect.y;
       windows.push(wdata);
@@ -444,7 +454,7 @@ function save() {
       w: Math.max(w.w, MIN_WINDOW_WIDTH),
       h: Math.max(w.h, MIN_WINDOW_HEIGHT)
     };
-    const adjusted = clampMove(expanded, expanded, windows);
+    const adjusted = clampMove(expanded, w, windows);
     windows.push({ ...expanded, x: adjusted.x, y: adjusted.y });
   }
   transform.scale = state.transform.scale;

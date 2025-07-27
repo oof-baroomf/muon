@@ -17,6 +17,7 @@ export function rectsOverlap(a: Rect, b: Rect): boolean {
 
 // Test a rect against all windows except optional ignoreId
 import { WindowData } from './windowManager';
+import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
 export function collides(rect: Rect, windows: WindowData[], ignoreId?: string): boolean {
   for (const w of windows) {
     if (w.id === ignoreId) continue;
@@ -100,7 +101,14 @@ export function clampResize(rect: Rect, prev: Rect, windows: WindowData[], ignor
 }
 
 // Clamp a creation drag rectangle so it never crosses other windows
-export function clampDrag(sx: number, sy: number, cx: number, cy: number, windows: WindowData[]): Rect {
+
+export function clampDrag(
+  sx: number,
+  sy: number,
+  cx: number,
+  cy: number,
+  windows: WindowData[]
+): Rect {
   // Move the drag start point outside existing windows so new windows never
   // spawn inside another
   let startX = sx;
@@ -139,6 +147,15 @@ export function clampDrag(sx: number, sy: number, cx: number, cy: number, window
       if (cy >= sy && y2 > w.y && sy < w.y) y2 = Math.min(y2, w.y);
       else if (cy <= sy && y1 < w.y + w.h && sy > w.y + w.h) y1 = Math.max(y1, w.y + w.h);
     }
+  }
+
+  if (x2 - x1 < MIN_WINDOW_WIDTH) {
+    if (cx >= sx) x2 = x1 + MIN_WINDOW_WIDTH;
+    else x1 = x2 - MIN_WINDOW_WIDTH;
+  }
+  if (y2 - y1 < MIN_WINDOW_HEIGHT) {
+    if (cy >= sy) y2 = y1 + MIN_WINDOW_HEIGHT;
+    else y1 = y2 - MIN_WINDOW_HEIGHT;
   }
 
   return { x: x1, y: y1, w: Math.max(0, x2 - x1), h: Math.max(0, y2 - y1) };

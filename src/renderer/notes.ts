@@ -30,8 +30,6 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   root.style.padding = '8px';
   root.style.fontSize = '13px';
 
-  container.appendChild(root);
-
   const editor = createEditor({
     namespace: 'muon-note',
     onError: (e: Error) => {
@@ -61,6 +59,9 @@ export async function setupNoteEditor(container: HTMLElement, notePath: string) 
   editor.update(() => {
     $convertFromMarkdownString(markdown, TRANSFORMERS);
   });
+
+  // allow immediate editing after loading
+  editor.focus();
 
   editor.registerUpdateListener(({editorState}) => {
     editorState.read(() => {

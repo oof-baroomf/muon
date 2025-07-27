@@ -87,7 +87,13 @@ import { createShortcutInput } from './shortcutInput';
   const defs: [keyof typeof cfg.shortcuts, string][] = [
     ['toggleSearch', 'Toggle Search'],
     ['saveState', 'Save Layout'],
-    ['centerWindow', 'Center Window']
+    ['centerWindow', 'Center Window'],
+    ['reloadWindow', 'Reload Window'],
+    ['newWindow', 'New Window'],
+    ['zoomInSite', 'Zoom In (Site)'],
+    ['zoomOutSite', 'Zoom Out (Site)'],
+    ['zoomInUI', 'Zoom In (UI)'],
+    ['zoomOutUI', 'Zoom Out (UI)']
   ];
   for (const [key, labelText] of defs) {
     const row = document.createElement('div');

@@ -11,6 +11,12 @@ export interface AppConfig {
     toggleSearch: string;
     saveState: string;
     centerWindow: string;
+    reloadWindow: string;
+    newWindow: string;
+    zoomInSite: string;
+    zoomOutSite: string;
+    zoomInUI: string;
+    zoomOutUI: string;
   };
 }
 
@@ -19,7 +25,13 @@ const modKey = isMac ? 'Cmd' : 'Ctrl';
 const defaultShortcuts = {
   toggleSearch: `${modKey}+K`,
   saveState: `${modKey}+S`,
-  centerWindow: `${modKey}+D`
+  centerWindow: `${modKey}+D`,
+  reloadWindow: `${modKey}+R`,
+  newWindow: `${modKey}+T`,
+  zoomInSite: `${modKey}+=`,
+  zoomOutSite: `${modKey}+-`,
+  zoomInUI: `Alt+=`,
+  zoomOutUI: `Alt+-`
 };
 
 const configPath = path.join(app.getPath('userData'), 'config.yaml');
@@ -47,7 +59,13 @@ export function loadConfig(): AppConfig {
       shortcuts: {
         toggleSearch: cfg.shortcuts?.toggleSearch ?? defaultShortcuts.toggleSearch,
         saveState: cfg.shortcuts?.saveState ?? defaultShortcuts.saveState,
-        centerWindow: cfg.shortcuts?.centerWindow ?? defaultShortcuts.centerWindow
+        centerWindow: cfg.shortcuts?.centerWindow ?? defaultShortcuts.centerWindow,
+        reloadWindow: cfg.shortcuts?.reloadWindow ?? defaultShortcuts.reloadWindow,
+        newWindow: cfg.shortcuts?.newWindow ?? defaultShortcuts.newWindow,
+        zoomInSite: cfg.shortcuts?.zoomInSite ?? defaultShortcuts.zoomInSite,
+        zoomOutSite: cfg.shortcuts?.zoomOutSite ?? defaultShortcuts.zoomOutSite,
+        zoomInUI: cfg.shortcuts?.zoomInUI ?? defaultShortcuts.zoomInUI,
+        zoomOutUI: cfg.shortcuts?.zoomOutUI ?? defaultShortcuts.zoomOutUI
       }
     };
   } catch {

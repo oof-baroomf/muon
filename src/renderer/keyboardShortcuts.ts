@@ -12,6 +12,7 @@ interface Deps {
   transform: TransformState;
   applyTransform: () => void;
   root: HTMLElement;
+  newWindow: (base: HTMLElement | null, url?: string) => void;
 }
 
 function matchesShortcut(e: KeyboardEvent, shortcut: string): boolean {
@@ -92,6 +93,58 @@ export function initKeyboardShortcuts(d: Deps) {
       if (targetWindow) {
         zoomAndCenterWindow(targetWindow, d.root, d.transform, d.applyTransform);
       }
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.reloadWindow)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) {
+        const id = active.dataset.id!;
+        window.electronAPI.send('view:reload', id);
+      }
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.newWindow)) {
+      e.preventDefault();
+      d.newWindow(d.getActiveWindow());
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.zoomInSite)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) {
+        const id = active.dataset.id!;
+        window.electronAPI.send('view:adjust-zoom', id, 0.1);
+      }
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.zoomOutSite)) {
+      e.preventDefault();
+      const active = d.getActiveWindow();
+      if (active) {
+        const id = active.dataset.id!;
+        window.electronAPI.send('view:adjust-zoom', id, -0.1);
+      }
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.zoomInUI)) {
+      e.preventDefault();
+      d.transform.scale = Math.min(4, d.transform.scale * 1.1);
+      d.applyTransform();
+      d.save();
+      return;
+    }
+
+    if (matchesShortcut(e, cfg.shortcuts.zoomOutUI)) {
+      e.preventDefault();
+      d.transform.scale = Math.max(0.25, d.transform.scale / 1.1);
+      d.applyTransform();
+      d.save();
       return;
     }
   });

@@ -19,6 +19,25 @@ let index = -1;
 
 export function initSearchOverlay(d: Deps) {
   deps = d;
+  document.addEventListener('keydown', e => {
+    if (!overlay) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (results.length) {
+        index = (index + 1 + results.length) % results.length;
+        refreshHighlight();
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (results.length) {
+        index = (index - 1 + results.length) % results.length;
+        refreshHighlight();
+      }
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (index >= 0) selectResult(index);
+    }
+  });
 }
 
 function fuzzyMatch(text: string, query: string) {

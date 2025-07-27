@@ -148,6 +148,11 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   views.set(id, view);
   view.webContents.loadURL(url);
 
+  view.webContents.setWindowOpenHandler(({ url }) => {
+    mainWindow?.webContents.send('view:new-window', id, url);
+    return { action: 'deny' };
+  });
+
   const send = (channel: string, ...args: unknown[]) => {
     const wc = evt.sender;
     if (!wc.isDestroyed()) {
@@ -223,6 +228,14 @@ ipcMain.on('view:set-zoom-factor', (evt, id: string, factor: number) => {
   const view = views.get(id);
   if (view) {
     view.webContents.setZoomFactor(factor);
+  }
+});
+
+ipcMain.on('view:adjust-zoom', (_evt, id: string, delta: number) => {
+  const view = views.get(id);
+  if (view) {
+    const current = view.webContents.getZoomFactor();
+    view.webContents.setZoomFactor(Math.max(0.25, current + delta));
   }
 });
 

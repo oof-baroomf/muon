@@ -24,6 +24,26 @@ const windowElements = new Map<string, HTMLElement>();
 
 const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
 
+function createAdjacentWindow(base: HTMLElement | null, url = '') {
+  const width = base ? parseFloat(base.style.width) : 800;
+  const height = base ? parseFloat(base.style.height) : 600;
+  const left = base ? parseFloat(base.style.left) + width + 10 : 10;
+  const top = base ? parseFloat(base.style.top) : 10;
+  const wdata: WindowData = {
+    id: crypto.randomUUID(),
+    x: left,
+    y: top,
+    w: width,
+    h: height,
+    url,
+    title: url ? '' : 'Blank'
+  };
+  windows.push(wdata);
+  const el = createWindowElement(wdata, false);
+  muonActiveWindow = el;
+  save();
+}
+
 function apply() {
   applyTransform(desk, root, windows, windowElements, transform);
 }
@@ -47,7 +67,8 @@ initKeyboardShortcuts({
   save,
   transform,
   applyTransform: apply,
-  root
+  root,
+  newWindow: createAdjacentWindow
 });
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
@@ -442,5 +463,9 @@ function save() {
     setConfig(cfg);
     applyGridStyle(root);
     apply();
+  });
+  window.electronAPI.receive('view:new-window', (srcId: string, url: string) => {
+    const base = windowElements.get(srcId) || null;
+    createAdjacentWindow(base, url);
   });
 })();

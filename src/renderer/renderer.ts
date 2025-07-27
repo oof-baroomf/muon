@@ -7,7 +7,8 @@ import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
-import { clampDrag, clampMove } from './collision';
+import { Rect, clampDrag, clampMove, collides } from './collision';
+import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -62,8 +63,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
   cont.style.left = w.x + 'px';
   cont.style.top = w.y + 'px';
-  cont.style.width = w.w + 'px';
-  cont.style.height = w.h + 'px';
+  cont.style.width = Math.max(w.w, MIN_WINDOW_WIDTH) + 'px';
+  cont.style.height = Math.max(w.h, MIN_WINDOW_HEIGHT) + 'px';
   cont.style.transform = '';
   cont.style.transformOrigin = 'top left';
   cont.dataset.id = w.id;
@@ -359,7 +360,11 @@ let dragStartY = 0;
 root.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const target = e.target as HTMLElement;
-  if (target.closest('.muon-urlbar') || target.closest('.muon-resize-handle')) {
+  if (
+    target.closest('.muon-window') ||
+    target.closest('.muon-urlbar') ||
+    target.closest('.muon-resize-handle')
+  ) {
     return;
   }
   dragStartX = e.clientX;
@@ -390,19 +395,27 @@ root.addEventListener('mousedown', e => {
     const gw = parseFloat(ghost.style.width);
     const gh = parseFloat(ghost.style.height);
     if (gw > 32 && gh > 32) {
-      const wdata: WindowData = {
-        id: crypto.randomUUID(),
+      const startRect: Rect = {
         x: parseFloat(ghost.style.left),
         y: parseFloat(ghost.style.top),
         w: gw,
-        h: gh,
+        h: gh
+      };
+      const wdata: WindowData = {
+        id: crypto.randomUUID(),
+        x: startRect.x,
+        y: startRect.y,
+        w: Math.max(gw, MIN_WINDOW_WIDTH),
+        h: Math.max(gh, MIN_WINDOW_HEIGHT),
         url: '',
         title: 'Blank'
       };
-      windows.push(wdata);
-      const el = createWindowElement(wdata, true);
-      muonActiveWindow = el;
-      save();
+      if (!collides(wdata, windows)) {
+        windows.push(wdata);
+        const el = createWindowElement(wdata, true);
+        muonActiveWindow = el;
+        save();
+      }
     }
     ghost.remove();
   };
@@ -419,7 +432,16 @@ function save() {
   await loadConfig();
   applyGridStyle(root);
   const state: DesktopState = await loadState();
-  windows = state.windows;
+  windows = [];
+  for (const w of state.windows) {
+    const expanded = {
+      ...w,
+      w: Math.max(w.w, MIN_WINDOW_WIDTH),
+      h: Math.max(w.h, MIN_WINDOW_HEIGHT)
+    };
+    const adjusted = clampMove(expanded, w, windows);
+    windows.push({ ...expanded, x: adjusted.x, y: adjusted.y });
+  }
   transform.scale = state.transform.scale;
   transform.offsetX = state.transform.x;
   transform.offsetY = state.transform.y;

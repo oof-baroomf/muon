@@ -2,7 +2,7 @@ import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow, centerWindow, initPanZoom } from './desktopTransform';
-import { initSearchOverlay } from './searchOverlay';
+import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
@@ -192,11 +192,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       e.preventDefault();
     }
   });
-  urlBar.addEventListener('dblclick', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    zoomAndCenterWindow(cont, root, transform, apply);
-  });
   urlBar.className = 'muon-urlbar px-2 py-1 text-xs outline-none';
   urlBar.style.flex = '1 1 0%';
   urlBar.style.height = `${barHeight - 4}px`;
@@ -319,12 +314,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  cont.addEventListener('dblclick', e => {
-    if ((e.target as HTMLElement).closest('.muon-urlbar') ||
-        (e.target as HTMLElement).closest('.muon-resize-handle')) return;
-    e.stopPropagation();
-    centerWindow(cont, root, transform, apply);
-  });
 
   const setActiveWindow = () => {
     muonActiveWindow = cont;

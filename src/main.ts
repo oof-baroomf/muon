@@ -5,25 +5,12 @@ declare const SETTINGS_WINDOW_WEBPACK_ENTRY: string;
 
 import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
+import type { Rectangle } from 'electron';
 import fs from 'fs';
 import { loadConfig, saveConfig, AppConfig } from './config';
+import type { DesktopState } from './renderer/state';
 
 const views = new Map<string, WebContentsView>();
-
-interface WindowState {
-  id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  url: string;
-  notePath?: string;
-}
-
-interface DesktopState {
-  windows: WindowState[];
-  transform: { scale: number; x: number; y: number };
-}
 
 let mainWindow: BrowserWindow | null = null;
 let appConfig: AppConfig = loadConfig();
@@ -117,9 +104,21 @@ ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
 });
 
 const notesDir = path.join(app.getPath('userData'), 'notes');
+if (!fs.existsSync(notesDir)) {
+  fs.mkdirSync(notesDir, { recursive: true });
+  fs.writeFileSync(path.join(notesDir, 'welcome.md'), '# Welcome to Muon\n');
+}
+
+function resolveNotePath(notePath: string): string {
+  const full = path.resolve(notesDir, notePath);
+  if (!full.startsWith(notesDir + path.sep) && full !== notesDir) {
+    throw new Error('Invalid note path');
+  }
+  return full;
+}
 
 ipcMain.handle('note:read', async (_evt, notePath: string) => {
-  const full = path.join(notesDir, notePath);
+  const full = resolveNotePath(notePath);
   try {
     return fs.readFileSync(full, 'utf-8');
   } catch {
@@ -130,7 +129,7 @@ ipcMain.handle('note:read', async (_evt, notePath: string) => {
 });
 
 ipcMain.on('note:write', (_evt, notePath: string, content: string) => {
-  const full = path.join(notesDir, notePath);
+  const full = resolveNotePath(notePath);
   fs.mkdirSync(path.dirname(full), { recursive: true });
   fs.writeFileSync(full, content);
 });
@@ -150,7 +149,7 @@ ipcMain.on('view:create', (evt, id: string, url: string) => {
   views.set(id, view);
   view.webContents.loadURL(url);
 
-  const send = (channel: string, ...args: any[]) => {
+  const send = (channel: string, ...args: unknown[]) => {
     const wc = evt.sender;
     if (!wc.isDestroyed()) {
       wc.send(channel, ...args);
@@ -179,7 +178,7 @@ ipcMain.on('view:destroy', (evt, id: string) => {
   }
 });
 
-ipcMain.on('view:set-bounds', (evt, id: string, bounds: Electron.Rectangle) => {
+ipcMain.on('view:set-bounds', (evt, id: string, bounds: Rectangle) => {
   const view = views.get(id);
   if (view) {
     view.setBounds(bounds);

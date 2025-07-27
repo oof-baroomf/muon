@@ -193,11 +193,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
       e.preventDefault();
     }
   });
-  urlBar.addEventListener('dblclick', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    zoomAndCenterWindow(cont, root, transform, apply);
-  });
   urlBar.className = 'muon-urlbar px-2 py-1 text-xs outline-none';
   urlBar.style.flex = '1 1 0%';
   urlBar.style.height = `${barHeight - 4}px`;
@@ -320,12 +315,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   cont.appendChild(barContainer);
   cont.appendChild(viewContainer);
 
-  cont.addEventListener('dblclick', e => {
-    if ((e.target as HTMLElement).closest('.muon-urlbar') ||
-        (e.target as HTMLElement).closest('.muon-resize-handle')) return;
-    e.stopPropagation();
-    centerWindow(cont, root, transform, apply);
-  });
 
   const setActiveWindow = () => {
     muonActiveWindow = cont;
@@ -365,7 +354,6 @@ function rebuild () {
   apply();
 }
 
-let isDragging = false;
 let dragStartX = 0;
 let dragStartY = 0;
 
@@ -381,7 +369,6 @@ root.addEventListener('mousedown', e => {
   }
   dragStartX = e.clientX;
   dragStartY = e.clientY;
-  isDragging = true;
   const ghost = document.createElement('div');
   ghost.id = 'ghost';
   ghost.className = 'absolute border border-gray-500 bg-gray-500/10';
@@ -431,7 +418,6 @@ root.addEventListener('mousedown', e => {
       }
     }
     ghost.remove();
-    isDragging = false;
   };
 
   document.addEventListener('mousemove', move);

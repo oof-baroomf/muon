@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm exec electron-forge start",
     "build": "pnpm exec electron-forge make",
-    "lint": "pnpm exec eslint . --ext .ts,.tsx"
+    "lint": "pnpm exec eslint \"src/**/*.{ts,tsx}\""
   },
   "keywords": [],
   "author": "",
@@ -22,10 +22,15 @@
     "@electron-forge/maker-squirrel": "^7.4.0",
     "@electron-forge/maker-zip": "^7.4.0",
     "@electron-forge/plugin-webpack": "^7.4.0",
+    "@eslint/js": "^9.31.0",
     "@types/node": "^20.12.8",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
     "autoprefixer": "^10.4.19",
     "css-loader": "^6.10.0",
     "electron": "^36.5.0",
+    "eslint": "^9.31.0",
+    "globals": "^16.3.0",
     "postcss": "^8.4.37",
     "postcss-loader": "^7.3.4",
     "style-loader": "^3.3.4",

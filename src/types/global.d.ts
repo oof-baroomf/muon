@@ -12,6 +12,13 @@ declare global {
       readNote(path: string): Promise<string>;
       writeNote(path: string, content: string): void;
     };
+    toastui: {
+      Editor: new (options: unknown) => {
+        getMarkdown(): string;
+        layout(): void;
+        on(event: string, handler: () => void): void;
+      };
+    };
   }
 
   // Extend CSSStyleDeclaration to include non-standard 'zoom' property used in renderer code

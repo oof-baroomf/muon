@@ -5,32 +5,43 @@ export function sanitizeNotePath(input: string): string {
   return p;
 }
 
+interface ToastEditor {
+  getMarkdown(): string;
+  layout(): void;
+  on(event: string, handler: () => void): void;
+}
+
+const activeEditors = new Map<HTMLElement, ToastEditor>();
+
 export async function setupNoteEditor(container: HTMLElement, notePath: string) {
   container.innerHTML = '';
-  const editor = document.createElement('div');
-  editor.className = 'muon-note-editor';
-  editor.contentEditable = 'true';
-  editor.style.outline = 'none';
-  editor.style.height = '100%';
-  editor.style.overflow = 'auto';
-  editor.style.padding = '8px';
-  const text = await window.electronAPI.readNote(notePath);
-  editor.innerHTML = text;
-  editor.addEventListener('input', () => {
-    window.electronAPI.writeNote(notePath, editor.innerHTML);
+  const holder = document.createElement('div');
+  holder.className = 'muon-note-editor';
+  holder.style.height = '100%';
+  container.appendChild(holder);
+
+  const markdown = await window.electronAPI.readNote(notePath);
+
+  const editor = new window.toastui.Editor({
+    el: holder,
+    height: '100%',
+    initialEditType: 'markdown',
+    previewStyle: 'vertical',
+    initialValue: markdown
   });
-  container.appendChild(editor);
+
+  editor.on('change', () => {
+    window.electronAPI.writeNote(notePath, editor.getMarkdown());
+  });
+
+  activeEditors.set(holder, editor);
 }
 
 
 export function rerenderVisibleNotes(): void {
-  const editors = document.querySelectorAll('.muon-note-editor') as NodeListOf<HTMLElement>;
-  editors.forEach(editor => {
-    if (editor.offsetParent) {
-      const originalDisplay = editor.style.display;
-      editor.style.display = 'none';
-      editor.offsetHeight;
-      editor.style.display = originalDisplay;
+  for (const [el, ed] of activeEditors) {
+    if (el.offsetParent) {
+      ed.layout();
     }
-  });
+  }
 }

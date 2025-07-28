@@ -17,6 +17,16 @@ let settingsWindow: BrowserWindow | null = null;
 
 function createMenu() {
   const isMac = process.platform === 'darwin';
+  const viewSubmenu: MenuItemConstructorOptions[] = [
+    { role: 'toggleDevTools' },
+    { type: 'separator' },
+    { role: 'resetZoom' },
+    { role: 'zoomIn' },
+    { role: 'zoomOut' },
+    { type: 'separator' },
+    { role: 'togglefullscreen' }
+  ];
+
   const template = [
     ...(isMac ? [
       {
@@ -38,7 +48,7 @@ function createMenu() {
       ]
     },
     { role: 'editMenu' },
-    { role: 'viewMenu' },
+    { label: 'View', submenu: viewSubmenu },
     { role: 'windowMenu' }
   ] as MenuItemConstructorOptions[];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

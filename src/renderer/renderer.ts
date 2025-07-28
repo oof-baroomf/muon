@@ -25,11 +25,22 @@ const windowElements = new Map<string, HTMLElement>();
 
 const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
 
+let spawnChainBaseId: string | null = null;
+let lastSpawnWindow: HTMLElement | null = null;
+
 function createAdjacentWindow(base: HTMLElement | null, url = '') {
-  const width = base ? parseFloat(base.style.width) : 800;
-  const height = base ? parseFloat(base.style.height) : 600;
-  const left = base ? parseFloat(base.style.left) + width + 10 : 10;
-  const top = base ? parseFloat(base.style.top) : 10;
+  let ref = base;
+  if (base && spawnChainBaseId === base.dataset.id && lastSpawnWindow) {
+    ref = lastSpawnWindow;
+  } else {
+    spawnChainBaseId = base ? base.dataset.id! : null;
+    lastSpawnWindow = base;
+  }
+
+  const width = ref ? parseFloat(ref.style.width) : 800;
+  const height = ref ? parseFloat(ref.style.height) : 600;
+  const left = ref ? parseFloat(ref.style.left) + width + 10 : 10;
+  const top = ref ? parseFloat(ref.style.top) : 10;
   const wdata: WindowData = {
     id: crypto.randomUUID(),
     x: left,
@@ -42,12 +53,8 @@ function createAdjacentWindow(base: HTMLElement | null, url = '') {
   windows.push(wdata);
   const el = createWindowElement(wdata, false);
   muonActiveWindow = el;
-  if (base) {
-    const baseLeft = parseFloat(base.style.left);
-    const delta = left - baseLeft;
-    transform.offsetX -= delta;
-    apply();
-  }
+  lastSpawnWindow = el;
+  centerWindow(el, root, transform, apply);
   save();
 }
 

@@ -1,4 +1,4 @@
-import { showSearch, hideSearch, isSearchVisible } from './searchOverlay';
+import { showSearch, hideSearch, isSearchVisible, handleSearchKey } from './searchOverlay';
 import { zoomAndCenterWindow, TransformState } from './desktopTransform';
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';
@@ -33,34 +33,11 @@ function matchesShortcut(e: KeyboardEvent, shortcut: string): boolean {
 
 export function initKeyboardShortcuts(d: Deps) {
   document.addEventListener('keydown', e => {
-    console.log('Key event:', e.key, 'meta:', e.metaKey, 'ctrl:', e.ctrlKey);
-
     const cfg = getConfig();
 
-    if (isSearchVisible()) {
-      if (e.key === 'Escape') { hideSearch(); return; }
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const results = d.getWindows();
-        if (results.length) {
-          // cycling handled in search overlay
-          document.dispatchEvent(new KeyboardEvent('keydown', { key: e.key }));
-        }
-        return;
-      }
-      if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const results = d.getWindows();
-        if (results.length) {
-          document.dispatchEvent(new KeyboardEvent('keydown', { key: e.key }));
-        }
-        return;
-      }
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        document.dispatchEvent(new KeyboardEvent('keydown', { key: e.key }));
-        return;
-      }
+    if (isSearchVisible() && handleSearchKey(e)) {
+      e.preventDefault();
+      return;
     }
 
     if (matchesShortcut(e, cfg.shortcuts.toggleSearch)) {

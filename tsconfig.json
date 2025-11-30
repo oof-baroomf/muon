@@ -9,6 +9,7 @@
     "paths": {
       "*": ["node_modules/*"]
     },
+    "types": ["node"],
     "outDir": ".webpack",
     "sourceMap": true,
     "skipLibCheck": true

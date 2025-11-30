@@ -1,8 +1,8 @@
 import './styles.css';
 import { WindowData, addResizeHandle, addAddressBarDrag } from './windowManager';
 import { DesktopState, loadState, saveState } from './state';
-import { TransformState, applyTransform, zoomAndCenterWindow, centerWindow, initPanZoom } from './desktopTransform';
-import { initSearchOverlay, showSearch, hideSearch, isSearchVisible } from './searchOverlay';
+import { TransformState, applyTransform, zoomAndCenterWindow, initPanZoom } from './desktopTransform';
+import { initSearchOverlay } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
 import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
@@ -22,6 +22,7 @@ let windows: WindowData[] = [];
 let muonActiveWindow: HTMLElement | null = null;
 
 const windowElements = new Map<string, HTMLElement>();
+const windowCleanups = new Map<string, () => void>();
 
 const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
 
@@ -52,6 +53,9 @@ initKeyboardShortcuts({
 });
 
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
+  const subscriptions: Array<() => void> = [];
+  const resizeObservers: ResizeObserver[] = [];
+
   if (w.notePath) {
     const name = w.notePath.split('/').pop()!.replace(/\.md$/, '');
     w.title = w.title || name;
@@ -160,6 +164,9 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   removeBtn.style.zIndex = '4';
   removeBtn.onclick = (e) => {
     e.stopPropagation();
+    const cleanup = windowCleanups.get(w.id);
+    cleanup?.();
+    windowCleanups.delete(w.id);
     windows = windows.filter(win => win.id !== w.id);
     windowElements.delete(w.id);
     window.electronAPI.send('view:destroy', w.id);
@@ -288,17 +295,17 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const updateTitle = (title: string) => { w.title = title; };
 
   if (!w.notePath) {
-    window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
+    subscriptions.push(window.electronAPI.receive(`view:did-navigate:${w.id}`, (url: string) => {
       urlBar.value = url;
       w.url = url;
-    });
-    window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
+    }));
+    subscriptions.push(window.electronAPI.receive(`view:did-navigate-in-page:${w.id}`, (url: string) => {
       urlBar.value = url;
       w.url = url;
-    });
-    window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
+    }));
+    subscriptions.push(window.electronAPI.receive(`view:page-title-updated:${w.id}`, (title: string) => {
       updateTitle(title);
-    });
+    }));
   }
 
   const adjustZoom = () => {
@@ -308,8 +315,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     }
   };
 
-  new ResizeObserver(updateBounds).observe(cont);
-  new ResizeObserver(adjustZoom).observe(cont);
+  const boundsObserver = new ResizeObserver(updateBounds);
+  const zoomObserver = new ResizeObserver(adjustZoom);
+  boundsObserver.observe(cont);
+  zoomObserver.observe(cont);
+  resizeObservers.push(boundsObserver, zoomObserver);
 
   cont.appendChild(topBar);
   cont.appendChild(barContainer);
@@ -339,10 +349,17 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   if (focusBar) urlBar.focus();
 
+  windowCleanups.set(w.id, () => {
+    subscriptions.forEach(unsub => unsub());
+    resizeObservers.forEach(obs => obs.disconnect());
+  });
+
   return cont;
 }
 
 function rebuild () {
+  windowCleanups.forEach(clean => clean());
+  windowCleanups.clear();
   desk.innerHTML = '';
   windowElements.clear();
   windows.forEach((w, index) => {

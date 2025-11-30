@@ -7,6 +7,7 @@ import path from 'path';
 import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuItemConstructorOptions } from 'electron';
 import type { Rectangle } from 'electron';
 import fs from 'fs';
+import os from 'os';
 import { loadConfig, saveConfig, AppConfig } from './config';
 import type { DesktopState } from './renderer/state';
 
@@ -15,6 +16,17 @@ const views = new Map<string, WebContentsView>();
 let mainWindow: BrowserWindow | null = null;
 let appConfig: AppConfig = loadConfig();
 let settingsWindow: BrowserWindow | null = null;
+
+const tempRoot = path.join(os.tmpdir(), 'muon');
+fs.mkdirSync(tempRoot, { recursive: true });
+process.env.TMPDIR = tempRoot;
+
+// Headless/dev environments struggle with Chromium's GPU process; disable it up front.
+app.commandLine.appendSwitch('disable-gpu');
+app.commandLine.appendSwitch('disable-gpu-compositing');
+app.commandLine.appendSwitch('disable-dev-shm-usage');
+app.commandLine.appendSwitch('enable-unsafe-swiftshader');
+app.disableHardwareAcceleration();
 
 function createMenu() {
   const isMac = process.platform === 'darwin';
@@ -52,6 +64,7 @@ function createMainWindow () {
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       sandbox: true,
+      contextIsolation: true
     }
   });
 
@@ -71,7 +84,8 @@ function openSettingsWindow() {
     resizable: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      sandbox: true
+      sandbox: true,
+      contextIsolation: true
     }
   });
   settingsWindow.loadURL(SETTINGS_WINDOW_WEBPACK_ENTRY);
@@ -240,10 +254,12 @@ ipcMain.on('overlay:hide', () => {
 });
 
 app.whenReady().then(() => {
+  app.setPath('temp', tempRoot);
+
   createMainWindow();
   createMenu();
 });
-  
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });

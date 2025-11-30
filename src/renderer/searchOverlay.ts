@@ -78,6 +78,27 @@ export function isSearchVisible() {
   return !!overlay;
 }
 
+export function handleSearchKey(e: KeyboardEvent): boolean {
+  if (!isSearchVisible()) return false;
+  if (e.key === 'Escape') {
+    hideSearch();
+    return true;
+  }
+  if (e.key === 'ArrowDown') {
+    moveSelection(1);
+    return true;
+  }
+  if (e.key === 'ArrowUp') {
+    moveSelection(-1);
+    return true;
+  }
+  if (e.key === 'Enter') {
+    selectResult(index);
+    return true;
+  }
+  return false;
+}
+
 function updateResults() {
   if (!listEl || !inputEl) return;
   const query = inputEl.value;
@@ -86,6 +107,11 @@ function updateResults() {
     .filter(r => r.element && fuzzyMatch(r.win.title || r.win.url, query));
 
   listEl.innerHTML = '';
+  if (results.length && (index < 0 || index >= results.length)) {
+    index = 0;
+  } else if (!results.length) {
+    index = -1;
+  }
   results.forEach((r, idx) => {
     const item = document.createElement('div');
     item.textContent = r.win.title || r.win.url;
@@ -102,6 +128,14 @@ function refreshHighlight() {
   Array.from(listEl.children).forEach((el, i) => {
     (el as HTMLElement).style.background = i === index ? '#333' : 'transparent';
   });
+}
+
+function moveSelection(delta: number) {
+  if (!results.length) return;
+  index = (index + delta + results.length) % results.length;
+  refreshHighlight();
+  const item = listEl?.children[index] as HTMLElement | undefined;
+  item?.scrollIntoView({ block: 'nearest' });
 }
 
 function selectResult(i: number) {

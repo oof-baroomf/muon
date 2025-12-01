@@ -1,0 +1,50 @@
+gridSize = 32
+gridStyle = "lines"
+gridOpacity = 0.15
+
+[shortcuts]
+toggleSearch = "Ctrl+K"
+saveState = "Ctrl+S"
+centerWindow = "Ctrl+D"
+
+[windowLayout]
+barHeight = 24
+viewPadding = 8
+
+  [windowLayout.nav]
+  buttonSize = 16
+  fontSize = 12
+  gap = 2
+  marginLeft = 4
+
+    [windowLayout.nav.icons]
+    back = "←"
+    forward = "→"
+    reload = "⟳"
+    stop = "⨉"
+
+    [windowLayout.nav.titles]
+    back = "Back"
+    forward = "Forward"
+    reload = "Reload"
+    stop = "Stop"
+
+  [windowLayout.urlBar]
+  fontSize = 12
+  heightInset = 4
+  marginRight = 2
+
+  [windowLayout.removeButton]
+  label = "×"
+  title = "Remove window"
+  size = 16
+  marginRight = 2
+
+  [windowLayout.minWindow]
+  width = 280
+  height = 120
+
+  [windowLayout.resizeHandles]
+  corner = 12
+  edge = 8
+  inset = 12

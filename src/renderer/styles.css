@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+    --muon-scale: 1;
+    --muon-hairline: calc(1px / var(--muon-scale));
+    --muon-bar-height: 24px;
+    --muon-view-padding: 8px;
+    --muon-nav-btn-size: 16px;
+    --muon-nav-btn-font-size: 12px;
+    --muon-nav-gap: 2px;
+    --muon-nav-margin-left: 4px;
+    --muon-urlbar-font-size: 12px;
+    --muon-urlbar-height-inset: 4px;
+    --muon-urlbar-margin-right: 2px;
+    --muon-remove-size: 16px;
+    --muon-remove-margin-right: 2px;
+    --muon-resize-corner: 12px;
+    --muon-resize-edge: 8px;
+    --muon-resize-inset: 12px;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -9,7 +28,7 @@
 }
 ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
+    border-radius: 0;
 }
 
 @font-face {
@@ -48,12 +67,22 @@ button,
 .muon-window {
     background: #23232a;
     border-color: #444;
+    border-style: solid;
+    border-width: var(--muon-hairline);
+    border-radius: 0;
     box-shadow: 0 2px 16px #000a;
 }
 .muon-urlbar {
+    flex: 1 1 0%;
+    height: calc(var(--muon-bar-height) - var(--muon-urlbar-height-inset));
+    font-size: var(--muon-urlbar-font-size);
+    margin-right: var(--muon-urlbar-margin-right);
     background: #23232a;
     color: #e5e5e5;
-    border-bottom: 1px solid #444;
+    border: none;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
     /* Force pixel-perfect text rendering */
     text-rendering: geometricPrecision;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -64,19 +93,19 @@ button,
     image-rendering: pixelated;
 }
 .muon-remove {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
+    font-size: var(--muon-remove-size);
+    width: var(--muon-remove-size);
+    height: var(--muon-remove-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 2px;
+    margin-right: var(--muon-remove-margin-right);
     background: transparent;
     border: none;
     cursor: pointer;
     color: #aaa;
     transition: color 0.15s;
-    border-radius: 4px;
+    border-radius: 0;
     /* Force pixel-perfect rendering of close button */
     text-rendering: geometricPrecision;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -96,14 +125,14 @@ button,
     display: flex;
     align-items: center;
     background: #23232a;
-    border-bottom: 1px solid #444;
+    border-bottom: var(--muon-hairline) solid #444;
     width: 100%;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     z-index: 3;
-    height: 24px;
+    height: var(--muon-bar-height);
     /* Force pixel-perfect rendering */
     text-rendering: geometricPrecision;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -117,7 +146,7 @@ button,
 
 .muon-drag-area {
     flex: 1 1 0%;
-    height: 24px;
+    height: var(--muon-bar-height);
     cursor: grab;
     user-select: none;
     background: transparent;
@@ -126,18 +155,18 @@ button,
 .muon-nav-controls {
     display: flex;
     align-items: center;
-    gap: 2px;
-    margin-left: 4px;
+    gap: var(--muon-nav-gap);
+    margin-left: var(--muon-nav-margin-left);
 }
 
 .muon-nav-btn {
-    font-size: 12px;
-    width: 16px;
-    height: 16px;
+    font-size: var(--muon-nav-btn-font-size);
+    width: var(--muon-nav-btn-size);
+    height: var(--muon-nav-btn-size);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
+    border-radius: 0;
     color: #aaa;
     transition:
         color 0.15s,
@@ -163,14 +192,14 @@ button,
     display: flex;
     align-items: center;
     background: #23232a;
-    border-bottom: 1px solid #444;
+    border-bottom: var(--muon-hairline) solid #444;
     width: 100%;
     position: absolute;
-    top: 24px;
+    top: var(--muon-bar-height);
     left: 0;
     right: 0;
     z-index: 2;
-    height: 24px;
+    height: var(--muon-bar-height);
     /* Force pixel-perfect rendering */
     text-rendering: geometricPrecision;
     -webkit-font-smoothing: subpixel-antialiased;
@@ -180,6 +209,15 @@ button,
     backface-visibility: hidden;
     transform: translateZ(0);
     will-change: transform;
+}
+
+.muon-view-container {
+    position: absolute;
+    left: var(--muon-view-padding);
+    right: var(--muon-view-padding);
+    top: calc(var(--muon-bar-height) * 2);
+    bottom: var(--muon-view-padding);
+    z-index: 0;
 }
 
 /* Resize handles */
@@ -192,39 +230,55 @@ button,
     pointer-events: auto;
 }
 .muon-resize-corner {
-    width: 12px;
-    height: 12px;
+    width: var(--muon-resize-corner);
+    height: var(--muon-resize-corner);
+    background: transparent;
+}
+.muon-resize-corner-se {
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, transparent 50%, #3b82f6 50%);
     cursor: nwse-resize;
-    opacity: 1;
+}
+.muon-resize-corner-sw {
+    left: 0;
+    bottom: 0;
+    cursor: nesw-resize;
+}
+.muon-resize-corner-ne {
+    right: 0;
+    top: 0;
+    cursor: nesw-resize;
+}
+.muon-resize-corner-nw {
+    left: 0;
+    top: 0;
+    cursor: nwse-resize;
 }
 .muon-resize-right {
-    width: 8px;
-    top: 12px;
+    width: var(--muon-resize-edge);
+    top: var(--muon-resize-inset);
     right: 0;
-    bottom: 12px;
+    bottom: var(--muon-resize-inset);
     cursor: ew-resize;
 }
 .muon-resize-bottom {
-    height: 8px;
-    left: 12px;
-    right: 12px;
+    height: var(--muon-resize-edge);
+    left: var(--muon-resize-inset);
+    right: var(--muon-resize-inset);
     bottom: 0;
     cursor: ns-resize;
 }
 .muon-resize-left {
-    width: 8px;
-    top: 12px;
+    width: var(--muon-resize-edge);
+    top: var(--muon-resize-inset);
     left: 0;
-    bottom: 12px;
+    bottom: var(--muon-resize-inset);
     cursor: ew-resize;
 }
 .muon-resize-top {
-    height: 8px;
-    left: 12px;
-    right: 12px;
+    height: var(--muon-resize-edge);
+    left: var(--muon-resize-inset);
+    right: var(--muon-resize-inset);
     top: 0;
     cursor: ns-resize;
 }
@@ -236,6 +290,11 @@ button,
 /* Move cursor for address bar */
 .muon-urlbar.cursor-move {
     cursor: move;
+}
+
+#ghost {
+    border: var(--muon-hairline) solid #6b7280;
+    border-radius: 0;
 }
 
 .muon-note-editor {

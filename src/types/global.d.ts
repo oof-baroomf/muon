@@ -6,7 +6,7 @@ declare global {
       loadState(): Promise<import('../renderer/state').DesktopState>;
       saveState(state: import('../renderer/state').DesktopState): void;
       loadConfig(): Promise<import('../config').AppConfig>;
-      saveConfig(cfg: import('../config').AppConfig): void;
+      configPath(): Promise<string>;
       send<T extends unknown[]>(channel: string, ...args: T): void;
       receive<T extends unknown[]>(channel: string, func: (...args: T) => void): () => void;
       readNote(path: string): Promise<string>;

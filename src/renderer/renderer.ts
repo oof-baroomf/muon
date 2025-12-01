@@ -4,11 +4,10 @@ import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow, initPanZoom } from './desktopTransform';
 import { initSearchOverlay } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
-import { loadConfig, setConfig, AppConfig } from './settings/appConfig';
+import { loadConfig, applyWindowLayoutVars, getWindowLayout } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
 import { Rect, clampDrag, clampMove, collides } from './collision';
-import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -55,6 +54,7 @@ initKeyboardShortcuts({
 function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   const subscriptions: Array<() => void> = [];
   const resizeObservers: ResizeObserver[] = [];
+  const layout = getWindowLayout();
 
   if (w.notePath) {
     const name = w.notePath.split('/').pop()!.replace(/\.md$/, '');
@@ -64,28 +64,18 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   }
   const cont = document.createElement('div');
   windowElements.set(w.id, cont);
-  cont.className = 'muon-window absolute border rounded overflow-hidden shadow-lg';
+  cont.className = 'muon-window absolute overflow-hidden shadow-lg';
   cont.style.left = w.x + 'px';
   cont.style.top = w.y + 'px';
-  cont.style.width = Math.max(w.w, MIN_WINDOW_WIDTH) + 'px';
-  cont.style.height = Math.max(w.h, MIN_WINDOW_HEIGHT) + 'px';
+  cont.style.width = Math.max(w.w, layout.minWindow.width) + 'px';
+  cont.style.height = Math.max(w.h, layout.minWindow.height) + 'px';
   cont.style.transform = '';
   cont.style.transformOrigin = 'top left';
   cont.dataset.id = w.id;
   cont.style.zIndex = '1';
 
-  const barHeight = 24;
   const topBar = document.createElement('div');
   topBar.className = 'muon-topbar-container';
-  topBar.style.position = 'absolute';
-  topBar.style.top = '0';
-  topBar.style.left = '0';
-  topBar.style.right = '0';
-  topBar.style.height = `${barHeight}px`;
-  topBar.style.display = 'flex';
-  topBar.style.alignItems = 'center';
-  topBar.style.zIndex = '3';
-  topBar.style.background = '#23232a';
 
   topBar.addEventListener('dblclick', (e) => {
     e.preventDefault();
@@ -95,20 +85,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   const navControls = document.createElement('div');
   navControls.className = 'muon-nav-controls';
-  navControls.style.display = 'flex';
-  navControls.style.alignItems = 'center';
-  navControls.style.gap = '2px';
-  navControls.style.marginLeft = '4px';
 
   let backBtn: HTMLButtonElement, fwdBtn: HTMLButtonElement, reloadBtn: HTMLButtonElement, stopBtn: HTMLButtonElement;
 
   const dragArea = document.createElement('div');
   dragArea.className = 'muon-drag-area';
-  dragArea.style.flex = '1 1 0%';
-  dragArea.style.height = `${barHeight}px`;
-  dragArea.style.cursor = 'grab';
-  dragArea.style.userSelect = 'none';
-  dragArea.style.background = 'transparent';
 
   dragArea.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
@@ -158,8 +139,8 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
   });
 
   const removeBtn = document.createElement('button');
-  removeBtn.textContent = '×';
-  removeBtn.title = 'Remove window';
+  removeBtn.textContent = layout.removeButton.label;
+  removeBtn.title = layout.removeButton.title;
   removeBtn.className = 'muon-remove';
   removeBtn.style.zIndex = '4';
   removeBtn.onclick = (e) => {
@@ -180,15 +161,6 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   const barContainer = document.createElement('div');
   barContainer.className = 'muon-urlbar-container';
-  barContainer.style.position = 'absolute';
-  barContainer.style.top = `${barHeight}px`;
-  barContainer.style.left = '0';
-  barContainer.style.right = '0';
-  barContainer.style.height = `${barHeight}px`;
-  barContainer.style.display = 'flex';
-  barContainer.style.alignItems = 'center';
-  barContainer.style.zIndex = '2';
-  barContainer.style.background = '#23232a';
 
   const urlBar = document.createElement('input');
   urlBar.type = 'text';
@@ -201,27 +173,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     }
   });
   urlBar.className = 'muon-urlbar px-2 py-1 text-xs outline-none';
-  urlBar.style.flex = '1 1 0%';
-  urlBar.style.height = `${barHeight - 4}px`;
-  urlBar.style.fontSize = `12px`;
-  urlBar.style.border = 'none';
-  urlBar.style.background = 'transparent';
-  urlBar.style.color = '#e5e5e5';
-  urlBar.style.marginRight = '2px';
-  urlBar.style.textOverflow = 'ellipsis';
-  urlBar.style.overflow = 'hidden';
-  urlBar.style.whiteSpace = 'nowrap';
 
   barContainer.appendChild(urlBar);
 
   const viewContainer = document.createElement('div');
   viewContainer.className = 'muon-view-container';
-  viewContainer.style.position = 'absolute';
-  viewContainer.style.left = '8px';
-  viewContainer.style.right = '8px';
-  viewContainer.style.top = `${barHeight * 2}px`;
-  viewContainer.style.bottom = '8px';
-  viewContainer.style.zIndex = '0';
 
   if (w.notePath) {
     setupNoteEditor(viewContainer, w.notePath);
@@ -239,19 +195,22 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     });
   };
 
-  function makeNavBtn(label: string, title: string, handler: () => void) {
+  function makeNavBtn(kind: 'back' | 'forward' | 'reload' | 'stop', label: string, title: string, handler: () => void) {
     const btn = document.createElement('button');
     btn.textContent = label;
     btn.title = title;
     btn.className = 'muon-nav-btn';
+    btn.dataset.nav = kind;
     btn.onclick = (e) => { e.stopPropagation(); handler(); };
     return btn;
   }
 
-  backBtn = makeNavBtn('←', 'Back', () => window.electronAPI.send('view:back', w.id));
-  fwdBtn = makeNavBtn('→', 'Forward', () => window.electronAPI.send('view:forward', w.id));
-  reloadBtn = makeNavBtn('⟳', 'Reload', () => window.electronAPI.send('view:reload', w.id));
-  stopBtn = makeNavBtn('⨉', 'Stop', () => window.electronAPI.send('view:stop', w.id));
+  const icons = layout.nav.icons;
+  const titles = layout.nav.titles;
+  backBtn = makeNavBtn('back', icons.back, titles.back, () => window.electronAPI.send('view:back', w.id));
+  fwdBtn = makeNavBtn('forward', icons.forward, titles.forward, () => window.electronAPI.send('view:forward', w.id));
+  reloadBtn = makeNavBtn('reload', icons.reload, titles.reload, () => window.electronAPI.send('view:reload', w.id));
+  stopBtn = makeNavBtn('stop', icons.stop, titles.stop, () => window.electronAPI.send('view:stop', w.id));
 
   topBar.insertBefore(stopBtn, topBar.firstChild);
   topBar.insertBefore(reloadBtn, topBar.firstChild);
@@ -374,6 +333,56 @@ function rebuild () {
 let dragStartX = 0;
 let dragStartY = 0;
 
+function applyLayoutFromConfig() {
+  applyWindowLayoutVars(document.documentElement, getWindowLayout());
+}
+
+function refreshWindowsFromLayout() {
+  const layout = getWindowLayout();
+  let changed = false;
+  windowElements.forEach((cont, id) => {
+    const winData = windows.find(w => w.id === id);
+    if (!winData) return;
+
+    const width = Math.max(winData.w, layout.minWindow.width);
+    const height = Math.max(winData.h, layout.minWindow.height);
+    if (width !== winData.w || height !== winData.h) {
+      winData.w = width;
+      winData.h = height;
+      changed = true;
+    }
+    cont.style.width = width + 'px';
+    cont.style.height = height + 'px';
+
+    const removeBtn = cont.querySelector<HTMLButtonElement>('.muon-remove');
+    if (removeBtn) {
+      removeBtn.textContent = layout.removeButton.label;
+      removeBtn.title = layout.removeButton.title;
+    }
+
+    const navButtons = cont.querySelectorAll<HTMLButtonElement>('.muon-nav-btn');
+    navButtons.forEach(btn => {
+      const key = btn.dataset.nav as 'back' | 'forward' | 'reload' | 'stop' | undefined;
+      if (!key) return;
+      btn.textContent = layout.nav.icons[key];
+      btn.title = layout.nav.titles[key];
+    });
+
+    const viewContainer = cont.querySelector<HTMLElement>('.muon-view-container');
+    if (viewContainer) {
+      const rect = viewContainer.getBoundingClientRect();
+      window.electronAPI.send('view:set-bounds', id, {
+        x: Math.round(rect.left),
+        y: Math.round(rect.top),
+        width: Math.round(rect.width),
+        height: Math.round(rect.height)
+      });
+    }
+  });
+
+  if (changed) save();
+}
+
 root.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   const target = e.target as HTMLElement;
@@ -388,7 +397,7 @@ root.addEventListener('mousedown', e => {
   dragStartY = e.clientY;
   const ghost = document.createElement('div');
   ghost.id = 'ghost';
-  ghost.className = 'absolute border border-gray-500 bg-gray-500/10';
+  ghost.className = 'absolute bg-gray-500/10';
   desk.appendChild(ghost);
 
   const updateGhost = (ev: MouseEvent) => {
@@ -405,28 +414,29 @@ root.addEventListener('mousedown', e => {
   };
 
   const move = (ev: MouseEvent) => updateGhost(ev);
-  const up = (ev: MouseEvent) => {
-    document.removeEventListener('mousemove', move);
-    document.removeEventListener('mouseup', up);
-    updateGhost(ev);
-    const gw = parseFloat(ghost.style.width);
-    const gh = parseFloat(ghost.style.height);
-    if (gw > 32 && gh > 32) {
-      const startRect: Rect = {
-        x: parseFloat(ghost.style.left),
-        y: parseFloat(ghost.style.top),
-        w: gw,
-        h: gh
-      };
-      const wdata: WindowData = {
-        id: crypto.randomUUID(),
-        x: startRect.x,
-        y: startRect.y,
-        w: Math.max(gw, MIN_WINDOW_WIDTH),
-        h: Math.max(gh, MIN_WINDOW_HEIGHT),
-        url: '',
-        title: 'Blank'
-      };
+    const up = (ev: MouseEvent) => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+      updateGhost(ev);
+      const gw = parseFloat(ghost.style.width);
+      const gh = parseFloat(ghost.style.height);
+      const minWindow = getWindowLayout().minWindow;
+      if (gw > 32 && gh > 32) {
+        const startRect: Rect = {
+          x: parseFloat(ghost.style.left),
+          y: parseFloat(ghost.style.top),
+          w: gw,
+          h: gh
+        };
+        const wdata: WindowData = {
+          id: crypto.randomUUID(),
+          x: startRect.x,
+          y: startRect.y,
+          w: Math.max(gw, minWindow.width),
+          h: Math.max(gh, minWindow.height),
+          url: '',
+          title: 'Blank'
+        };
       if (!collides(wdata, windows)) {
         windows.push(wdata);
         const el = createWindowElement(wdata, true);
@@ -447,14 +457,16 @@ function save() {
 
 (async () => {
   await loadConfig();
+  applyLayoutFromConfig();
   applyGridStyle(root);
   const state: DesktopState = await loadState();
   windows = [];
+  const minWindow = getWindowLayout().minWindow;
   for (const w of state.windows) {
     const expanded = {
       ...w,
-      w: Math.max(w.w, MIN_WINDOW_WIDTH),
-      h: Math.max(w.h, MIN_WINDOW_HEIGHT)
+      w: Math.max(w.w, minWindow.width),
+      h: Math.max(w.h, minWindow.height)
     };
     const adjusted = clampMove(expanded, w, windows);
     windows.push({ ...expanded, x: adjusted.x, y: adjusted.y });
@@ -463,9 +475,5 @@ function save() {
   transform.offsetX = state.transform.x;
   transform.offsetY = state.transform.y;
   rebuild();
-  window.electronAPI.receive('config:updated', (cfg: AppConfig) => {
-    setConfig(cfg);
-    applyGridStyle(root);
-    apply();
-  });
+  refreshWindowsFromLayout();
 })();

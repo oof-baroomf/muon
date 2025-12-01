@@ -4,27 +4,30 @@ Infinite canvas web browser.
 
 ## Development
 
-Install dependencies using [pnpm](https://pnpm.io):
+Install dependencies using [Bun](https://bun.sh):
 
 ```bash
-pnpm install
+bun install
 ```
 
 Run the development environment with Electron Forge:
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
 To create production builds:
 
 ```bash
-pnpm build
+bun run build
 ```
 
 Run ESLint:
 
 ```bash
-pnpm lint
+bun run lint
 ```
 
+## Configuration
+
+User settings are stored in `config.toml` under the app’s user data directory (e.g., `~/Library/Application Support/Muon/config.toml` on macOS, `%APPDATA%/Muon/config.toml` on Windows). Grid preferences and keyboard shortcuts live there and can be edited directly.

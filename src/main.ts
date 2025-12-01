@@ -8,7 +8,7 @@ import { app, BrowserWindow, ipcMain, IpcMainEvent, WebContentsView, Menu, MenuI
 import type { Rectangle } from 'electron';
 import fs from 'fs';
 import os from 'os';
-import { loadConfig, saveConfig, AppConfig } from './config';
+import { loadConfig, AppConfig, getConfigPath } from './config';
 import type { DesktopState } from './renderer/state';
 
 const views = new Map<string, WebContentsView>();
@@ -110,12 +110,7 @@ ipcMain.handle('config:load', () => {
   return appConfig;
 });
 
-ipcMain.on('config:save', (_evt, cfg: AppConfig) => {
-  appConfig = cfg;
-  saveConfig(appConfig);
-  mainWindow?.webContents.send('config:updated', appConfig);
-  settingsWindow?.webContents.send('config:updated', appConfig);
-});
+ipcMain.handle('config:path', () => getConfigPath());
 
 const notesDir = path.join(app.getPath('userData'), 'notes');
 if (!fs.existsSync(notesDir)) {

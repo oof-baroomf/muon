@@ -17,7 +17,7 @@ export interface Transform {
 }
 
 import { Rect, clampResize, clampMove } from './collision';
-import { MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT } from './constants';
+import { getWindowLayout } from './settings/appConfig';
 
 interface ResizeState {
   startWidth: number;
@@ -34,7 +34,9 @@ export function addResizeHandle(
   windows: WindowData[],
   save: () => void,
   updateBounds: () => void
-) {
+  ) {
+  const currentLayout = () => getWindowLayout();
+
   function makeHandle(
     edge: string,
     cursor: string,
@@ -42,7 +44,7 @@ export function addResizeHandle(
     resizeFn: (dx: number, dy: number, state: ResizeState) => void
   ) {
     const handle = document.createElement('div');
-    handle.className = 'muon-resize-handle muon-resize-' + edge;
+    handle.className = 'muon-resize-handle muon-resize-' + edge + (edge.startsWith('corner') ? ' muon-resize-corner' : '');
     Object.assign(handle.style, style);
     handle.style.position = 'absolute';
     handle.style.zIndex = '20';
@@ -102,9 +104,10 @@ export function addResizeHandle(
   makeHandle(
     'corner-se',
     'nwse-resize',
-    { right: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' },
+    {},
     (dx, dy, { startWidth, startHeight }) => {
-      const minWidth = MIN_WINDOW_WIDTH, minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width, minHeight = minWindow.height;
       const newWidth = Math.max(minWidth, startWidth + dx);
       const newHeight = Math.max(minHeight, startHeight + dy);
       cont.style.width = newWidth + 'px';
@@ -115,9 +118,10 @@ export function addResizeHandle(
   makeHandle(
     'corner-nw',
     'nwse-resize',
-    { left: '0', top: '0', width: '12px', height: '12px', background: 'transparent' },
+    {},
     (dx, dy, { startWidth, startHeight, startLeft, startTop }) => {
-      const minWidth = MIN_WINDOW_WIDTH, minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width, minHeight = minWindow.height;
       let newWidth = Math.max(minWidth, startWidth - dx);
       let newHeight = Math.max(minHeight, startHeight - dy);
       let newLeft = startLeft + dx;
@@ -134,9 +138,10 @@ export function addResizeHandle(
   makeHandle(
     'corner-ne',
     'nesw-resize',
-    { right: '0', top: '0', width: '12px', height: '12px', background: 'transparent' },
+    {},
     (dx, dy, { startWidth, startHeight, startTop }) => {
-      const minWidth = MIN_WINDOW_WIDTH, minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width, minHeight = minWindow.height;
       const newWidth = Math.max(minWidth, startWidth + dx);
       let newHeight = Math.max(minHeight, startHeight - dy);
       let newTop = startTop + dy;
@@ -150,9 +155,10 @@ export function addResizeHandle(
   makeHandle(
     'corner-sw',
     'nesw-resize',
-    { left: '0', bottom: '0', width: '12px', height: '12px', background: 'transparent' },
+    {},
     (dx, dy, { startWidth, startHeight, startLeft }) => {
-      const minWidth = MIN_WINDOW_WIDTH, minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width, minHeight = minWindow.height;
       let newWidth = Math.max(minWidth, startWidth - dx);
       const newHeight = Math.max(minHeight, startHeight + dy);
       let newLeft = startLeft + dx;
@@ -165,9 +171,10 @@ export function addResizeHandle(
   makeHandle(
     'right',
     'ew-resize',
-    { right: '0', top: '12px', width: '8px', bottom: '12px', background: 'transparent' },
+    { right: '0' },
     (dx, _, { startWidth }) => {
-      const minWidth = MIN_WINDOW_WIDTH;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width;
       const newWidth = Math.max(minWidth, startWidth + dx);
       cont.style.width = newWidth + 'px';
     }
@@ -175,9 +182,10 @@ export function addResizeHandle(
   makeHandle(
     'bottom',
     'ns-resize',
-    { left: '12px', right: '12px', bottom: '0', height: '8px', background: 'transparent' },
+    { bottom: '0' },
     (_, dy, { startHeight }) => {
-      const minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minHeight = minWindow.height;
       const newHeight = Math.max(minHeight, startHeight + dy);
       cont.style.height = newHeight + 'px';
     }
@@ -185,9 +193,10 @@ export function addResizeHandle(
   makeHandle(
     'left',
     'ew-resize',
-    { left: '0', top: '12px', width: '8px', bottom: '12px', background: 'transparent' },
+    { left: '0' },
     (dx, _, { startWidth, startLeft }) => {
-      const minWidth = MIN_WINDOW_WIDTH;
+      const { minWindow } = currentLayout();
+      const minWidth = minWindow.width;
       let newWidth = startWidth - dx;
       let newLeft = startLeft + dx;
       if (newWidth < minWidth) {
@@ -201,9 +210,10 @@ export function addResizeHandle(
   makeHandle(
     'top',
     'ns-resize',
-    { left: '12px', right: '12px', top: '0', height: '8px', background: 'transparent' },
+    { top: '0' },
     (_, dy, { startHeight, startTop }) => {
-      const minHeight = MIN_WINDOW_HEIGHT;
+      const { minWindow } = currentLayout();
+      const minHeight = minWindow.height;
       let newHeight = startHeight - dy;
       let newTop = startTop + dy;
       if (newHeight < minHeight) {

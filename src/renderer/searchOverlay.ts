@@ -39,12 +39,14 @@ export function showSearch() {
   });
 
   const box = document.createElement('div');
-  box.className = 'bg-zinc-800 border border-zinc-600 rounded-lg w-96 overflow-hidden';
+  box.className = 'bg-zinc-800 w-96 overflow-hidden';
+  box.style.border = 'calc(1px / var(--muon-scale)) solid #52525b';
 
   const input = document.createElement('input');
   input.type = 'text';
   input.placeholder = 'Search windows...';
-  input.className = 'w-full bg-transparent px-3 py-2 border-b border-zinc-600 outline-none text-zinc-200';
+  input.className = 'w-full bg-transparent px-3 py-2 outline-none text-zinc-200';
+  input.style.borderBottom = 'calc(1px / var(--muon-scale)) solid #52525b';
 
   const list = document.createElement('div');
   list.className = 'max-h-72 overflow-y-auto';

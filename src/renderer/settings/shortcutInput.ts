@@ -1,6 +1,6 @@
 export function createShortcutInput(initial: string, onChange: (v: string) => void): HTMLButtonElement {
   const btn = document.createElement('button');
-  btn.className = 'bg-zinc-700 text-zinc-200 px-2 py-1 rounded';
+  btn.className = 'bg-zinc-700 text-zinc-200 px-2 py-1';
   btn.textContent = initial;
   let recording = false;
 

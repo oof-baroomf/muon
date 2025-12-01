@@ -134,11 +134,15 @@ export function applyTransform(
   windowElements: Map<string, HTMLElement>,
   state: TransformState
 ) {
-  desk.style.transform = `translate(${state.offsetX}px,${state.offsetY}px) scale(${state.scale})`;
+  root.style.setProperty('--muon-scale', state.scale.toString());
+  root.style.setProperty('--muon-hairline', `${1 / state.scale}px`);
+  const snappedOffsetX = Math.round(state.offsetX * state.scale) / state.scale;
+  const snappedOffsetY = Math.round(state.offsetY * state.scale) / state.scale;
+  desk.style.transform = `translate(${snappedOffsetX}px,${snappedOffsetY}px) scale(${state.scale})`;
   const base = getConfig().gridSize;
   const gridSize = base * state.scale;
   root.style.backgroundSize = `${gridSize}px ${gridSize}px`;
-  root.style.backgroundPosition = `${state.offsetX}px ${state.offsetY}px`;
+  root.style.backgroundPosition = `${snappedOffsetX}px ${snappedOffsetY}px`;
   updateAllWindowsBounds(windows, windowElements);
   updateAllWindowsZoom(windows, windowElements, state.scale);
   root.style.backgroundRepeat = 'repeat';
@@ -326,4 +330,3 @@ export function initPanZoom(root: HTMLElement, state: TransformState, apply: () 
     apply();
   }, { passive: false });
 }
-

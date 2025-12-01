@@ -4,7 +4,6 @@ import type { AppConfig } from './config';
 
 const allowedSendChannels = new Set([
   'state:save',
-  'config:save',
   'note:write',
   'view:create',
   'view:destroy',
@@ -19,9 +18,7 @@ const allowedSendChannels = new Set([
   'overlay:hide'
 ]);
 
-const allowedReceiveExact = new Set([
-  'config:updated'
-]);
+const allowedReceiveExact = new Set<string>([]);
 
 const allowedReceivePrefixes = [
   'view:did-navigate:',
@@ -49,10 +46,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.send('state:save', state);
   },
   loadConfig: (): Promise<AppConfig> => ipcRenderer.invoke('config:load'),
-  saveConfig: (cfg: AppConfig) => {
-    ensureAllowedSend('config:save');
-    ipcRenderer.send('config:save', cfg);
-  },
+  configPath: (): Promise<string> => ipcRenderer.invoke('config:path'),
   send: <T extends unknown[]>(channel: string, ...args: T) => {
     ensureAllowedSend(channel);
     ipcRenderer.send(channel, ...args);

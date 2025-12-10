@@ -35,6 +35,7 @@ let uiRerenderTimeout: ReturnType<typeof setTimeout> | null = null;
 import { WindowData } from './windowManager';
 import { getConfig } from './settings/appConfig';
 import { rerenderVisibleNotes } from './notes';
+import { computeViewZoom } from './viewZoom';
 
 export function updateAllWindowsBounds(
   windows: WindowData[],
@@ -57,15 +58,20 @@ export function updateAllWindowsBounds(
   }
 }
 
+const lastZoomFactors = new Map<string, number>();
+
 export function updateAllWindowsZoom(
   windows: WindowData[],
-  windowElements: Map<string, HTMLElement>,
-  scale: number
+  windowElements: Map<string, HTMLElement>
 ) {
   for (const w of windows) {
+    if (w.notePath) continue;
     const cont = windowElements.get(w.id);
     if (cont) {
-      const newZoom = scale * (cont.offsetWidth / 800);
+      const newZoom = computeViewZoom(cont.offsetWidth);
+      const prev = lastZoomFactors.get(w.id);
+      if (prev !== undefined && Math.abs(prev - newZoom) < 0.001) continue;
+      lastZoomFactors.set(w.id, newZoom);
       window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
     }
   }
@@ -144,7 +150,7 @@ export function applyTransform(
   root.style.backgroundSize = `${gridSize}px ${gridSize}px`;
   root.style.backgroundPosition = `${snappedOffsetX}px ${snappedOffsetY}px`;
   updateAllWindowsBounds(windows, windowElements);
-  updateAllWindowsZoom(windows, windowElements, state.scale);
+  updateAllWindowsZoom(windows, windowElements);
   root.style.backgroundRepeat = 'repeat';
   void root.offsetHeight;
   debouncedUIRerender(root, desk, state.scale);

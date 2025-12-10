@@ -27,10 +27,13 @@ interface ResizeState {
 }
 
 // Add resize handle to all windows
+type SnapFn = (rect: Rect) => Rect;
+
 export function addResizeHandle(
   cont: HTMLElement,
   w: WindowData,
-  scale: number,
+  getScale: () => number,
+  snapRectFn: SnapFn,
   windows: WindowData[],
   save: () => void,
   updateBounds: () => void
@@ -60,6 +63,7 @@ export function addResizeHandle(
       let lastRect: Rect = { x: startLeft, y: startTop, w: startWidth, h: startHeight };
 
       const doResize = (ev: MouseEvent) => {
+        const scale = getScale();
         const dx = (ev.clientX - startX) / scale;
         const dy = (ev.clientY - startY) / scale;
         resizeFn(dx, dy, { startWidth, startHeight, startLeft, startTop });
@@ -70,11 +74,12 @@ export function addResizeHandle(
           h: parseFloat(cont.style.height)
         } as Rect;
         const clamped = clampResize(rect, lastRect, windows, w.id);
-        cont.style.left = clamped.x + 'px';
-        cont.style.top = clamped.y + 'px';
-        cont.style.width = clamped.w + 'px';
-        cont.style.height = clamped.h + 'px';
-        lastRect = clamped;
+        const snapped = snapRectFn(clamped);
+        cont.style.left = snapped.x + 'px';
+        cont.style.top = snapped.y + 'px';
+        cont.style.width = snapped.w + 'px';
+        cont.style.height = snapped.h + 'px';
+        lastRect = snapped;
         updateBounds();
       };
 
@@ -230,7 +235,8 @@ export function addAddressBarDrag(
   urlBar: HTMLInputElement,
   cont: HTMLElement,
   w: WindowData,
-  scale: number,
+  getScale: () => number,
+  snapRectFn: SnapFn,
   windows: WindowData[],
   save: () => void,
   updateBounds: () => void
@@ -251,6 +257,7 @@ export function addAddressBarDrag(
     let lastTop = startTop;
 
     const doDrag = (e: MouseEvent) => {
+      const scale = getScale();
       const dx = (e.clientX - startX) / scale;
       const dy = (e.clientY - startY) / scale;
       const width = parseFloat(cont.style.width);
@@ -261,10 +268,11 @@ export function addAddressBarDrag(
         windows,
         w.id
       );
-      cont.style.left = rect.x + 'px';
-      cont.style.top = rect.y + 'px';
-      lastLeft = rect.x;
-      lastTop = rect.y;
+      const snapped = snapRectFn(rect);
+      cont.style.left = snapped.x + 'px';
+      cont.style.top = snapped.y + 'px';
+      lastLeft = snapped.x;
+      lastTop = snapped.y;
       updateBounds();
     };
 

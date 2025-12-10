@@ -1,6 +1,16 @@
 gridSize = 32
 gridStyle = "lines"
 gridOpacity = 0.15
+pixelSnap = true
+gridSnap = true
+
+[mainWindow]
+width = 1400
+height = 900
+
+[settingsWindow]
+width = 400
+height = 260
 
 [shortcuts]
 toggleSearch = "Ctrl+K"

@@ -1,15 +1,24 @@
 import { WindowLayoutConfig, defaultWindowLayout, normalizeWindowLayout } from '../../shared/windowLayout';
 
+export interface WindowSize {
+  width: number;
+  height: number;
+}
+
 export interface AppConfig {
   gridSize: number;
   gridStyle: 'lines' | 'dots';
   gridOpacity: number;
+  pixelSnap: boolean;
+  gridSnap: boolean;
   shortcuts: {
     toggleSearch: string;
     saveState: string;
     centerWindow: string;
   };
   windowLayout: WindowLayoutConfig;
+  mainWindow: WindowSize;
+  settingsWindow: WindowSize;
 }
 
 const platform = typeof navigator !== 'undefined' ? navigator.platform : '';
@@ -25,9 +34,20 @@ let config: AppConfig = {
   gridSize: 32,
   gridStyle: 'lines',
   gridOpacity: 0.15,
+  pixelSnap: true,
+  gridSnap: true,
   shortcuts: { ...defaultShortcuts },
-  windowLayout: normalizeWindowLayout(defaultWindowLayout)
+  windowLayout: normalizeWindowLayout(defaultWindowLayout),
+  mainWindow: { width: 1400, height: 900 },
+  settingsWindow: { width: 400, height: 260 }
 };
+
+function normalizeWindowSize(size: Partial<WindowSize> | undefined, fallback: WindowSize): WindowSize {
+  return {
+    width: typeof size?.width === 'number' ? size.width : fallback.width,
+    height: typeof size?.height === 'number' ? size.height : fallback.height
+  };
+}
 
 export async function loadConfig(): Promise<AppConfig> {
   const c = await window.electronAPI.loadConfig();
@@ -35,12 +55,16 @@ export async function loadConfig(): Promise<AppConfig> {
     gridSize: typeof c.gridSize === 'number' ? c.gridSize : 32,
     gridStyle: c.gridStyle === 'dots' ? 'dots' : 'lines',
     gridOpacity: typeof c.gridOpacity === 'number' ? c.gridOpacity : 0.15,
+    pixelSnap: typeof c.pixelSnap === 'boolean' ? c.pixelSnap : true,
+    gridSnap: typeof c.gridSnap === 'boolean' ? c.gridSnap : true,
     shortcuts: {
       toggleSearch: c.shortcuts?.toggleSearch || defaultShortcuts.toggleSearch,
       saveState: c.shortcuts?.saveState || defaultShortcuts.saveState,
       centerWindow: c.shortcuts?.centerWindow || defaultShortcuts.centerWindow
     },
-    windowLayout: normalizeWindowLayout(c.windowLayout)
+    windowLayout: normalizeWindowLayout(c.windowLayout),
+    mainWindow: normalizeWindowSize(c.mainWindow, config.mainWindow),
+    settingsWindow: normalizeWindowSize(c.settingsWindow, config.settingsWindow)
   };
   return config;
 }

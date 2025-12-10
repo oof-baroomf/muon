@@ -4,10 +4,12 @@ import { DesktopState, loadState, saveState } from './state';
 import { TransformState, applyTransform, zoomAndCenterWindow, initPanZoom } from './desktopTransform';
 import { initSearchOverlay } from './searchOverlay';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
-import { loadConfig, applyWindowLayoutVars, getWindowLayout } from './settings/appConfig';
+import { loadConfig, applyWindowLayoutVars, getWindowLayout, getConfig } from './settings/appConfig';
 import { applyGridStyle } from './settings/gridStyles';
 import { sanitizeNotePath, setupNoteEditor } from './notes';
 import { Rect, clampDrag, clampMove, collides } from './collision';
+import { snapRect, snapRectToGrid } from './pixelSnap';
+import { computeViewZoom } from './viewZoom';
 
 const root = document.getElementById('root') as HTMLElement;
 root.tabIndex = 0;
@@ -24,6 +26,17 @@ const windowElements = new Map<string, HTMLElement>();
 const windowCleanups = new Map<string, () => void>();
 
 const transform: TransformState = { scale: 1, offsetX: 0, offsetY: 0 };
+const maybeSnapRect = (rect: Rect) => {
+  const cfg = getConfig();
+  let next = rect;
+  if (cfg.gridSnap) {
+    next = snapRectToGrid(next, cfg.gridSize);
+  }
+  if (cfg.pixelSnap) {
+    next = snapRect(next, transform.scale);
+  }
+  return next;
+};
 
 function apply() {
   applyTransform(desk, root, windows, windowElements, transform);
@@ -113,10 +126,11 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
         windows,
         w.id
       );
-      cont.style.left = rect.x + 'px';
-      cont.style.top = rect.y + 'px';
-      lastLeft = rect.x;
-      lastTop = rect.y;
+      const snapped = maybeSnapRect(rect);
+      cont.style.left = snapped.x + 'px';
+      cont.style.top = snapped.y + 'px';
+      lastLeft = snapped.x;
+      lastTop = snapped.y;
       updateBounds();
     };
 
@@ -269,7 +283,7 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
 
   const adjustZoom = () => {
     if (!w.notePath) {
-      const newZoom = transform.scale * (cont.offsetWidth / 800);
+      const newZoom = computeViewZoom(cont.offsetWidth);
       window.electronAPI.send('view:set-zoom-factor', w.id, newZoom);
     }
   };
@@ -298,10 +312,10 @@ function createWindowElement (w: WindowData, focusBar = false): HTMLElement {
     // placeholder for focus logic in main process
   });
 
-  addResizeHandle(cont, w, transform.scale, windows, save, updateBounds);
+  addResizeHandle(cont, w, () => transform.scale, maybeSnapRect, windows, save, updateBounds);
 
   if (urlBar) {
-    addAddressBarDrag(urlBar, cont, w, transform.scale, windows, save, updateBounds);
+    addAddressBarDrag(urlBar, cont, w, () => transform.scale, maybeSnapRect, windows, save, updateBounds);
   }
 
   desk.appendChild(cont);
@@ -407,10 +421,11 @@ root.addEventListener('mousedown', e => {
     const cx = (ev.clientX - deskRect.left - transform.offsetX) / transform.scale;
     const cy = (ev.clientY - deskRect.top - transform.offsetY) / transform.scale;
     const rect = clampDrag(sx, sy, cx, cy, windows);
-    ghost.style.left = rect.x + 'px';
-    ghost.style.top = rect.y + 'px';
-    ghost.style.width = rect.w + 'px';
-    ghost.style.height = rect.h + 'px';
+    const snapped = maybeSnapRect(rect);
+    ghost.style.left = snapped.x + 'px';
+    ghost.style.top = snapped.y + 'px';
+    ghost.style.width = snapped.w + 'px';
+    ghost.style.height = snapped.h + 'px';
   };
 
   const move = (ev: MouseEvent) => updateGhost(ev);
@@ -422,12 +437,12 @@ root.addEventListener('mousedown', e => {
       const gh = parseFloat(ghost.style.height);
       const minWindow = getWindowLayout().minWindow;
       if (gw > 32 && gh > 32) {
-        const startRect: Rect = {
+        const startRect: Rect = maybeSnapRect({
           x: parseFloat(ghost.style.left),
           y: parseFloat(ghost.style.top),
           w: gw,
           h: gh
-        };
+        });
         const wdata: WindowData = {
           id: crypto.randomUUID(),
           x: startRect.x,

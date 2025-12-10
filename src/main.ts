@@ -59,8 +59,8 @@ function createMenu() {
 
 function createMainWindow () {
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
+    width: appConfig.mainWindow.width,
+    height: appConfig.mainWindow.height,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       sandbox: true,
@@ -79,8 +79,8 @@ function openSettingsWindow() {
     return;
   }
   settingsWindow = new BrowserWindow({
-    width: 400,
-    height: 260,
+    width: appConfig.settingsWindow.width,
+    height: appConfig.settingsWindow.height,
     resizable: true,
     webPreferences: {
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,

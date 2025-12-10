@@ -31,3 +31,7 @@ Ops hints (repo owner preferences)
 - Switched config storage to `config.toml` and documented the new path; removed YAML dependency and migration path.
 - Moved window chrome defaults (bar height, paddings, nav/close labels, resize handle sizing, min window size) into `config.toml`, wiring renderer/UI to read layout values from config and CSS variables.
 - 2025-12-01: Removed all in-app config saving UI; settings window is read-only and shows file location. Config now lives alongside the app (`config.toml` in app path) instead of under userData; IPC channel for config saving was removed.
+- 2025-12-01: Added main/settings BrowserWindow default sizes to `config.toml` and read them from config; removed hard-coded pixel values from window creation.
+- 2025-12-01: Fixed zoom blur by snapping window geometry to the pixel grid and decoupling BrowserView zoom from canvas scale; resize handles now use live scale values so vertical/diagonal resizing is accurate again.
+- 2025-12-02: Added `pixelSnap` flag to `config.toml` so pixel snapping can be toggled; snapping now respects this setting during drag/resize/new window creation while keeping hairline scaling intact.
+- 2025-12-02: Added `gridSnap` flag (default true) to align windows to the grid size on drag/resize/new window creation; uses the `gridSize` value for snapping.

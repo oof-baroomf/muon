@@ -1,6 +1,6 @@
 # Muon
 
-Infinite canvas web browser.
+An infinite canvas web browser.
 
 ## Development
 
@@ -30,4 +30,4 @@ bun run lint
 
 ## Configuration
 
-User settings are stored in `config.toml` under the app’s user data directory (e.g., `~/Library/Application Support/Muon/config.toml` on macOS, `%APPDATA%/Muon/config.toml` on Windows). Grid preferences and keyboard shortcuts live there and can be edited directly.
+User settings are stored in `config.toml` under the your user data directory (e.g., `~/Library/Application Support/Muon/config.toml` on macOS, `%APPDATA%/Muon/config.toml` on Windows).

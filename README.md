@@ -2,6 +2,10 @@
 
 An infinite canvas web browser.
 
+
+https://github.com/user-attachments/assets/8b154cd6-f317-4f89-8288-2bafcf10ef08
+
+
 ## Development
 
 Install dependencies using [Bun](https://bun.sh):

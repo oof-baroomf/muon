@@ -1,6 +1,6 @@
 gridSize = 32
-gridStyle = "lines"
-gridOpacity = 0.15
+gridStyle = "dots"
+gridOpacity = 0.2
 pixelSnap = true
 gridSnap = true
 
